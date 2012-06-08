@@ -32,16 +32,7 @@ if (array_key_exists("parameters",$_GET)) {
   }
 }
 
-#extract($_REQUEST);
-#extract($_SERVER);
-
-#if (substr($PHP_SELF,0,1)=="/") $SELF = $PHP_SELF; else $SELF="$PWD/$PHP_SELF";
-#$docroot = substr($SELF,0,strrpos($SELF,'/'));
-#if (!$DOCUMENT_ROOT) $DOCUMENT_ROOT = $docroot;
-
-$DOCUMENT_ROOT = "/var/www/probind/public_html";
-
-$_ENV["local"] = $DOCUMENT_ROOT."/phplib/"; 
+$_ENV["local"] = $_SERVER["DOCUMENT_ROOT"]."/phplib/"; 
 $_ENV["libdir"] = "/usr/share/phplib/";
 
 $QUERY_STRING="";
@@ -51,22 +42,9 @@ require($_ENV["libdir"] . "ct_sql.inc");    /* Change this to match your data st
 require($_ENV["libdir"] . "session.inc");   /* Required for everything below.      */
 require($_ENV["libdir"] . "auth.inc");      /* Disable this, if you are not using authentication. */
 require($_ENV["libdir"] . "perm.inc");      /* Disable this, if you are not using permission checks. */
-require($_ENV["libdir"] . "user.inc");      /* Disable this, if you are not using user variables. */
-#require($_ENV["libdir"] . "cart.inc");      /* Disable this, if you are not using the shopping cart. */
-
-/* Additional require statements go below this line */
-include($_ENV["libdir"] . 'oohforms.inc');
-include($_ENV["libdir"] . 'tpl_form.inc');
-include($_ENV["libdir"] . 'table.inc');
-include($_ENV["libdir"] . 'sqlquery.inc');
-/* Additional require statements go before this line */
-
-#require($_ENV["libdir"] . "My_Cart.inc");      /* Disable this, if you are not using the shopping cart. */
 require($_ENV["local"] . "local.inc");     /* Required, contains your local configuration. */
-
 require($_ENV["libdir"] . "page.inc");      /* Required, contains the page management functions. */
 
-// require($_ENV['libdir'] . 'template.inc');  /* Required by Slash */
 
 function EventLog($Description,$ExtraInfo="",$Level="Info") {
 	global $PHP_SELF, $argv, $REMOTE_ADDR, $auth;
