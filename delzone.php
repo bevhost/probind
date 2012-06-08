@@ -11,6 +11,7 @@ $html_top = '
 <TABLE width="100%">
 <TR>
  <TD align=left><H1>Deleting a zone</H1></TD>
+ <TH align=right><A HREF="manual.html#del">Help</A></TH>
 </TR>
 </TABLE>
 <HR><P>

@@ -23,6 +23,7 @@ $html_top = '
 <TABLE width="100%">
 <TR>
  <TD align=left><H3>Pushing DNS updates to the servers</H3></TD>
+ <TH align=right><A HREF="manual.html#push">Help</A></TH>
 </TR>
 </TABLE>
 <HR>

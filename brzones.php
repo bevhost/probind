@@ -31,6 +31,8 @@ $left_frame = '
 <TR><TD colspan="2"><IMG SRC="images/space.gif" align=top width="3" height="13">For</TD></TR>
 <TR><TD colspan="2"><INPUT type=text name="lookfor" value="%s" SIZE="16"></TD></TR>
 <TR><TD><IMG SRC="images/space.gif" width="5" height="10"><BR><INPUT type=submit value="Search" class=button onmousemoveover="this.className=\'buttonhover\'" onmouseout="this.className=\'button\'"></TD>
+ <TD valign=bottom><A HREF="manual.html#zones" target="right">Help</A></TD>
+</TR>
 </TABLE>
 </FORM>
 <HR noshade width="100%%" size="1" color="#000000">

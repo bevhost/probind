@@ -36,6 +36,7 @@ $query_form = '
 <TD><INPUT type=text name="pref" value="%s" SIZE=2 MAXLENGTH=4></TD>
 <TD><INPUT type=text name="data" value="%s" SIZE=25></TD>
 <TD><INPUT type=submit name="submit" value="Search"></TD>
+<TD align=right><A HREF="manual.html#records">Help</A></TD>
 </TR></TABLE>
 </FORM>
 Use the %% wildcard character to specify a substring search.

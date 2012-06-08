@@ -10,6 +10,7 @@ $html_top = '
 <BODY bgcolor="#cccc99" background="images/BG-shadowleft.gif">
 <TABLE width="100%">
 <TR>
+ <TH align=right><A HREF="manual.html#add">Help</A></TH>
  <TD align=left><H1>Adding a zone</H1></TD>
 </TR>
 </TABLE>
@@ -27,10 +28,8 @@ $start_frame = '
 <TITLE>Add Zone</TITLE>
 </HEAD>
 <FRAMESET rows="12,*" frameborder="0" border="0" framespacing="0">
-  <FRAME src="topshadow.html" name="topshadow" noresize scrolling=no frameborder
-="0" border="0" framespacing="0" marginheight="0" marginwidth="0">
-  <FRAME src="addzone.php?frame=addzone" name="main" noresize scrolling=auto fr
-ameborder="0" border="0" framespacing="0" marginheight="0" marginwidth="10">
+  <FRAME src="topshadow.html" name="topshadow" noresize scrolling=no frameborder="0" border="0" framespacing="0" marginheight="0" marginwidth="0">
+  <FRAME src="addzone.php?frame=addzone" name="main" noresize scrolling=auto frameborder="0" border="0" framespacing="0" marginheight="0" marginwidth="10">
 </FRAMESET>
 </HTML>
 ';
