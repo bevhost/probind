@@ -1,0 +1,124 @@
+#!/bin/sh
+#
+# Push new versions of zone and name.conf files to a BIND server, and
+# restart the server.
+#
+# push.local  [-v] [-PUSH] [-CONF] [-u USER] HOST REMOTE-DIRECTORY
+#
+PATH=/opt/sfw/bin:/usr/ucb:/usr/bin:/usr/local/bin:/bin:
+export PATH
+
+RSYNC="rsync -b -p -t -r --exclude='*.b,CVS,SEC,*.pid' --cvs-exclude --suffix=.bck"
+USER=root
+# SSH (not open ssh) - enforce ssh2 (it does not work with ssh)
+# For openssh, use "ssh -x" instead.
+if [ -d /etc/ssh2 ]
+then
+  SSH="ssh2 -x"
+else
+  SSH="ssh -x"
+fi
+
+echo push.remote $*
+# V=-v
+# set -x
+if [ "$1" = "-v" ]
+then
+	V=-v
+	shift
+fi
+
+if [ "$1" = "-PUSH" ]
+then
+	PUSH=1
+	shift
+fi
+
+if [ "$1" = "-CONF" ]
+then
+	RECONF=1
+	shift
+fi
+
+if [ "$1" = "-u" ]
+then
+	shift
+	USER=$1
+	shift
+fi
+
+
+if [ "$RECONF" = "" -a "$PUSH" = "" ]
+then
+	RECONF=1
+	PUSH=1
+fi
+
+HOST=$1
+dir=$2
+
+if [ "$HOST" = "" -o "$dir" = "" ]
+then
+    echo $0 "[-PUSH] [-CONF] [-l USER] dest-host remote-dir"
+	exit 1
+fi
+
+if [ "$PUSH" = "1" ]
+then
+ if [ "$V" != "" ]
+ then
+  id
+  echo Try ssh who first to verify how it works
+  $SSH $USER@$HOST who
+ fi
+ echo $RSYNC -v -e "$SSH"  . "$USER@$HOST:$dir" < /dev/null
+ $RSYNC -v -e "$SSH"  . "$USER@$HOST:$dir" < /dev/null
+ ko=$?
+ echo $ko
+ if [ $ko != 0 ]
+ then
+  	 echo RSYNC FAILURE
+	 exit 1
+ fi
+ rm -f deleted_files
+ # If this directory is saved into the CVS, save it after a successfull reconfiguration
+ if [ -d CVS ]
+ then
+	CVSROOT=
+	export CVSROOT
+	cvs diff
+ fi
+fi
+
+if [ "$RECONF" = 1 ]
+then
+ if [ -f reconfig.sh ]
+ then
+    echo Now restarting named
+	$SSH -n -l $USER $HOST "cd $dir && sh reconfig.sh" || exit $?
+ else
+	if [ -f deleted_files ]
+	then
+	    $SSH -n -l $USER $HOST "cd $dir && rm -f `cat deleted_files`"
+	fi
+	$SSH -n -l $USER $HOST "/usr/local/bin/rndc reconfig"
+	if [ $? != 0 ]
+	then
+	    echo rndc failure
+		exit 1
+	fi
+ fi
+ # If this directory is saved into the CVS, save it after a successfull reconfiguration
+ if [ -d CVS ]
+ then
+	CVSROOT=
+	export CVSROOT
+	# id
+	# set -x
+	cvs -q remove -l .                 < /dev/null
+	cvs -q add  -m ""       *.*        < /dev/null 2>& 1 |  grep -v 'already'
+	cvs -q commit -l        -m ""  *.* < /dev/null
+ fi
+fi
+
+exit 0

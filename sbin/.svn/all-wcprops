@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svnroot/probind/!svn/ver/50/trunk/sbin
+END
+push.local
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svnroot/probind/!svn/ver/47/trunk/sbin/push.local
+END
+push.remote
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svnroot/probind/!svn/ver/50/trunk/sbin/push.remote
+END
+nop
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svnroot/probind/!svn/ver/47/trunk/sbin/nop
+END

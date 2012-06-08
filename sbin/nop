@@ -1,0 +1,3 @@
+#!/bin/sh
+echo "TEST SCRIPT - DO NOTHING. Args: $*"
+exit 0

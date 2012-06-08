@@ -1,0 +1,83 @@
+#!/bin/sh
+#
+# Push new versions of zone and name.conf files to a BIND server, and
+# restart the server.
+# 
+# push.local  [-PUSH] [-CONF] [-u USER] HOST REMOTE-DIRECTORY {op ...]
+#
+PATH=/usr/bin:/bin:/usr/local/bin:/opt/sfw/bin:/usr/ucb
+
+RSYNC="rsync -b -p -t -r --exclude='*.b,CVS,SEC,*.pid' --suffix=.bck"
+
+echo push.local $*
+
+if [ "$1" = "-PUSH" ]
+then
+	PUSH=1
+	shift
+fi
+
+if [ "$1" = "-CONF" ]
+then
+	RECONF=1
+	shift
+fi
+
+if [ "$RECONF" = "" -a "$PUSH" = "" ]
+then
+	RECONF=1
+	PUSH=1
+fi
+
+host=$1
+dir=$2
+
+if [ "$host" = "" -o "$dir" = "" ]
+then
+    echo $0 dest-host remote-dir
+	exit 1
+fi
+
+
+if [ "$PUSH" = "1" ]
+then
+ $RSYNC  . $dir
+ ko=$?
+ echo $ko
+ if [ $ko != 0 ]
+ then
+  	 echo RSYNC FAILURE
+	 exit 1
+ fi
+ rm -f deleted_files
+fi
+
+if [ "$RECONF" = 1 ]
+then
+ cd $dir || exit 1
+ if [ -f reconfig.sh ]
+ then
+    echo Now restarting named
+	sh reconfig.sh  || exit $?
+ else
+    set -x
+	if [ -f deleted_files ]
+	then
+	    rm -f `cat deleted_files`
+	fi	
+	/usr/local/bin/rndc reconfig
+	if [ $? != 0 ]
+	then
+	    echo rndc failure
+		exit 1
+	fi
+ fi
+ # If this directory is saved into the CVS, save it after a successfull reconfiguration
+ if [ -d CVS ]
+ then
+	cvs -q remove -l .                 < /dev/null
+	cvs -q add  -m ""       *.*        < /dev/null 2>& 1 |  grep -v 'already'
+	cvs -q commit -l        -m ""  *.* < /dev/null
+ fi
+fi
+exit 0

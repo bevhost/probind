@@ -1,0 +1,79 @@
+# Items that should be taken care of
+
+- All things marked as TODO in the code.
+- Clean up the import tool to work better
+- Allow for importing zones interactively
+- Clean up HTML code to validate and drop use of frames
+- Add the ability to use multiple template zones
+- Add ability to define how you want in-addr.arpa zones set up
+
+
+# Less urgent items for future consideration
+
+- Integrated authentication system to allow for different access levels
+- Add more consistency checks for zone information
+- Create a better zone push system
+- Support paging for long lists of domains
+
+
+Last Update: 20071210
+
+
+###########################################################################
+### NOTE: The below information is current kept for historical purposes ###
+###       These items may or may not be under consideration.            ###
+###########################################################################
+
+#
+# Ideas for the next version
+#
+
+Internal consistency: Find CNAMES which point to non-existent RRs
+
+Implement a tool for delegating a subdomain, including the 
+necessary glue records (another section on "Add zone" ?).
+
+Import RRs from another domain, e.g. "I want MX records here
+like there is in foobar.com"
+
+Maybe we need to be able to define multiple templates?
+
+A tool for administrating the typesort table ?
+
+Improve the well-formed checking for MX records domains: Either
+FQDN or a dot-less domain? Or just another internal consistency check?
+
+Support higher-order in-addr.arpa domains.
+
+Multiple ProBIND instances in one MySQL database ?
+
+Feedback from the BIND server log files.
+
+A better way of communicating between ProBIND and BIND. The current
+openssh scheme places an undue burden on the DNS administrator, who
+has to write and/or debug a shell script that can only copy data in one
+direction. Something easier, with two-way capability, is needed.
+
+If you have a _lot_ of domains, it might be nice to have a mechanism
+for grouping domains. Explicit label? Search criteria?
+
+A read-only mode, to enable browsing by personnel unauthorized to make
+changes.
+
+Maybe it would be nice to associated ProBIND users with specific domains,
+so that customers could administer their own domains without risk to 
+other domains in the database.
+
+Integration with the ISC DHCP server, so Probind can be used to track
+DDNS updates.
+
+In settings, add a template for zone entries in named.com. Add a field
+to the zone description, to include in the zone entry for that zone.
+
+Make probind compatible with PHP safe_mode.
+
+Add a flag to the domain description that can make a domain inactive,
+without actually removing it from the database. 
+
+Improve the documentation, e.g with some MySQL howto info - not hostmaster
+is a seasoned MySQL DBA.

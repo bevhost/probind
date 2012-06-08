@@ -1,0 +1,83 @@
+body
+{
+	color: #000000;
+}
+
+BODY, TABLE, TR, TD, TH, P, UL, LI {
+	font-family: Verdana, Arial, Helvetica;
+	font-size: 11px;
+	}
+H1 {
+	color: #000;
+	font-family: Verdana, Arial, Helvetica;
+	font-size: 24px;
+	}
+H2, H3, H4 {
+	color: #000;
+	font-family: Verdana, Arial, Helvetica;
+	font-size: 18px;
+	}
+A:link {
+	font-family: Verdana, Arial, Helvetica;
+	font-size: 11px;
+	color: #024;
+	text-decoration: none;
+	}
+A:visited {
+	font-family: Verdana, Arial, Helvetica;
+	font-size : 11px;
+	color : #624;
+	text-decoration: none;
+	}
+A:active {
+	font-family: Verdana, Arial, Helvetica;
+	font-size : 11px;
+	color : #635;
+	text-decoration: underline;
+	}
+A:hover {
+	font-family: Verdana, Arial, Helvetica;
+	font-size : 11px;
+	color: #646;
+	text-decoration: underline;
+	}
+INPUT, TEXTAREA {
+	background-color: #CC9;
+	font-family: Verdana, Arial, Helvetica;
+	font-size: 11px;
+	color: #000;
+	}
+INPUT.button {
+	COLOR: #CC9;
+	FONT-FAMILY: Verdana, Arial, Helvetica;
+	FONT-SIZE: 11px;
+	FONT-WEIGHT: bold;
+	PADDING: 0px 5px 0px 5px;
+	BACKGROUND-COLOR: #663;
+	}
+INPUT.buttonhover {
+	COLOR: #CC9;
+	FONT-FAMILY: Verdana, Arial, Helvetica;
+	FONT-SIZE: 11px;
+	FONT-WEIGHT: bold;
+	PADDING: 0px 5px 0px 5px;
+	BACKGROUND-COLOR: #F90;
+	}
+INPUT.buttonwarning {
+	COLOR: #CC9;
+	FONT-FAMILY: Verdana, Arial, Helvetica;
+	FONT-SIZE: 11px;
+	FONT-WEIGHT: bold;
+	PADDING: 0px 5px 0px 5px;
+	BACKGROUND-COLOR: #C00;
+	}
+SELECT, OPTION {
+	font-family: Verdana, Arial, Helvetica;
+	font-size: 11px;
+	color: #CCCC99;
+	background-color: #663;
+	}
+.warning
+{
+	color: #ff0000;
+}

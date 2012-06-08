@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svnroot/probind/!svn/ver/84/trunk/bin
+END
+domain-report
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnroot/probind/!svn/ver/59/trunk/bin/domain-report
+END
+mknamed.conf
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svnroot/probind/!svn/ver/84/trunk/bin/mknamed.conf
+END
+testns
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svnroot/probind/!svn/ver/47/trunk/bin/testns
+END
+mkdeadlist
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svnroot/probind/!svn/ver/59/trunk/bin/mkdeadlist
+END
+mkzonefile
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svnroot/probind/!svn/ver/59/trunk/bin/mkzonefile
+END
+nsrecs
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svnroot/probind/!svn/ver/47/trunk/bin/nsrecs
+END

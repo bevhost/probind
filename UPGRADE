@@ -1,0 +1,56 @@
+UPGRADE for ProBIND
+
+This document will discuss how to upgrade from earlier versions of ProBIND.
+
+Prerequisites
+-------------
+
+You should be familiar with the installation procedures in the INSTALL
+document. This document only discusses the upgrading process.
+
+A full backup should be made before attempting an upgrade.
+
+
+Upgrading from ProBIND 1.0.1 and earlier
+----------------------------------------
+
+NOTE: ProBIND doesn't check for a valid user login for sensitive operations
+anymore. It is important to make sure you have user authentication set up
+properly via Apache or anyone could access and change your DNS information.
+
+ProBIND now uses features from the ProBIND2 fork. You will need to upgrade
+your database to the new format. The etc/upgrade_tables.sql file has been
+provided with the changes. Simply load this file into the existing ProBIND
+database.
+
+Example: mysql -u probinduser -p probind < etc/upgrade_tables.sql
+
+Also, some changes have been made to the files. Notably, the scripts in the
+sbin directory have been changed around and older ones have been removed.
+
+It is advisable that you remove the old ProBIND files and replace with the
+new files.
+
+Once the files have been replaced, rename config.tmpl.php to config.php and
+fill in the information based on the values you had in config.inc.
+
+
+Upgrading from ProBIND2
+-----------------------
+
+NOTE: ProBIND doesn't check for a valid user login for sensitive operations
+anymore. It is important to make sure you have user authentication set up
+properly via Apache or anyone could access and change your DNS information.
+
+ProBIND now contains many of the features of PriBIND2. The main exception is
+namespace support. No database changes are required if you are running
+ProBIND2.
+
+Some files have been removed or changed. It is advisable that you remove the
+old ProBIND files and replace with the new files.
+
+Once the files have been replaced, rename config.tmpl.php to config.php and
+fill in the information based on the values you had in config.inc.
+
+
+Last Update: 20071225

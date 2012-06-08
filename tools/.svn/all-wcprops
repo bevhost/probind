@@ -1,0 +1,95 @@
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svnroot/probind/!svn/ver/84/trunk/tools
+END
+servers.php
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnroot/probind/!svn/ver/84/trunk/tools/servers.php
+END
+int-ptr.php
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnroot/probind/!svn/ver/60/trunk/tools/int-ptr.php
+END
+stats.php
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svnroot/probind/!svn/ver/68/trunk/tools/stats.php
+END
+settings.php
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svnroot/probind/!svn/ver/68/trunk/tools/settings.php
+END
+bulkupdate.php
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svnroot/probind/!svn/ver/84/trunk/tools/bulkupdate.php
+END
+find-lamers.php
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svnroot/probind/!svn/ver/60/trunk/tools/find-lamers.php
+END
+int-nosoa.php
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/probind/!svn/ver/60/trunk/tools/int-nosoa.php
+END
+full-report.php
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svnroot/probind/!svn/ver/68/trunk/tools/full-report.php
+END
+find-baddels.php
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svnroot/probind/!svn/ver/60/trunk/tools/find-baddels.php
+END
+int-invrec.php
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svnroot/probind/!svn/ver/60/trunk/tools/int-invrec.php
+END
+toolmenu.html
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/probind/!svn/ver/30/trunk/tools/toolmenu.html
+END
+int-mxcnt.php
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/probind/!svn/ver/60/trunk/tools/int-mxcnt.php
+END
+int-multia.php
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svnroot/probind/!svn/ver/60/trunk/tools/int-multia.php
+END
+index.html
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svnroot/probind/!svn/ver/60/trunk/tools/index.html
+END
+ip-ranges.php
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/probind/!svn/ver/68/trunk/tools/ip-ranges.php
+END

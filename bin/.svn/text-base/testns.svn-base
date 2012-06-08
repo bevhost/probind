@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+
+use Net::DNS;
+use Getopt::Std;
+
+# -h name_server
+# -t type [NS]
+# -d delimiter - answer delimiter (\n will be added)
+
+getopts('h:t:d:');
+
+my($res) = new Net::DNS::Resolver;
+$res->nameservers($opt_h) if ($opt_h);
+$res->retry(2);
+$res->retrans(1);
+$type = "NS";
+$type = $opt_t if ($opt_t);
+$delim = " ";
+$delim = $opt_d if ($opt_d);
+$ko = 99;
+
+while($_ = shift) {
+	chomp;
+	$query = $res->query($_, $type);
+	# print "$_";
+	if ($query) {
+		foreach $rr ($query->answer) {
+			next unless ($rr->type eq $type || $type eq "ANY");
+			print $delim, $rr->string,"\n";
+			$ko = 0;
+	       }
+	}
+}
+
+exit $ko;

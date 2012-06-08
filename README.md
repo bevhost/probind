@@ -1,4 +1,0 @@
-probind
-=======
-
-Professional DNS Management

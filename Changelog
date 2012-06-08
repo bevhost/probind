@@ -1,0 +1,114 @@
+ProBIND 1.0.4 (?????)
+---------------------
+
+- Bug 1981649 - Updated root.hints
+- Bug 2796935 - Zone options should be generated for slave server.
+- Request 1380317 - Added IPv6 AAAA record support
+- Request 1928824 - Added basic chroot support
+- Multiple Bugs - Import script cleanups
+- Adjusted root.hints so EOL isn't stripped
+
+
+ProBIND 1.0.3 (10 November 2008)
+--------------------------------
+
+It's been some time since the last release, and I was hoping to have more
+done. Unfortunately, some big projects came up, and re-working things like the
+import system will take some time, so it's best to make a release with 
+bugfixes completed.
+
+- Bug 1885891 - Deletion of zone broken
+- Bug 1981649 - Add updated root.hints
+- Bug 1928820 - Clarify reverse zone population in documentation
+- Clean code to load config.php in lib.inc
+- Clean code to load libraries in import script
+- Remove broken "help" links that go to manual.html
+
+
+ProBIND 1.0.2 (25 December 2007)
+--------------------------------
+
+After a long hiatus, the ProBIND project is alive again! Welcome to those
+updating to this release and to those new to the software. This release
+incorporates the work done in the ProBIND2 fork (now defunct) and involves
+cleanup work to allow ProBIND to function on modern configurations. There is
+otherwise no major functionality changes in this release. Please look over the
+TODO file for future plans.
+
+- Merged in changes from ProBIND2.
+- Cleaned up unused files from merge.
+- Removal of ProBIND2 namespace system.
+- Removed forced auth on update - webserver should be configured to
+  handle, not us.
+- Changed default remote user to root in the push scripts.
+- Miscelaneous cleanup involving replacing short open tags with full tags
+  and clean up uninitialized variables.
+- Updates to INSTALL, README, TODO files
+- Added upgrade instructions in UPGRADE
+
+
+ProBIND2 Version 2.0 build 1
+=====================
+Bug fixes in:
+- import
+- reverse zone generations
+- special cases when zone is empty etc
+- scripts - bug fixed for local script
+- serial generation
+- many small bugs fixed.
+
+Version 2.1 - TODO list prepared.
+Alexei Roudnev
+
+
+ProBIND2 Version 2.0
+===============
+Released April 2003
+
+Changes:
+- new zone editor
+- new update alghoritm
+- zone comments
+- PTR flag
+- new update programms
+- support for named.conf options
+- support for zone options
+- embedded RR testing
+- 'update' block rewritten 
+- now slaves can be configured to keep secondary zones
+- update scripts can 'cvs' files
+- when creating subzone, records moved into it if theey belong to subzone
+- additional rights for 'update' required
+- numeroous bug fixes.
+- new documentation
+- new 'import'
+- system deployed in production, production internal, office, office internal environment
+Alexei Roudnev
+
+
+
+Version 1.0.1
+=============
+
+Released 15-feb-2001, mostly a bugfix release
+
+- Updated the INSTALL document with some badly needed troubleshooting tips.
+- Updated the TODO list with a few new ideas
+- Added the tools/full-report.php and bin/domain-report scripts, updated 
+  tools/toolmenu and manual.html to match.
+- Added the sbin/copy-local update script
+- Fixed a bug in tools/ip-ranges which could cause incomplete lists to
+  be displayed.
+- Fixed a missing </BODY></HTML> in addzone.php and update.php
+- Fixed some marginal SQL SELECT syntax in several places
+- Fixed a bad mysql call in inc/lib.php
+- Fixed a bad library call in addzone.php
+- Changed addzone.php to allow bulk zone creation
+- Made bin/mknamed.conf work in the absence of slave servers
+- Fixed bin/mkzonefile to add a missing TTL in zone files
+- Added an IP number check to inc/lib.inc:validate_record
+
+Version 1.0
+===========
+
+Released 19-dec-2000

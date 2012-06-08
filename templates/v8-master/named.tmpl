@@ -1,0 +1,24 @@
+#
+# Origin: $TEMPLATE_FILE
+# 
+# bind8 template
+# 
+options {
+	directory "$ZONE_DIR";
+	$OPTIONS
+};
+
+
+zone "." {
+	type hint;
+	file "root.hint";
+};
+
+# Comment this zone if you intend to import this zone in the 'import'
+zone "0.0.127.in-addr.arpa" {
+       type master;
+       file "localhost.rev";
+       notify no;
+};
+
+$ZONE_DEFINITIONS

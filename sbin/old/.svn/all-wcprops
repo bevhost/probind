@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svnroot/probind/!svn/ver/49/trunk/sbin/old
+END
+push
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svnroot/probind/!svn/ver/49/trunk/sbin/old/push
+END
+copy.local
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/probind/!svn/ver/49/trunk/sbin/old/copy.local
+END
+local-v9
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnroot/probind/!svn/ver/49/trunk/sbin/old/local-v9
+END
+push-v9
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svnroot/probind/!svn/ver/49/trunk/sbin/old/push-v9
+END

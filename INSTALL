@@ -1,0 +1,261 @@
+INSTALL for ProBIND
+
+This document will guide you through installing ProBIND.
+
+This is a step-by-step procedure for getting started with ProBIND.
+In the examples, I will assume that your Apache document root is in
+/www/htdocs, and that the stand-alone PHP interpreter is installed as
+/usr/local/bin/php
+
+
+Prerequisites
+-------------
+
+The following minimum software versions are required for running ProBIND:
+- MySQL 3.23
+- PHP 4.30
+- Apache 1.3
+- Perl 5.005
+
+For pushing updates with the included scripts, the following additional
+software is required:
+- OpenSSH
+- rsync
+
+To run consistency checks, the following additional software is required:
+- Perl 5.005 or newer
+- Net::DNS Perl module (installable through CPAN)
+
+For running the bulk import script, the following additional software is
+required:
+- PHP CLI binary (NOT CGI)
+- Console_Getopt PEAR package (this comes by default with PHP PEAR) 
+
+If you run PHP as an Apache module, you must also have the CGI version
+installed for some scripts to work.
+
+
+1. Preparation
+--------------
+
+WARNING: Due to the nature of ProBIND, your Apache user will need to have
+higher permission levels than normal for a public webserver. It is HIGHLY
+RECOMMENDED to keep ProBIND on a non-public server or at least isolate it and
+monitor access to the server closely.  
+
+If you are switching to ProBIND from an existing configuration, make sure to
+have current backups of your existing DNS setup.
+
+
+2. Installation
+---------------
+
+Initial Install of ProBIND
+--------------------------
+Unpack the ProBIND tarball somewhere that is reachable by your Apache 
+server. Usually, this would be in a directory in the document root for
+your Apache installation, e.g. /www/htdocs/probind. Change to this
+directory.
+
+Configuring MySQL
+-----------------
+Now you must create a MySQL database instance. The name of the database 
+instance is not important, so pick something descriptive, e.g. 'probind'. 
+You should also create a MySQL user for ProBIND.
+
+NOTE: You are not required to run MySQL on the same server as Apache.
+
+Once the database is created, you will need to load the initial database
+structure. You can do this by loading etc/mktables.sql file into the MySQL
+database you just created.
+
+Example: mysql -u probinduser -p probind < etc/mktables.sql
+
+Configuring ProBIND
+-------------------
+There are two steps to configuring ProBIND. The initial step is to edit the
+config.php file with your database information. The config.php file is a small
+PHP script that holds the information for ProBIND's operation. It holds
+directory settings and database information and resides in the "inc" directory.
+
+Copy the config.tmpl.php file to config.php and open config.php in a text
+editor. It contains several settings which you must edit to reflect your
+installation:
+
+$TOP
+  This is the directory you unpacked ProBIND in, e.g /www/htdocs/probind
+$MYSQL_HOST
+	The host where MySQL is running, e.g. "localhost". 
+$MYSQL_DB
+	The name of the MySQL database, e.g. "probind".
+$MYSQL_USER
+	The MySQL username that ProBIND should use to log into MySQL.
+$MYSQL_PASSWD
+	The MySQL password that ProBIND should use to log into MySQL.
+	
+At this point, you can load the ProBIND web interface. The final step for a
+working ProBIND configuration is described in the next section.
+
+
+3. Configuring Settings
+-----------------------
+
+Click the 'Misc. tools' link in the top frame. Then select 'Settings' in the
+sub-menu that appears.  Fill out the top four fields according to your needs
+and click the 'Update settings' button.
+
+
+4. Adding BIND DNS Servers
+--------------------------
+
+Now you must tell the database about your BIND servers. Click 'Servers'
+on the submenu. Add a description for each server you wish to manage
+through the ProBIND interface. For each server, you must specify its
+hostname, an IP number and some supplemental information that ProBIND
+needs: If the server is used as a master or slave server, whether it
+should receive updates from ProBIND, and whether the server should 
+appear in NS records for the domains managed by ProBIND. The latter
+two settings makes it possible to use ProBIND e.g. while you are
+migrating a BIND server from one host to another, or deals with
+a dual-interface server that must receive updates through one interface,
+but speaks with the outside world on another.
+
+Three fields in the server description are used when delivering an
+update to the server. The first field tells ProBIND where the zonefiles
+exist on the server, e.g. /var/named. NB: ProBIND expects that the
+named.conf file exists in the same directory as the zone files. You may
+have to create a symlink in /etc to /var/named/named.conf to alleviate
+this. Also NB: All files in this directory are subject to being completely
+rewritten/overwritten/deleted by ProBIND. If you have some interesting
+hacks in your named.conf, be sure to put them into the ProBIND template
+file before you update the BIND server.
+
+You must also specify a template for the named.conf file on the
+server. Template files must be located in the etc directory of the
+ProBIND installation. A template consists of all the BIND configurations 
+which are not zone declarations, see the sample master.tmpl file 
+included in the distribution. The template is also where you put
+your BIND options.
+
+Finally, you must specify a script that will copy zonefiles to the
+BIND server, and then restart the BIND server. This script must exist
+in the sbin directory of ProBIND installation. See the push scripts
+included in the distribution, they are based on rsync/openssh for secure
+access to the BIND server host. If you want to try out ProBIND without
+risk to your servers, specify the included 'nop' script in this field.
+
+
+5. Start using ProBIND
+----------------------
+
+At this point you should click 'Browse domains' and flesh out the
+TEMPLATE pseudo-domain. If you have some data which should apply
+to all your domains, add it now. This might include TXT or MX
+records which all your domains should contain. 
+
+NOTE: DO NOT ADD ANY NS RECORDS TO YOUR TEMPLATE! NS records for your
+servers are automatically generated by ProBIND. You control how the 
+NS records are generated when you describe your BIND servers.
+
+You are now ready to populate the database. You can do this manually, 
+or you can use the etc/import script to load an existing BIND configuration
+with zone files into the database. 
+
+
+6. Using the import script
+--------------------------
+
+You probably already have a BIND installation that you want to streamline
+the management of. Otherwise you would not be looking at this program.
+The good news is that there is a small PHP script included with ProBIND,
+etc/import, which automates the task of converting BIND named.conf and
+zone files to ProBIND database entries. 
+
+To import your BIND configuration, copy named.conf and all of your zone 
+files into a directory on your ProBIND host. 
+
+Then execute this command:
+
+/www/htdocs/probind/etc/import -v $PWD/named.conf | tee import.log
+
+Note the $PWD prefix on the filename. Due to a peculiarity of PHP
+as a stand-alone interpreter, it is necessary to specify the full
+path to the source file.
+
+Review the import log and the database carefully. You do not want to
+update your BIND servers until your are confident that the database
+accurately represents your DNS data.
+
+If you have a lot of comments in your zone files, run import with the -a
+flag too (i.e. import -av $PWD/named.conf). That way the unaltered text of 
+a zone file is put into the ProBIND database as a comment text for the zone.
+
+
+7. Update the BIND servers
+--------------------------
+
+When you are satisfied with the contents, click the 'Update' link to
+generate the zone files and distribute them to the servers. You can
+inspect the zone files generated in the tmp/master directory in the
+ProBIND installation.
+
+If you want to see what ProBIND would do to your servers, without actually
+letting it touch them, specify the "nop" update script in the BIND server
+descriptions. This will let ProBIND generate all the files it thinks are
+needed on your BIND server, but not actually copy them. You can examine
+the generated files in the tmp/master and tmp/slave directories.
+
+NOTE: The "push" scripts included use rsync to copy files from the ProBIND
+server to the BIND servers. This assumes that openssh trust relationships
+have been set up between the ProBIND computer and the BIND servers. 
+
+
+8. Troubleshooting
+-------------------
+
+Web server configuration
+------------------------
+Your web server must have write access to several directories in order
+to write the named.conf and zone files. Either chown the tmp dir to
+whichever userid web server is running under, or chmod it to mode 01777.
+Either way, make sure that it is empty before running your first update!
+
+Another way updates can fail is if the PHP interpreter is configured
+for safe_mode. ProBIND relies on several external program for tasks
+like generating zone files, updating BIND servers and making specialized
+queries against external name servers. ProBIND is not currently compatible
+with safe_mode.
+
+Pushing updates/using rsync/ssh
+-------------------------------
+The sample "push" scripts depend on rsync to copy files from your ProBIND
+server to one or more BIND servers. This means that your web server user 
+must somehow be allowed to copy files to the name server user on the BIND
+server, without password prompts.
+ 
+An example to illustrate this: ProBIND is installed under an Apache server
+running under userid nobody on host foo.example.com. BIND is running
+under userid root on host bar.example.com. The problem is that a very
+untrusted user (nobody@foo.example.com) needs to upload data to 
+root@bar.example.com, and reload the name server. Additionally, SSH insists
+on having a home directory so it can keep a database of keys in ~/.ssh.
+
+There are several ways around this: 
+1)Make apache on foo run under a more privileged user id (e.g. root)
+2) Make $TOP/sbin/push setuid to a more privileged user id
+3) Give the nobody user a home directory with write access
+
+The best option among these is 1, but this is dependant on the situation.
+
+One an option above, or similar option is chosen, the following steps need
+to be taken:
+  
+1)  Make this more privileged trusted by root on bar. This is as easy
+as appending the /root/.ssh/identity.pub file from foo to /root/.ssh/known_hosts
+on bar. (or id_dsa.pub to known_hosts2).
+
+2)  Verify that you can ssh from root@foo to root@bar without being prompted 
+for a password.
+
+
+Last Update: 20071210

@@ -1,0 +1,43 @@
+#
+# Origin: $TEMPLATE_FILE
+# Template for bind9 / INTERNAL ZONE (can be used for EXTERNAL but be sure that you do filter out
+# all private networks on your router/firewall from outside
+#
+options {
+	directory "$ZONE_DIR";
+	pid-file "named.pid";
+	$OPTIONS
+};
+
+logging {
+	category security { default_syslog; };
+	category lame-servers { null; };
+	category queries { null; };
+
+};
+
+
+# Use with the following in named.conf, adjusting the allow list as needed:
+key "rndc-key" {
+      algorithm hmac-md5;
+      secret "U0gwgPnM6+QNIlS/jCWLXw==";
+};
+
+controls {
+      inet 127.0.0.1 port 953
+	      allow { 127.0.0.1; } keys { "rndc-key"; };
+
+};
+
+zone "." {
+	type hint;
+	file "root.hint";
+};
+
+zone "0.0.127.in-addr.arpa" {
+       type master;
+       file "localhost.rev";
+       notify no;
+};
+
+$ZONE_DEFINITIONS

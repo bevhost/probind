@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/probind/!svn/ver/73/trunk/templates/v9-master
+END
+named.tmpl
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svnroot/probind/!svn/ver/49/trunk/templates/v9-master/named.tmpl
+END
+localhost.rev
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svnroot/probind/!svn/ver/49/trunk/templates/v9-master/localhost.rev
+END
+root.hint
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svnroot/probind/!svn/ver/73/trunk/templates/v9-master/root.hint
+END
+reconfig.sh
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svnroot/probind/!svn/ver/49/trunk/templates/v9-master/reconfig.sh
+END
+rndc.conf
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svnroot/probind/!svn/ver/49/trunk/templates/v9-master/rndc.conf
+END

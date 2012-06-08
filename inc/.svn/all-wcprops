@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svnroot/probind/!svn/ver/83/trunk/inc
+END
+config.tmpl.php
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/probind/!svn/ver/54/trunk/inc/config.tmpl.php
+END
+getopt.inc
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svnroot/probind/!svn/ver/58/trunk/inc/getopt.inc
+END
+lib.inc
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svnroot/probind/!svn/ver/83/trunk/inc/lib.inc
+END

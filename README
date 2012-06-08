@@ -1,0 +1,124 @@
+                                      README for ProBIND
+
+Installation
+------------
+
+Please see INSTALL for instructions
+
+
+What is ProBIND?
+----------------
+
+ProBIND is a web application intended for use in the administration of one or
+more servers running ISC BIND.
+
+ProBIND is written in the PHP scripting language and uses MySQL to store its
+data. The contents of the database are generated into files formatted for ISC
+BIND and are pushed to the controlled servers on request through the interface
+or by a scheduled job.
+
+
+Advantages of ProBIND
+---------------------
+
+- ProBIND allows for quick searching across domains, allowing for quick editing
+  of important information.
+  
+- ProBIND has built-in templating to allow the use of certain standard
+  information across all zones.
+  
+- Based on settings in ProBIND, NS records will be automatically created.
+
+- ProBIND can automatically populate reverse zones (in-addr.arpa) for all your
+  A records. All you need to do is add the zone.
+
+
+Security Notice
+---------------
+
+Because of the high level of access that is currently needed for the operation
+of this application, it is highly recommended that you run ProBIND on a non-
+public web server. It is further recommended that you set your web server to
+use authentication for access to the application. 
+
+
+Limitations
+-----------
+
+- The import script is rather limited and doesn't work well with extended
+  features (GENERATE is an example) or odd formatting.
+
+- The import script cannot handle zone files larger than 64 kilobytes
+
+- Currently, a server can be only a master or a slave. Mixing of roles is not
+  possible.
+  
+- ProBIND can only automatically handle in-addr.arpa zones for /24 networks.
+  Other sizes can only be handled manually at this time. 
+
+- Only a subset of all possible record types is supported. These include A, CNAME,
+  MX, NS, PTR, TXT, and HINFO.
+
+- ProBIND exists independently of ISC BIND, thus no feedback from BIND itself
+  is used. This may change in the future, although it will be limited due to
+  the nature of ProBIND.
+
+
+Acknowledgements
+----------------
+
+Current maintainer: Michael Johnson <youngmug@users.sourceforge.net>
+
+I would like to acknowledge PhD Computing for offering support and time to
+contribute to this project and get it started again.
+
+
+ProBIND 2 Maintainer: Alexei P. Roudnev
+
+
+Original Author: Flemming S. Johansen <fjohansen@proventum.net>
+
+I acknowledge the role of my colleague Lasse L. Johnsen, who has
+contributed a lot of useful suggestions, without which this software
+would almost certainly be utterly useless to anyone other than myself.
+
+
+Logo: Susanne B. Olesen
+
+
+Visual Layout: Jeffrey R. McDonald
+
+
+History
+--------------------
+
+ProBIND was originally developed by Flemming S. Johansen as part of his duties
+as resident DNS manager at Proventum Solutions (now Consendo Systems A/S).
+
+Later, a fork of ProBIND called ProBIND2 was developed by Alexei P. Roudnev, a
+senior network/software engineer, at Exigen Group LTD.
+
+ProBIND2 was re-incorporated in ProBIND by the new maintainer, Michael Johnson,
+a systems administrator for PhD Computing,
+
+
+License
+-------
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+
+
+Last Update: 20100615

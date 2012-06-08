@@ -1,0 +1,9 @@
+This directory contains template directories for different bind installations.
+
+ProBIND copy all files whose names match '*.*' from template directory
+into the HOST directory when new server is created, or when
+'update from template' box is checked in 'update' operation.
+
+It created 'SEC' directory in the HOST directory.
+
+Only directories containing 'named.tmpl' are treated as templates.

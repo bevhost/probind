@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svnroot/probind/!svn/ver/86/trunk/etc
+END
+upgrade_tables.sql
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svnroot/probind/!svn/ver/47/trunk/etc/upgrade_tables.sql
+END
+import.php
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svnroot/probind/!svn/ver/86/trunk/etc/import.php
+END
+mktables.sql
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svnroot/probind/!svn/ver/84/trunk/etc/mktables.sql
+END
