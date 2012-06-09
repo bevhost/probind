@@ -14,6 +14,8 @@
 <?php
 require('../inc/lib.inc');
 
+if (!$perm->have_perm("admin")) die("Access Denied");
+
 $preamble = '
 NB: When you change these settings, the change is only reflected in
 domains which are pushed onto the DNS servers after the update. If
