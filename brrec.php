@@ -30,10 +30,10 @@ $query_form = '
 <TABLE width="100%%">
 <TR><TH>Zone</TH><TH>Domain</TH><TH>Type</TH><TH>Pref</TH><TH>Data</TH></TR>
 <TR>
-<TD><INPUT TYPE=text name="zdomain" value="%s" SIZE=15 MAXLENGTH=100></TD>
-<TD><INPUT TYPE=text name="rdomain" value="%s" SIZE=15 MAXLENGTH=100></TD>
+<TD><INPUT TYPE=text name="zdomain" value="%s" SIZE=15 MAXLENGTH=100 onfocus=this.select()></TD>
+<TD><INPUT TYPE=text name="rdomain" value="%s" SIZE=15 MAXLENGTH=100 onfocus=this.select()></TD>
 %s
-<TD><INPUT type=text name="pref" value="%s" SIZE=2 MAXLENGTH=4></TD>
+<TD><INPUT type=text name="pref" value="%s" SIZE=2 MAXLENGTH=4 onfocus=this.select()></TD>
 <TD><INPUT type=text name="data" value="%s" SIZE=25></TD>
 <TD><INPUT type=submit name="submit" value="Search"></TD>
 <TD align=right><A HREF="manual.html#records">Help</A></TD>
@@ -83,7 +83,7 @@ function query_type($type)
 	$result = "<TD><SELECT name=\"type\">\n";
 	$result .= sprintf("<OPTION%s>*</OPTION>\n",
 		((!$type || ($type == '*')) ? ' selected' : ''));
-	$types = array('A', 'CNAME', 'MX', 'NS', 'PTR', 'TXT', 'HINFO', 'SRV');
+	$types = array('A', 'AAAA', 'CNAME', 'MX', 'NS', 'PTR', 'TXT', 'HINFO', 'SRV');
 	while ($tp = each($types)) {
 		$result .= sprintf("<OPTION%s>%s</OPTION>\n",
 			($type == $tp[1] ? ' selected' : ''),
@@ -132,7 +132,7 @@ function result_form($INPUT_VARS)
 		return $empty_result;
 	$queryhead = "SELECT zones.id AS zid, zones.domain AS zdom, records.domain AS rdom, records.id AS rrid, type, pref, data FROM zones, records ";
 	$counthead = "SELECT count(*) FROM zones, records ";
-	$querycond = "WHERE zones.id = records.zone AND zones.domain != 'TEMPLATE' AND type != 'SOA'";
+	$querycond = "WHERE zones.id = records.zone AND zones.domain != 'TEMPLATE' AND type != 'SOA'".access();
 	if (strlen($zdomain)) {
 		if (strchr($zdomain, "%"))
 			$querycond .= " AND zones.domain like '$zdomain'";
@@ -217,6 +217,15 @@ function result_form($INPUT_VARS)
 get_input();
 
 $selectval = isset($INPUT_VARS['select'])? $INPUT_VARS['select'] : ''; 
+if (!$selectval) {
+	$selectval='result';
+	$INPUT_VARS['type']='*';
+	$INPUT_VARS['zdomain']='%';
+	$INPUT_VARS['rdomain']='%';
+	$INPUT_VARS['pref']='';
+	$INPUT_VARS['data']='';
+	$INPUT_VARS['pointer']='0';
+}
 
 switch($selectval) {
 case 'result':
