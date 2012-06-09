@@ -42,8 +42,9 @@ $start_form = "
 # MAIN
 #
 get_input();
-if (($domain = $INPUT_VARS['domain']) || !$INPUT_VARS['trashdomain']) {
-	if ($INPUT_VARS['frame'] == "delzone")
+$extra="";
+if (($domain = @$INPUT_VARS['domain']) || !@$INPUT_VARS['trashdomain']) {
+	if (@$INPUT_VARS['frame'] == "delzone")
 		print $html_top.sprintf($start_form, $domain);
 	else {
 		if ($domain)
