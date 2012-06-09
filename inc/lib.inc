@@ -8,9 +8,11 @@ if(file_exists(dirname(__FILE__) . "/config.php"))
 else
 	die('Could not load configuration file. Please check this ProBIND installation.');
 
+require_once("../phplib/prepend.php");
+
 $BIN = "$TOP/bin";
 $SBIN = "$TOP/sbin";
-if (!$TMP)
+if (empty($TMP))
 	$TMP = "$TOP/tmp";
 $DOMAIN_RE = "^(\*|[_a-z0-9]+([_a-z0-9-]+[_a-z0-9]+)*)(\.[_a-z0-9]+([_a-z0-9-]+[_a-z0-9]+)*)*\.?$";
 $DOMAIN_RE_NODOT = "^[_a-z0-9]+([_a-z0-9-]+[_a-z0-9]+)*(\.[_a-z0-9]+([_a-z0-9-]+[_a-z0-9]+)*)*$";

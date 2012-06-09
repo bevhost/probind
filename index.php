@@ -1,3 +1,4 @@
+<?php include("phplib/checkperm.inc"); ?>
 <HTML>
 <HEAD>
 <TITLE>ProBIND</TITLE>
