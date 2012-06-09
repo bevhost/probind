@@ -21,6 +21,8 @@
     <TD background="images/button-middle.gif"><A HREF="tools/" target="canvas"><B>Misc. tools</B></A></TD>
     <TD><IMG SRC="images/button-join.gif" width="30" height="33"></TD>
     <TD background="images/button-middle.gif"><A HREF="update.php" target="canvas"><B>Push updates</B></A></TD>
+    <TD><IMG SRC="images/button-join.gif" width="30" height="33"></TD>
+    <TD background="images/button-middle.gif"><A HREF="logout.php" target="_top"><B>Logout</B></A></TD>
     <TD><IMG SRC="images/button-right.gif" width="10" height="33"></TD>
    </TR>
    </TABLE>

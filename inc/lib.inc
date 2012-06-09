@@ -8,7 +8,7 @@ if(file_exists(dirname(__FILE__) . "/config.php"))
 else
 	die('Could not load configuration file. Please check this ProBIND installation.');
 
-require_once("../phplib/prepend.php");
+require_once("../phplib/checkperm.inc");
 
 $BIN = "$TOP/bin";
 $SBIN = "$TOP/sbin";
