@@ -1,6 +1,7 @@
 <?php
 
 require_once("checkperm.inc");
+require_once("idna_convert.class.php");
 
 $db = new DB_probind;
 $MYSQL_HOST = $db->Host;
@@ -74,7 +75,6 @@ function owner($o="")
 function access($a="")
 {
         global $perm, $auth;
-        if (!$perm) return "";
         if ($perm->have_perm("admin")) return "";
 	$query = "";
         if ($perm->have_perm("owner")) $query .= " AND owner='".$auth->auth["uname"]."'";
@@ -89,6 +89,11 @@ function access($a="")
                         }
                 }
                 if ($query) $query .= ")";
+		else {
+			$query=" AND 1=0";  /* user does not belong to any groups */
+			echo "<b>Permission Error</b><br>You do not have a valid group.";
+	var_dump($perm->permissions);
+		}
         }
         return $query;
 }
@@ -665,8 +670,13 @@ function insert_record($zone, $domain, $ttlspec, $type, $pref, $data, $genptr, $
 # was used to invoke this page
 function get_input()
 {
-	global $INPUT_VARS;
-	$INPUT_VARS = $_REQUEST;
+	global $INPUT_VARS, $db, $idn_version;
+	$IDN = new idna_convert(array('idn_version' => $idn_version));
+	foreach($_REQUEST as $k=>$v) {
+		$utf8 = to_utf8($v);
+		$punycode = $IDN->encode($utf8);
+		$INPUT_VARS[$k] = $db->escape_string($punycode);
+	}
 }
 
 # Return the serial number to use for the domain ID. Automatically

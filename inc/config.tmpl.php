@@ -17,9 +17,12 @@ class DB_probind extends DB_Sql {
   var $Password = "CHANGEME";
 }
 
+$idn_version = 2008;  // internationalisation version for punycode converter
+
 // Optional settings are below. These are safe defaults, but you can adjust
 // them if you need to.
 
+header('Content-Type: text/html; charset=utf-8');
 ini_set('display_errors', 'On');
 date_default_timezone_set("Australia/Sydney");
 
