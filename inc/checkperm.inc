@@ -1,5 +1,5 @@
 <?php
-	include "../phplib/prepend.php";
+	include dirname(__FILE__) . "/../phplib/prepend.php";
 
 //Configuration file sits in same directory as this file.
 //Using dirname() is a valid way to get the right file no matter
