@@ -3,14 +3,25 @@
 // Root of the ProBIND Application
 $TOP = '/usr/local/bind-web/probind';
 
+//default ownership groups, don't remove admin or owner
+//admin has access to everything
+//owner has access to zones owned by their username
+//you can add multiple permissions to a user in auth_user table
+$_ENV["Perms"] = "admin,owner,group1,group2,group3,etc";
+
 // Database connection information
-$MYSQL_HOST = 'localhost';
-$MYSQL_DB = 'probind';
-$MYSQL_USER = 'probinduser';
-$MYSQL_PASSWD = 'CHANGEME';
+class DB_probind extends DB_Sql {
+  var $Host     = "localhost";
+  var $Database = "probind";
+  var $User     = "probinduser";
+  var $Password = "CHANGEME";
+}
 
 // Optional settings are below. These are safe defaults, but you can adjust
 // them if you need to.
+
+ini_set('display_errors', 'On');
+date_default_timezone_set("Australia/Sydney");
 
 // Where do we put temporary files?
 $TMP='/tmp';

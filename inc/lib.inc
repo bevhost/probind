@@ -1,14 +1,6 @@
 <?php
 
-//Configuration file sits in same directory as this file.
-//Using dirname() is a valid way to get the right file no matter
-//what our caller was.
-if(file_exists(dirname(__FILE__) . "/config.php"))
-	require_once(dirname(__FILE__) . "/config.php");
-else
-	die('Could not load configuration file. Please check this ProBIND installation.');
-
-require_once("../phplib/checkperm.inc");
+require_once("checkperm.inc");
 
 $BIN = "$TOP/bin";
 $SBIN = "$TOP/sbin";
