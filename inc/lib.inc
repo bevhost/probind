@@ -92,7 +92,6 @@ function access($a="")
 		else {
 			$query=" AND 1=0";  /* user does not belong to any groups */
 			echo "<b>Permission Error</b><br>You do not have a valid group.";
-	var_dump($perm->permissions);
 		}
         }
         return $query;
