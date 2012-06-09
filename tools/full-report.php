@@ -20,7 +20,7 @@ require '../inc/lib.inc';
 #
 get_input();
 
-$query = "SELECT domain, id, master FROM zones WHERE domain != 'TEMPLATE' ORDER BY domain";
+$query = "SELECT domain, id, master FROM zones WHERE domain != 'TEMPLATE'".access()." ORDER BY domain";
 $rid = sql_query($query);
 while (list($dom, $id, $master) = mysql_fetch_row($rid)) {
 	if ($master)
