@@ -7,7 +7,7 @@ $TOP = '/usr/local/bind-web/probind';
 //admin has access to everything
 //owner has access to zones owned by their username
 //you can add multiple permissions to a user in auth_user table
-$_ENV["Perms"] = "admin,owner,group1,group2,group3,etc";
+$PERMS = "admin,owner,group1,group2,group3,etc";
 
 // Database connection information
 class DB_probind extends DB_Sql {

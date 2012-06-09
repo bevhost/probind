@@ -70,6 +70,29 @@ function owner($o="")
         return $html;
 }
 
+#determine sql query addon to limit zones returned to owner or group
+function access($a="")
+{
+        global $perm, $auth;
+        if (!$perm) return "";
+        if ($perm->have_perm("admin")) return "";
+	$query = "";
+        if ($perm->have_perm("owner")) $query .= " AND owner='".$auth->auth["uname"]."'";
+        else {
+                $conj = "AND (";
+                foreach ($perm->permissions as $k => $v) {
+                        if (($perm->have_perm($k)) or ($perm->have_perm("admin"))) {
+                                if($a=="" or $a==$k) {
+                                        $query .= " $conj owner='$k'";
+                                        $conj = "OR";
+                                }
+                        }
+                }
+                if ($query) $query .= ")";
+        }
+        return $query;
+}
+
 
 # Convert a number of seconds (as stored in the database) into
 # the Weeks/Days/Hours/Minutes/Seconds notation which is so much
@@ -205,7 +228,7 @@ clicking on this button:<P>
 # database
 function known_domain($domain)
 {
-	$rid = sql_query("SELECT id FROM zones WHERE domain = '$domain'");
+	$rid = sql_query("SELECT id FROM zones WHERE domain = '$domain'".access());
 	$id = 0;
 	if (mysql_num_rows($rid))
 		$id = mysql_result($rid, 0);
@@ -216,7 +239,7 @@ function known_domain($domain)
 # Return the known information about a zone ID
 function get_zone($id)
 {
-	$rid = sql_query("SELECT * FROM zones WHERE id = $id");
+	$rid = sql_query("SELECT * FROM zones WHERE id = $id".access());
 	$info = mysql_fetch_array($rid);
 	mysql_free_result($rid);
 	return $info;
@@ -225,7 +248,7 @@ function get_zone($id)
 # Return the known information about a zone name
 function get_named_zone($name)
 {
-	$rid = sql_query("SELECT * FROM zones WHERE domain = '$name'");
+	$rid = sql_query("SELECT * FROM zones WHERE domain = '$name'".access());
 	$info = mysql_fetch_array($rid);
 	mysql_free_result($rid);
 	return $info;
@@ -338,7 +361,7 @@ function del_zone($zoneid)
 	}
 	mysql_free_result($rid);
 	# Add this domain to deleted_domains
-	$rid = sql_query("SELECT domain, zonefile, master FROM zones WHERE id = $zoneid");
+	$rid = sql_query("SELECT domain, zonefile, master FROM zones WHERE id = $zoneid".access());
 	list($domain, $zonefile, $master) = mysql_fetch_row($rid);
 	mysql_free_result($rid);
 	sql_query("DELETE FROM deleted_domains WHERE domain = '$domain'");
@@ -381,6 +404,7 @@ function domain_list($lookfor, $type, $format)
 		$query .= ", annotations WHERE id = zone AND descr LIKE '$lookfor'";
 		break;
 	}
+	$query .= access();
 	$query .= " ORDER BY domain";
 	$rid = sql_query($query);
 	$typestr = "";
