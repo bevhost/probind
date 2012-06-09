@@ -20,3 +20,16 @@ ALTER TABLE `zones`
 
 INSERT INTO `typesort` (`type`, `ord`) VALUES
   ('SRV', 9);
+
+
+
+
+-- 20120609 (bevhost)
+-- update to allow permissions / zone ownership
+
+ALTER TABLE `zones`
+  ADD COLUMN `owner` varchar(32);
+
+ALTER TABLE `deleted_domains``
+  ADD COLUMN `owner` varchar(32);
+

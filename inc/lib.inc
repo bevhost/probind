@@ -2,6 +2,12 @@
 
 require_once("checkperm.inc");
 
+$db = new DB_probind;
+$MYSQL_HOST = $db->Host;
+$MYSQL_DB = $db->Database;
+$MYSQL_USER = $db->User;
+$MYSQL_PASSWD = $db->Password;
+
 $BIN = "$TOP/bin";
 $SBIN = "$TOP/sbin";
 if (empty($TMP))
@@ -38,6 +44,32 @@ function sql_query($query)
 		or die("'$query' failed with error:<p>" . mysql_error()."</p>");
 	return $rid;
 }
+
+# determine the html for setting the owner of a zone
+function owner($o="")
+{
+        global $perm, $auth;
+        $count=0;
+        if($perm->have_perm("owner")) {
+                $owner = $auth->auth["uname"];
+                $html = "<input type=hidden name=owner value='$owner'>$owner\n";
+                $count=1;
+        } else {
+                $html = "<select name=owner>\n";
+                foreach ($perm->permissions as $k => $v) {
+                        if (($perm->have_perm("admin")) or ($perm->have_perm($k))) {
+                                if ($o==$k) $sel="selected"; else $sel="";
+                                $html .= "  <option $sel value='$k'>$k\n";
+                                $count++;
+                                $last = $k;
+                        }
+                }
+                $html .= "</select>\n";
+                if ($count==1) $html="<input type=hidden name=owner value='$last'>$last\n";
+        }
+        return $html;
+}
+
 
 # Convert a number of seconds (as stored in the database) into
 # the Weeks/Days/Hours/Minutes/Seconds notation which is so much
