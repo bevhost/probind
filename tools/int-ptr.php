@@ -16,6 +16,7 @@ $html_bottom = "
 </HTML>
 ";
 
+$lastzone="";
 print $html_top;
 $query = "SELECT zones.id AS zid, zones.domain AS zdom, records.id AS rid, records.domain AS rdom, records.data AS rdata FROM zones, records WHERE zones.id = records.zone AND zones.domain != 'TEMPLATE' AND records.type = 'PTR' AND data NOT LIKE 'host-%' ORDER BY zone";
 $rid = sql_query($query);

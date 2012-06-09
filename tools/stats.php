@@ -37,7 +37,7 @@ adjust_serials();
 // Begin check for changes.
 $update = FALSE;
 
-$rid = sql_query("SELECT domain, id, zonefile FROM zones WHERE updated AND domain != 'TEMPLATE' ORDER BY zonefile");
+$rid = sql_query("SELECT domain, id, zonefile FROM zones WHERE updated AND domain != 'TEMPLATE'".access()." ORDER BY zonefile");
 
 $count = mysql_num_rows($rid);
 
@@ -51,7 +51,7 @@ if ($count) {
 }
 
 mysql_free_result($rid);
-$rid = sql_query("SELECT domain FROM deleted_domains");
+$rid = sql_query("SELECT domain FROM deleted_domains WHERE 1 ".access());
 $count = mysql_num_rows($rid);
 if ($count) {
 	print "<P>The following domains have been deleted from the database.<P><UL>\n";

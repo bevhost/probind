@@ -25,9 +25,11 @@ function check_mx_cnt($count)
 		AND zones.domain != 'TEMPLATE'
 		AND zones.domain NOT LIKE '%.in-addr.arpa'
 		AND length(zones.master) = 0
+		".access()."
 	GROUP BY zones.domain, records.type
 	";
 	$rid = sql_query($type_query);
+	$result = "";
 	$lastdom = "";
 	$lastzid = "";
 	$mxcnt = 0;

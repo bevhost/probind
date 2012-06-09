@@ -23,9 +23,10 @@ function list_record($record)
 	print "\">".$record['zdom']."</A><BR>\n";
 }
 
+$ul=0;
 print $html_top;
 # List all A records, sorted by IP number
-$query = "SELECT zones.id AS zid, zones.domain AS zdom, records.id AS rid, records.domain AS rdom, records.data AS rdata FROM zones, records WHERE zones.id = records.zone AND records.type = 'A' AND zones.domain != 'TEMPLATE' ORDER BY records.data";
+$query = "SELECT zones.id AS zid, zones.domain AS zdom, records.id AS rid, records.domain AS rdom, records.data AS rdata FROM zones, records WHERE zones.id = records.zone AND records.type = 'A' AND zones.domain != 'TEMPLATE'".access()." ORDER BY records.data";
 $rid = sql_query($query);
 $lastrow['rdata'] = "";
 $first = 1;

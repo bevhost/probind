@@ -26,6 +26,7 @@ function verify_mx()
 		AND length(zones.master) = 0
 		AND type = 'MX'
 		AND (pref IS NULL OR length(pref) = 0)
+		".access()."
 	ORDER BY zones.domain, records.domain
 	";
 	$result = "";
@@ -48,6 +49,7 @@ function verify_a()
 	WHERE zones.id = records.zone 
 		AND zones.domain != 'TEMPLATE'
 		AND type = 'A'
+		".access()."
 	ORDER BY zones.domain, records.domain
 	";
 	$result = "";

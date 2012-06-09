@@ -133,7 +133,7 @@ if (!$INPUT_VARS['nameserver']) {
 
 print sprintf($html_top, "#dcdcdc");
 initialize_servers();
-$rid = sql_query("SELECT domain FROM zones WHERE (master IS NULL OR NOT master) AND domain != 'TEMPLATE' AND domain != '0.0.127.in-addr.arpa' ORDER BY domain");
+$rid = sql_query("SELECT domain FROM zones WHERE (master IS NULL OR NOT master) AND domain != 'TEMPLATE' AND domain != '0.0.127.in-addr.arpa'".access()." ORDER BY domain");
 $listfile = fopen("$TMP/domains", "w");
 while ($row = mysql_fetch_row($rid)) {
 	$domain = sprintf("%s\n", $row[0]);
