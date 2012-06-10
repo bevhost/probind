@@ -1,5 +1,6 @@
 <?php
 include('phplib/prepend.php');
+include('inc/config.php');
 page_open(array("sess"=>"probind_Session"));
 $widemode="";
 $auth->logout();
