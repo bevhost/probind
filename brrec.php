@@ -28,14 +28,14 @@ $query_form = '
 <INPUT type=hidden name="select" value="result">
 <INPUT type=hidden name="pointer" value="%d">
 <TABLE width="100%%">
-<TR><TH>Zone</TH><TH>Domain</TH><TH>Type</TH><TH>Pref</TH><TH>Data</TH></TR>
+<TR><TH>'.trans('Zone').'</TH><TH>'.trans('Domain').'</TH><TH>'.trans('Type').'</TH><TH>'.trans('Pref').'</TH><TH>'.trans('Data').'</TH></TR>
 <TR>
 <TD><INPUT TYPE=text name="zdomain" value="%s" SIZE=15 MAXLENGTH=100 onfocus=this.select()></TD>
 <TD><INPUT TYPE=text name="rdomain" value="%s" SIZE=15 MAXLENGTH=100 onfocus=this.select()></TD>
 %s
 <TD><INPUT type=text name="pref" value="%s" SIZE=2 MAXLENGTH=4 onfocus=this.select()></TD>
 <TD><INPUT type=text name="data" value="%s" SIZE=25></TD>
-<TD><INPUT type=submit name="submit" value="Search"></TD>
+<TD><INPUT type=submit name="submit" value="'.trans('Search').'"></TD>
 <TD align=right><A HREF="manual.html#records">Help</A></TD>
 </TR></TABLE>
 </FORM>
@@ -171,14 +171,14 @@ function result_form($INPUT_VARS)
 	$result .= sprintf($button_form,
 		$zdomain, $rdomain, $type, $pref, $data,
 		0, "start",
-		"<<<< First");
+		"<<<< ".trans("First"));
 	$result .= "</TD>";
 	if ($pointer) {
 		$result .= "<TD>";
 		$result .= sprintf($button_form,
 			$zdomain, $rdomain, $type, $pref, $data,
 			$pointer-$ROWS_PER_PAGE, "prev",
-			"<< Prev $ROWS_PER_PAGE");
+			"<< ".trans("Prev")." $ROWS_PER_PAGE");
 		$result .= "</TD>";
 	}
 	if (($count >= 50) && (($pointer + $ROWS_PER_PAGE) <= $count)) {
@@ -186,17 +186,17 @@ function result_form($INPUT_VARS)
 		$result .= sprintf($button_form,
 			$zdomain, $rdomain, $type, $pref, $data,
 			$pointer+$ROWS_PER_PAGE, "next",
-			"Next $ROWS_PER_PAGE >>");
+			trans("Next")." $ROWS_PER_PAGE >>");
 		$result .= "</TD>";
 	}
 	$result .= "<TD>";
 	$result .= sprintf($button_form,
 		$zdomain, $rdomain, $type, $pref, $data,
 		($count - ($count % $ROWS_PER_PAGE)), "last",
-		"Last >>>>");
+		trans("Last")." >>>>");
 	$result .= "</TD>";
 	$result .= "</TR></TABLE>\n";
-	$result .= "<TABLE><TR><TH align=left>Host</TH><TH align=left>Domain</TH><TH align=left>Type</TH><TH align=left>Pref</TH><TH align=left>Data</TH></TR>\n";
+	$result .= "<TABLE><TR><TH align=left>".trans('Host')."</TH><TH align=left>".trans('Domain')."</TH><TH align=left>".trans('Type')."</TH><TH align=left>".trans('Pref')."</TH><TH align=left>".trans('Data')."</TH></TR>\n";
 	while ($row = mysql_fetch_array($rid)) {
 		$result .= "<TR><TD>".decode($row['rdom'])."</TD>";
 		$result .= "<TD><A HREF=\"brzones.php?frame=records&zone=";

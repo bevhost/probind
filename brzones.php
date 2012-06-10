@@ -26,11 +26,11 @@ $left_frame = '
 <FORM action="brzones.php" method="post">
 <INPUT type=hidden name="formname" value="zonesearch">
 <TABLE border="0" cellpadding="0" cellspacing="0">
-<TR><TD colspan="2"><IMG SRC="images/space.gif" align=top width="3" height="13">Search in</TD></TR>
+<TR><TD colspan="2"><IMG SRC="images/space.gif" align=top width="3" height="13">'.trans('Search').'</TD></TR>
 <TR><TD colspan="2">%s</TD></TR>
-<TR><TD colspan="2"><IMG SRC="images/space.gif" align=top width="3" height="13">For</TD></TR>
+<TR><TD colspan="2"><IMG SRC="images/space.gif" align=top width="3" height="13">'.trans('For').'</TD></TR>
 <TR><TD colspan="2"><INPUT type=text name="lookfor" value="%s" SIZE="16"></TD></TR>
-<TR><TD><IMG SRC="images/space.gif" width="5" height="10"><BR><INPUT type=submit value="Search" class=button onmousemoveover="this.className=\'buttonhover\'" onmouseout="this.className=\'button\'"></TD>
+<TR><TD><IMG SRC="images/space.gif" width="5" height="10"><BR><INPUT type=submit value="'.trans('Search').'" class=button onmousemoveover="this.className=\'buttonhover\'" onmouseout="this.className=\'button\'"></TD>
  <TD valign=bottom><A HREF="manual.html#zones" target="right">Help</A></TD>
 </TR>
 </TABLE>
@@ -128,13 +128,13 @@ $slave_zone_detail_form = '
 $rr_form_top = '
 <TR>
 	<TD valign=bottom><INPUT type="submit" value="Add RR" name="formname" class="button" onmouseover="this.className=\'buttonhover\'" onmouseout="this.className=\'button\'"></TD>
-	<TH align=left>Domain</TH>
-	<TH align=left>TTL</TH>
-	<TH align=left>Type</TH>
-	<TH align=left>Pref</TH>
-	<TH align=left>Ptr?</TH>
-	<TH align=left colspan=2>Data</TH>
-	<TH align=left>Comment</TH>
+	<TH align=left>'.trans('Domain').'</TH>
+	<TH align=left>'.trans('TTL').'</TH>
+	<TH align=left>'.trans('Type').'</TH>
+	<TH align=left>'.trans('Pref').'</TH>
+	<TH align=left>'.trans('Ptr').'?</TH>
+	<TH align=left colspan=2>'.trans('Data').'</TH>
+	<TH align=left>'.trans('Comment').'</TH>
 	<TH>
 	</TH>
 </TR>
@@ -262,13 +262,13 @@ function domain_search_form($input)
 	}
 
 	$typebox = "<SELECT name=\"domtype\">\n";
-	$typebox .= sprintf("<OPTION value=\"*\"%s>All zones</OPTION>\n",
+	$typebox .= sprintf("<OPTION value=\"*\"%s>".trans('All zones')."</OPTION>\n",
 		(($type == '*') ? ' selected' : ''));
-	$typebox .= sprintf("<OPTION value=\"M\"%s>Master zones</OPTION>\n",
+	$typebox .= sprintf("<OPTION value=\"M\"%s>".trans('Master zones')."</OPTION>\n",
 		(($type == 'M') ? ' selected' : ''));
-	$typebox .= sprintf("<OPTION value=\"S\"%s>Slave zones</OPTION>\n",
+	$typebox .= sprintf("<OPTION value=\"S\"%s>".trans('Slave zones')."</OPTION>\n",
 		(($type == 'S') ? ' selected' : ''));
-	$typebox .= sprintf("<OPTION value=\"A\"%s>Annotations</OPTION>\n",
+	$typebox .= sprintf("<OPTION value=\"A\"%s>".trans('Annotations')."</OPTION>\n",
 		(($type == 'A') ? ' selected' : ''));
 	$typebox .= "</SELECT>\n";
 	return sprintf($left_frame, $typebox, $srchstr);
@@ -386,11 +386,11 @@ function right_frame($vars)
 			$domain = $record['domain'];
 			$domstr = strtoupper($domain);
 			if ($domain == 'TEMPLATE')
-				$updtext = "N/A";
+				$updtext = trans("N/A");
 			elseif ($record['updated'])
-				$updtext = "Yes";
+				$updtext = trans("Yes");
 			else
-				$updtext = "No";
+				$updtext = trans("No");
 
 			if ($record['disabled'])
 				$distext = " CHECKED";

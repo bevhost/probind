@@ -10,8 +10,8 @@ $html_top = '
 <BODY bgcolor="#cccc99" background="images/BG-shadowleft.gif">
 <TABLE width="100%">
 <TR>
- <TH align=right><A HREF="manual.html#add">Help</A></TH>
- <TD align=left><H1>Adding a zone</H1></TD>
+ <TH align=right><A HREF="manual.html#add">'.trans('Help').'</A></TH>
+ <TD align=left><H1>'.trans('Add a zone').'</H1></TD>
 </TR>
 </TABLE>
 <HR><P>
@@ -38,11 +38,10 @@ $start_form = "
 <FORM method=\"post\" action=\"addzone.php\">
 <INPUT type=hidden name=\"type\" value=\"master\">
 <TABLE width=\"100%\">
-<TR><TD>Domain name</TD>
+<TR><TD>".trans('Domain name')."</TD>
     <TD><TEXTAREA name=\"newdomain\" rows=8 cols=44></TEXTAREA></TD>
-    <TD>Enter one or more names of domains to add to the database, each on
-    a separate line</TD></TR>
-<tr><td>Owner</td><td>".owner()."</tr>
+    <TD>".trans('Enter one or more names of domains to add to the database, each on a separate line')."</TD></TR>
+<tr><td>".trans('Owner')."</td><td>".owner()."</tr>
 <TR><TD colspan=2 align=center><INPUT type=submit value=\"Add Master Domain(s)\"></TD>
 </TABLE>
 </FORM>
@@ -51,11 +50,11 @@ $start_form = "
 <FORM method=\"post\" action=\"addzone.php\">
 <INPUT type=hidden name=\"type\" value=\"slave\">
 <TABLE width=\"100%\">
-<TR><TD>Domain name</TD>
+<TR><TD>".trans('Domain name')."</TD>
     <TD><INPUT name=\"newdomain\" size=32></TD>
-<TR><TD>Master server</TD>
+<TR><TD>".trans('Master server')."</TD>
     <TD><INPUT name=\"newmaster\" size=32></TD>
-<tr><td>Owner</td><td>".owner()."</tr>
+<tr><td>".trans('Owner')."</td><td>".owner()."</tr>
 <TR><TD colspan=2 align=center><INPUT type=submit value=\"Add Slave Domain\"></TD>
 </TABLE>
 </FORM>
