@@ -32,7 +32,7 @@ $start_frame = '
 $start_form = "
 <FORM method=\"post\" action=\"delzone.php\">
 <TABLE width=\"100%%\">
-<TR><TD>Domain name</TD><TD><INPUT name=\"trashdomain\" size=32 value=\"%s\"></TD>
+<TR><TD>Domain name</TD><TD><INPUT name=\"trashdomain\" size=32 value=\"%s\"> %s</TD>
 <TR><TD colspan=2 align=center><INPUT type=submit value=\"Delete zone from database\"></TD>
 </TABLE>
 </FORM>
@@ -45,7 +45,7 @@ get_input();
 $extra="";
 if (($domain = @$INPUT_VARS['domain']) || !@$INPUT_VARS['trashdomain']) {
 	if (@$INPUT_VARS['frame'] == "delzone")
-		print $html_top.sprintf($start_form, $domain);
+		print $html_top.sprintf($start_form, $domain, display_if_international($domain));
 	else {
 		if ($domain)
 			$extra = "&domain=$domain";
@@ -68,7 +68,7 @@ if (($domain = @$INPUT_VARS['domain']) || !@$INPUT_VARS['trashdomain']) {
 	if (strlen($warnings)) {
 		print "The domain was not deleted, for the following reasons:<P><UL>\n$warnings</UL>\n";
 	} else {
-		if (!$INPUT_VARS['iamserious']) {
+		if (!@$INPUT_VARS['iamserious']) {
 			print "
 			<B>WARNING</B>: You are about to delete domain <A href=\"brzones.php?frame=records&mode=view&zone=$domid\">$trashdomain</A> permanently.
 
@@ -82,6 +82,7 @@ if (($domain = @$INPUT_VARS['domain']) || !@$INPUT_VARS['trashdomain']) {
 		}
 		else {
 			$rrcount = del_zone($domid);
+			$trashdomain=decode($trashdomain);
 			print "<HR><P>Domain '$trashdomain' (id = $domid) and $rrcount resource records successfully removed.<P>\n";
 		}
 	}
