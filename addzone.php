@@ -42,6 +42,7 @@ $start_form = "
     <TD><TEXTAREA name=\"newdomain\" rows=8 cols=44></TEXTAREA></TD>
     <TD>Enter one or more names of domains to add to the database, each on
     a separate line</TD></TR>
+<tr><td>Owner</td><td>".owner()."</tr>
 <TR><TD colspan=2 align=center><INPUT type=submit value=\"Add Master Domain(s)\"></TD>
 </TABLE>
 </FORM>
@@ -54,6 +55,7 @@ $start_form = "
     <TD><INPUT name=\"newdomain\" size=32></TD>
 <TR><TD>Master server</TD>
     <TD><INPUT name=\"newmaster\" size=32></TD>
+<tr><td>Owner</td><td>".owner()."</tr>
 <TR><TD colspan=2 align=center><INPUT type=submit value=\"Add Slave Domain\"></TD>
 </TABLE>
 </FORM>
@@ -93,7 +95,7 @@ function add_master_domain($input)
 	    if (strlen($warnings)) {
 		    $result .= "The '$domain' domain was not created, for the following reasons:<P><UL>\n$warnings</UL>\n";
 	    } else {
-		    $id = add_domain($domain, '');
+		    $id = add_domain($domain, '', '', $input['owner']);
 		    $res1   .= fill_in_domain($id, 1);
 		    $result .= "<HR><P>Domain '<A HREF=\"brzones.php?frame=records&zone=$id\">$domain</A>' successfully added.<P>\n";
 			if ($res1) {
@@ -117,7 +119,7 @@ function add_slave_domain($input)
 	if (strlen($warnings)) {
 		$result .= "The domain was not created, for the following reasons:<P><UL>\n$warnings</UL>\n";
 	} else {
-		$id = add_domain($domain, $master);
+		$id = add_domain($domain, $master, '', $input['owner']);
 		$result .= "<HR><P>Domain '<A HREF=\"brzones.php?frame=records&zone=$id\">$domain</A>' successfully added.<P>\n";
 	}
 	$result .= "<hr><p>\n";

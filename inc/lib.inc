@@ -289,7 +289,7 @@ function valid_ip($ip)
 # NB: The 'master' parameter contains the IP number of the DNS master
 # server for the new (slave) domain, i.e., it is the empty string if
 # the domain is a master domain.
-function add_domain($domain, $master, $eoptions = "")
+function add_domain($domain, $master, $eoptions = "", $owner)
 {
 	global $domain_lock_msg, $REMOTE_USER, $SLAVE_ON_SLAVES;
 	# Find the template data
@@ -315,7 +315,7 @@ function add_domain($domain, $master, $eoptions = "")
 	if ($user = patient_enter_crit($REMOTE_USER, 'DOMAIN'))
 		die (sprintf($domain_lock_msg, ucfirst($user)));
 	# Add the domain to the zones table
-	$rid = sql_query("INSERT INTO zones (domain, serial, refresh, retry, expire, master, updated, zonefile, options) VALUES ('$domain', $serial, $refresh, $retry, $expire, $master, 1, '$zonefile', '$options')");
+	$rid = sql_query("INSERT INTO zones (domain, serial, refresh, retry, expire, master, updated, zonefile, options, owner) VALUES ('$domain', $serial, $refresh, $retry, $expire, $master, 1, '$zonefile', '$options', '$owner')");
 	$newzone = mysql_insert_id();
 	sql_query("UPDATE zones SET ctime = mtime WHERE id = $newzone");
 	# Just in case a domain of the same name was recently deleted...
