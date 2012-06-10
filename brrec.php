@@ -198,12 +198,12 @@ function result_form($INPUT_VARS)
 	$result .= "</TR></TABLE>\n";
 	$result .= "<TABLE><TR><TH align=left>Host</TH><TH align=left>Domain</TH><TH align=left>Type</TH><TH align=left>Pref</TH><TH align=left>Data</TH></TR>\n";
 	while ($row = mysql_fetch_array($rid)) {
-		$result .= "<TR><TD>".$row['rdom']."</TD>";
+		$result .= "<TR><TD>".decode($row['rdom'])."</TD>";
 		$result .= "<TD><A HREF=\"brzones.php?frame=records&zone=";
-		$result .= $row['zid']."&rrid=".$row['rrid']."\">".$row['zdom']."</A></TD>";
+		$result .= $row['zid']."&rrid=".$row['rrid']."\">".decode($row['zdom'])."</A></TD>";
 		$result .= "<TD>".$row['type']."</TD>";
 		$result .= "<TD>".$row['pref']."</TD>";
-		$result .= "<TD>".$row['data']."</TD></TR>\n";
+		$result .= "<TD>".decode($row['data'])."</TD></TR>\n";
 	}
 	$result .= "</TABLE>\n";
 	mysql_free_result($rid);

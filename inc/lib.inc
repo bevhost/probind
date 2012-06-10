@@ -678,6 +678,15 @@ function get_input()
 	}
 }
 
+function decode($str) {
+	global $idn_version;
+	if (strtolower(substr($str,0,4))=="xn--") {
+        	$IDN = new idna_convert(array('idn_version' => $idn_version));
+		$str .= " (".$IDN->decode(strtolower($str)).")";
+	}
+	return $str;
+}
+
 # Return the serial number to use for the domain ID. Automatically
 # updates the database as needed.
 function get_serial($id)

@@ -330,7 +330,7 @@ function record_view($record)
 		else
 			$stat_html = "<IMAGE width=\"15\" height=\"15\" SRC=\"images/noway.gif\">";
 		$result .= sprintf("<TR><TD align=CENTER><INPUT type=\"submit\" name=\"edit\" value=\"edit\" onclick=\"rrid.value='$id'\" class=\"button\" onmouseover=\"this.className='buttonhover'\" onmouseout=\"this.className='button'\"> $stat_html</TD>\n");
-		$result .= sprintf("\t<TD>%s</TD>\n", $record['domain']);
+		$result .= sprintf("\t<TD>%s</TD>\n", decode($record['domain']));
 		$result .= sprintf("\t<TD>%s</TD>\n", seconds_to_ttl($record['ttl']));
 		$result .= sprintf("\t<TD>%s</TD>\n", $record['type']);
 		$result .= sprintf("\t<TD>%s</TD>\n", $record['pref']);
@@ -399,12 +399,12 @@ function right_frame($vars)
 
 			if ($record['master'])
 				$result .= sprintf($slave_zone_detail_form,
-					$record['id'], $domain,
+					$record['id'], decode($domain),
 					$record['master'], $record['zonefile'],
 					$updtext, $distext);
 			else
 				$result .= sprintf($master_zone_detail_form,
-					$domstr, $record['id'],
+					decode($domstr), $record['id'],
 					$record['zonefile'], $record['serial'],
 					$updtext, $distext,
 					seconds_to_ttl($record['refresh']),
