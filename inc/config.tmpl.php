@@ -19,6 +19,9 @@ class DB_probind extends DB_Sql {
 
 $idn_version = 2008;  // internationalisation version for punycode converter
 
+include ("lang.php");
+$language = 'en';
+
 // Optional settings are below. These are safe defaults, but you can adjust
 // them if you need to.
 
