@@ -911,6 +911,13 @@ function published_servers()
 # Format and return the NS records for the BIND servers in the list
 function auto_nsrecs($domain, $ttl, $servers)
 {
+	$query = "SELECT id FROM records JOIN zones ON (records.zone=zone.id) WHERE records.type='NS' AND zone.domain='$domain'";
+	$rid = sql_query($query);
+	if ($row = mysql_fetch_row($rid)) {
+		# zone has it's own NS records so bypass auto NS.	
+		mysql_free_result($rid);
+		return "";
+	} # otherwise...
 	$result = ";\n; NS's implied by server records in the database\n;\n";
 	if ( count($servers) ) {
 	while ($server = each($servers))
