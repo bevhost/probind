@@ -46,9 +46,8 @@ function sql_query($query)
 	return $rid;
 }
 
-if (!function_exists("inet_pton"))
-function inet_pton($ip)
-{
+if (!function_exists("inet_pton")) {
+  function inet_pton($ip) {
     # ipv4
     if (strpos($ip, '.') !== FALSE) {
         $ip = pack('N',ip2long($ip));
@@ -63,6 +62,7 @@ function inet_pton($ip)
         $ip = pack('H'.strlen($res), $res);
     }
     return $ip;
+  }
 }
 
 function make_ipv6_ptr($ip) {
@@ -769,6 +769,38 @@ function updates_completed()
 	$rid = sql_query("UPDATE zones SET updated = 0 WHERE updated = 2 ");
 }
 
+function auto_ip6_ptrs($domain, $ttl, $reversehosts)
+{
+	$chop = (strlen($domain)+1) * -1;
+	$mainptr = substr($domain, 0, strlen($domain)-9);
+	$pieces = array_reverse(explode(".",$mainptr));  
+    	$hex = implode("",$pieces);
+	$ip = "";
+	while ($hex) {
+		$ip .= substr($hex,0,4) . ":";	
+		$hex = substr($hex,4);
+	}
+	$shortip = $ip;
+	while (strpos($shortip,":0")) $shortip = str_replace(":0",":",$shortip);
+	while (strpos($shortip,":::")) $shortip = str_replace(":::","::",$shortip);
+	$octets = count($pieces);
+	if ($ip==$shortip) $extra=""; else $extra = " OR `data` LIKE '$shortip%'";
+	$query = "SELECT zones.id AS zid, records.domain AS rdom, zones.domain AS zdom, `data` FROM zones, records WHERE zones.id = records.zone AND type = 'AAAA' /*AND genptr = 1*/ AND (`data` LIKE '$ip%'$extra) ORDER BY `data`";
+	$rid = sql_query($query);
+	$autoflag = FALSE;
+	$result = ";\n; PTR's implied by AAAA records in the database\n;\n";
+	while ($row = mysql_fetch_array($rid)) {
+		if ($row['rdom'] == '@')
+			$hostname = $row['zdom'].".";
+		elseif ($row['rdom'] != $row['zdom'].".")
+			$hostname = $row['rdom'].".".$row['zdom'].".";
+		else
+			$hostname = $row['rdom'];
+		$ptr = substr(make_ipv6_ptr($row['data']),0,$chop);
+		$result .= "$ptr\t$ttl IN\tPTR\t$hostname\n";
+	}
+	return $result;
+}
 #
 #
 function auto_ptrs($domain, $ttl, $reversehosts)

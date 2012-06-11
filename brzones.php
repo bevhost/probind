@@ -442,6 +442,8 @@ function right_frame($vars)
 				$result .= $ttl;
 			*/
 			$result .= auto_nsrecs($domain, seconds_to_ttl($ttl), $servers);
+			if (preg_match("/\.ip6\.arpa(\.)?$/", $domain))
+				$result .= auto_ip6_ptrs($domain, seconds_to_ttl($soa_ttl), $explicit_ptrs);
 			if (preg_match("/\.in-addr\.arpa(\.)?$/", $domain))
 				$result .= auto_ptrs($domain, seconds_to_ttl($soa_ttl), $explicit_ptrs);
 			$result .= sprintf($static_bottom, $zone);
