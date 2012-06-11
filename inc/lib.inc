@@ -46,6 +46,32 @@ function sql_query($query)
 	return $rid;
 }
 
+if (!function_exists("inet_pton"))
+function inet_pton($ip)
+{
+    # ipv4
+    if (strpos($ip, '.') !== FALSE) {
+        $ip = pack('N',ip2long($ip));
+    }
+    # ipv6
+    elseif (strpos($ip, ':') !== FALSE) {
+        $ip = explode(':', $ip);
+        $res = str_pad('', (4*(8-count($ip))), '0000', STR_PAD_LEFT);
+        foreach ($ip as $seg) {
+            $res .= str_pad($seg, 4, '0', STR_PAD_LEFT);
+        }
+        $ip = pack('H'.strlen($res), $res);
+    }
+    return $ip;
+}
+
+function make_ipv6_ptr($ip) {
+	$addr = inet_pton($ip);
+	$unpack = unpack('H*hex', $addr);
+	$hex = $unpack['hex'];
+	return implode('.', array_reverse(str_split($hex))) . '.ip6.arpa';
+}
+
 # determine the html for setting the owner of a zone
 function owner($o="")
 {
@@ -369,7 +395,9 @@ function del_zone($zoneid)
 	list($domain, $zonefile, $master) = mysql_fetch_row($rid);
 	mysql_free_result($rid);
 	sql_query("DELETE FROM deleted_domains WHERE domain = '$domain'");
-	sql_query("INSERT INTO deleted_domains SELECT domain, zonefile FROM zones WHERE id = $zoneid");
+	sql_query("INSERT INTO deleted_domains SELECT domain, zonefile, owner FROM zones WHERE id = $zoneid");
+	#?bevhost says.. why did we backup the domain name but not the records?
+	sql_query("CREATE TABLE IF NOT EXISTS deleted_records SELECT * FROM records WHERE zone=$zoneid");
 	# Finally, zap records, annotations and the zone itself.
 	sql_query("DELETE FROM records WHERE zone = $zoneid");
 	$rrcount = mysql_affected_rows();
@@ -420,6 +448,7 @@ function domain_list($lookfor, $type, $format)
 		        $d = "";
 		if ($type == "*")
 			$typestr = ($master ? " (slave)" : "");
+		if ($int_dom = display_if_international($domain)) $domain = $int_dom;
 		if (preg_match("/\.in-addr\.arpa(\.)?$/", $domain))
 			$result1 .= sprintf($format, $id, $d.$domain , $typestr);
 		else
@@ -687,6 +716,16 @@ function decode($str) {
 	return $str;
 }
 
+function display_if_international($str) {
+	global $idn_version;
+	if (strtolower(substr($str,0,4))=="xn--") {
+        	$IDN = new idna_convert(array('idn_version' => $idn_version));
+		return $IDN->decode(strtolower($str));
+	} else {
+		return "";
+	}
+}
+
 # Return the serial number to use for the domain ID. Automatically
 # updates the database as needed.
 function get_serial($id)
@@ -738,9 +777,11 @@ function auto_ptrs($domain, $ttl, $reversehosts)
 	preg_match("/(.*)\.in-addr\.arpa(\.)?/", $domain, $matches);
 	$bytes = explode(".", $matches[1]);
 	$iptop = join('.', array_reverse($bytes));
+	$octets = count($bytes);
 	$query = "SELECT zones.id AS zid, records.domain AS rdom, zones.domain AS zdom, data FROM zones, records WHERE zones.id = records.zone AND type = 'A' AND genptr = 1 AND data LIKE '$iptop.%' ORDER BY data";
 	$rid = sql_query($query);
 	$autoflag = FALSE;
+	$result = "";
 	# Output the PTR's implied by A records in the database
 	while ($row = mysql_fetch_array($rid)) {
 		if ($row['rdom'] == '@')
@@ -762,7 +803,7 @@ function auto_ptrs($domain, $ttl, $reversehosts)
 			$host = "$matches[2].$matches[1]";
 			$host0 = "$matches[1]";
 		}
-		if ($reversehosts[$host] || ($host0 && $reversehosts[$host0]) || ($host1 && $reversehosts[$host1]) )
+		if (@$reversehosts[$host] || ($host0 && @$reversehosts[$host0]) || ($host1 && @$reversehosts[$host1]) )
 			continue;
 		if (!$autoflag) {
 			$autoflag = TRUE;
@@ -785,13 +826,40 @@ function auto_ptrs($domain, $ttl, $reversehosts)
 	}
 	if (strtoupper($DEFAULT_PTR_DOMAIN) == "NONE")
 		return $result;
+	if ($octets==1) {
+		$result .= ";\n; Cowardly refusing to generate so many records as to run out of RAM\n;\n";
+		return $result;
+	}
+
 	$result .= ";\n; Default PTR records for unused IP numbers\n;\n";
-	for ($i=1; $i<255; $i++) {
-		if ($ips[$i])
+
+	$reversed = array_reverse($bytes);
+	for ($i=0; $i<=3; $i++) {
+		if ($octets>$i) {
+			# if octet specified, use it for octet begin and end of loop
+			$ob[$i] = $oe[$i] = $reversed[$i];
+		} else {
+			# octet not specified, so loop through entire range
+			$ob[$i] = 0; $oe[$i] = 255;
+		}
+	}
+	$subzone = "";
+	for ($i=$ob[0]; $i<=$oe[0]; $i++) { 
+	 for ($j=$ob[1]; $j<=$oe[1]; $j++) {
+	  for ($k=$ob[2]; $k<=$oe[2]; $k++) {
+	    if ($octets<3) { 
+		$result .= ";\n; $i.$j.$k PTRs\n;\n";
+		if ($octets==1) $subzone = "$j.$k.";
+		if ($octets==2) $subzone = "$k.";
+	    }
+	    for ($l=$ob[3]; $l<=$oe[3]; $l++) {
+		if (@$ips["$subzone$l"])
 			continue;
-		$hostname = sprintf("host-%s-%s.$DEFAULT_PTR_DOMAIN.",
-			join('-', array_reverse($bytes)), $i);
-		$result .= "$i\t$ttl IN\tPTR\t$hostname\n";
+		$hostname = sprintf("host-%s-%s-%s-%s.$DEFAULT_PTR_DOMAIN.",$i,$j,$k,$l);
+		$result .= "$subzone$l\t$ttl IN\tPTR\t$hostname\n";
+	    }
+	  }
+	 }
 	}
 	return $result;
 }
