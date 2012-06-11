@@ -9,7 +9,15 @@
  *
  */ 
 
-include($_ENV["local"].".htauth.local");
+$_ENV["BaseName"] = "probind";
+$_ENV["DatabaseClass"] = "DB_".$_ENV["BaseName"];
+$_ENV["SessionClass"] = $_ENV["BaseName"]."_Session";
+$_ENV["AuthClass"] = $_ENV["BaseName"]."_Auth";
+$_ENV["PermClass"] = $_ENV["BaseName"]."_Perm";
+$_ENV["RegisterMode"] = "Approve";  /* Auto, Approve or Email, see register.php */
+$_ENV["DocRoot"] = $_SERVER["DOCUMENT_ROOT"];
+$_ENV["SiteRoot"] = $_ENV["DocRoot"]."/".$_ENV["SubFolder"];
+
 
 class probind_CT_Sql extends CT_Sql {
   var $database_class = "DB_probind";          ## Which database to connect...
@@ -47,8 +55,8 @@ class probind_Auth extends Auth {
   function auth_validatelogin() {
     global $username, $password;
 
-    $username = trim($_POST["username"]);
-    $password = trim($_POST["password"]);
+    $username = trim(@$_POST["username"]);
+    $password = trim(@$_POST["password"]);
 
     if(isset($username)) {
       $this->auth["uname"]=$username;        ## This provides access for "loginform.ihtml"
