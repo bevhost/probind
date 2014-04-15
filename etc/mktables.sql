@@ -9,7 +9,8 @@
 # 20070511 youngmug  Fixed to support newer MySQL versions
 # 20100614 youngmug  Added AAAA record type for IPv6
 
-DROP TABLE IF EXISTS zones, zoneattr, records, annotations, servers, deleted_domains, typesort, blackboard;
+DROP TABLE IF EXISTS zones, zoneattr, records, annotations, servers, deleted_domains, typesort, blackboard, active_serrions, auth_user, session_stats;
+
 #
 #
 # For each domain served by our BIND servers, exactly one record
