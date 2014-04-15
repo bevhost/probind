@@ -196,6 +196,47 @@ are initialized. It is not a 'REAL' domain, it is
 not pushed to the BIND servers, and you cannot
 delete it.");
 
+-- 20120609 (bevhost)
+-- update to allow permissions / zone ownership
+
+ALTER TABLE `zones`
+  ADD COLUMN `owner` varchar(32);
+
+ALTER TABLE `deleted_domains``
+  ADD COLUMN `owner` varchar(32);
+
+-- new tables for session/auth/perm 
+
+CREATE TABLE `active_sessions` (
+  `sid` varchar(32) NOT NULL DEFAULT '',
+  `name` varchar(32) NOT NULL DEFAULT '',
+  `val` text,
+  `changed` varchar(14) NOT NULL DEFAULT '',
+  `username` varchar(50) NOT NULL,
+  PRIMARY KEY (`name`,`sid`),
+  KEY `changed` (`changed`)
+)
+
+CREATE TABLE `auth_user` (
+  `user_id` varchar(32) NOT NULL DEFAULT '',
+  `username` varchar(32) NOT NULL DEFAULT '',
+  `password` varchar(32) NOT NULL DEFAULT '',
+  `perms` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `k_username` (`username`)
+)
+
+CREATE TABLE `session_stats` (
+  `sid` varchar(32) NOT NULL DEFAULT '',
+  `name` varchar(32) NOT NULL DEFAULT '',
+  `start_time` varchar(14) NOT NULL DEFAULT '',
+  `referer` varchar(250) NOT NULL DEFAULT '',
+  `addr` varchar(15) NOT NULL DEFAULT '',
+  `user_agent` varchar(250) NOT NULL DEFAULT '',
+  KEY `session_identifier` (`name`,`sid`),
+  KEY `start_time` (`start_time`)
+) 
+
 -- new tables for Event Logging
 
 CREATE TABLE IF NOT EXISTS `EventLog` (
