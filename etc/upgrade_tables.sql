@@ -43,7 +43,7 @@ CREATE TABLE `active_sessions` (
   `username` varchar(50) NOT NULL,
   PRIMARY KEY (`name`,`sid`),
   KEY `changed` (`changed`)
-)
+);
 
 CREATE TABLE `auth_user` (
   `user_id` varchar(32) NOT NULL DEFAULT '',
@@ -52,7 +52,7 @@ CREATE TABLE `auth_user` (
   `perms` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `k_username` (`username`)
-)
+);
 
 CREATE TABLE `session_stats` (
   `sid` varchar(32) NOT NULL DEFAULT '',
@@ -63,7 +63,7 @@ CREATE TABLE `session_stats` (
   `user_agent` varchar(250) NOT NULL DEFAULT '',
   KEY `session_identifier` (`name`,`sid`),
   KEY `start_time` (`start_time`)
-) 
+);
 
 -- new tables for Event Logging
 
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `EventLog` (
   KEY `Level` (`Level`),
   KEY `EventTime` (`EventTime`),
   FULLTEXT KEY `Description` (`Description`,`ExtraInfo`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 
 
