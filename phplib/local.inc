@@ -16,7 +16,8 @@ $_ENV["AuthClass"] = $_ENV["BaseName"]."_Auth";
 $_ENV["PermClass"] = $_ENV["BaseName"]."_Perm";
 $_ENV["RegisterMode"] = "Approve";  /* Auto, Approve or Email, see register.php */
 $_ENV["DocRoot"] = $_SERVER["DOCUMENT_ROOT"];
-$_ENV["SiteRoot"] = $_ENV["DocRoot"]."/".$_ENV["SubFolder"];
+$_ENV["SiteRoot"] = $_ENV["DocRoot"];
+if (isset($_ENV["SubFolder"])) $_ENV["SiteRoot"] .="/".$_ENV["SubFolder"];
 
 
 class probind_CT_Sql extends CT_Sql {
