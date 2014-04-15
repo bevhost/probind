@@ -9,7 +9,8 @@
 # 20070511 youngmug  Fixed to support newer MySQL versions
 # 20100614 youngmug  Added AAAA record type for IPv6
 
-DROP TABLE IF EXISTS zones, zoneattr, records, annotations, servers, deleted_domains, typesort, blackboard;
+DROP TABLE IF EXISTS zones, zoneattr, records, annotations, servers, deleted_domains, typesort, blackboard, active_sessions, auth_user, session_stats;
+
 #
 #
 # For each domain served by our BIND servers, exactly one record
@@ -195,3 +196,64 @@ INSERT INTO annotations (zone, descr)
 are initialized. It is not a 'REAL' domain, it is
 not pushed to the BIND servers, and you cannot
 delete it.");
+
+-- 20120609 (bevhost)
+-- update to allow permissions / zone ownership
+
+ALTER TABLE `zones`
+  ADD COLUMN `owner` varchar(32);
+
+ALTER TABLE `deleted_domains`
+  ADD COLUMN `owner` varchar(32);
+
+-- new tables for session/auth/perm 
+
+CREATE TABLE `active_sessions` (
+  `sid` varchar(32) NOT NULL DEFAULT '',
+  `name` varchar(32) NOT NULL DEFAULT '',
+  `val` text,
+  `changed` varchar(14) NOT NULL DEFAULT '',
+  `username` varchar(50) NOT NULL,
+  PRIMARY KEY (`name`,`sid`),
+  KEY `changed` (`changed`)
+);
+
+CREATE TABLE `auth_user` (
+  `user_id` varchar(32) NOT NULL DEFAULT '',
+  `username` varchar(32) NOT NULL DEFAULT '',
+  `password` varchar(32) NOT NULL DEFAULT '',
+  `perms` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `k_username` (`username`)
+);
+
+CREATE TABLE `session_stats` (
+  `sid` varchar(32) NOT NULL DEFAULT '',
+  `name` varchar(32) NOT NULL DEFAULT '',
+  `start_time` varchar(14) NOT NULL DEFAULT '',
+  `referer` varchar(250) NOT NULL DEFAULT '',
+  `addr` varchar(15) NOT NULL DEFAULT '',
+  `user_agent` varchar(250) NOT NULL DEFAULT '',
+  KEY `session_identifier` (`name`,`sid`),
+  KEY `start_time` (`start_time`)
+);
+
+-- new tables for Event Logging
+
+CREATE TABLE IF NOT EXISTS `EventLog` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `EventTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `Program` varchar(64) NOT NULL DEFAULT '',
+  `IPAddress` varchar(20) DEFAULT '',
+  `UserName` varchar(100) NOT NULL DEFAULT '',
+  `Description` varchar(255) NOT NULL,
+  `ExtraInfo` text,
+  `Level` enum('Info','Warning','Error','Debug') CHARACTER SET latin1 NOT NULL DEFAULT 'Info',
+  PRIMARY KEY (`id`),
+  KEY `Program` (`Program`),
+  KEY `IPAddress` (`IPAddress`),
+  KEY `UserName` (`UserName`),
+  KEY `Level` (`Level`),
+  KEY `EventTime` (`EventTime`),
+  FULLTEXT KEY `Description` (`Description`,`ExtraInfo`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
