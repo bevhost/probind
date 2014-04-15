@@ -195,3 +195,23 @@ INSERT INTO annotations (zone, descr)
 are initialized. It is not a 'REAL' domain, it is
 not pushed to the BIND servers, and you cannot
 delete it.");
+
+-- new tables for Event Logging
+
+CREATE TABLE IF NOT EXISTS `EventLog` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `EventTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `Program` varchar(64) NOT NULL DEFAULT '',
+  `IPAddress` varchar(20) DEFAULT '',
+  `UserName` varchar(100) NOT NULL DEFAULT '',
+  `Description` varchar(255) NOT NULL,
+  `ExtraInfo` text,
+  `Level` enum('Info','Warning','Error','Debug') CHARACTER SET latin1 NOT NULL DEFAULT 'Info',
+  PRIMARY KEY (`id`),
+  KEY `Program` (`Program`),
+  KEY `IPAddress` (`IPAddress`),
+  KEY `UserName` (`UserName`),
+  KEY `Level` (`Level`),
+  KEY `EventTime` (`EventTime`),
+  FULLTEXT KEY `Description` (`Description`,`ExtraInfo`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8
