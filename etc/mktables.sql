@@ -202,7 +202,7 @@ delete it.");
 ALTER TABLE `zones`
   ADD COLUMN `owner` varchar(32);
 
-ALTER TABLE `deleted_domains``
+ALTER TABLE `deleted_domains`
   ADD COLUMN `owner` varchar(32);
 
 -- new tables for session/auth/perm 
