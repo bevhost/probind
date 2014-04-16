@@ -178,6 +178,7 @@ function valid_server($name, $ipno, $type, $push, $zonedir, $chrootbase, $templa
 	global $TOP;
 	global $TEMPL_DIR;
 	$name = trim($name);
+	$warns = "";
 	if (!strlen($name))
 		$warns .= "You must specify a hostname<BR>\n";
 	if (!preg_match("/^[-\w._]+$/", $name) || preg_match('/\.\./',$name))
@@ -354,8 +355,8 @@ function update_servers($input)
 		
 		return "Deleted the '$name' server.<P>\n";
 	case 'update':
-		if ($warns = valid_server($name, $ipno, $type, $push, $zonedir, $chrootbase, $template, $script))
-			return $warns;
+		$warns = valid_server($name, $ipno, $type, $push, $zonedir, $chrootbase, $template, $script);
+		if (strlen($warns)) return $warns;
 		$query = "UPDATE servers SET hostname = '$name', ipno = '$ipno', type = '$type', pushupdates = $push, mknsrec = $mkrec, zonedir = '$zonedir', chrootbase = '$chrootbase', template = '$template', script = '$script', descr = '$descr', state = 'OUT', options='$options' WHERE id = $id";
 		$rid = sql_query($query);
 		$count = mysql_affected_rows();
