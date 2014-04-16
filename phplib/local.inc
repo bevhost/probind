@@ -61,7 +61,7 @@ class probind_Auth extends Auth {
   function auth_validatelogin() {
 
     $username = trim(@$_POST["username"]);
-    $password = hash_auth($user,@$_POST['password']);
+    $password = hash_auth($username,@$_POST['password']);
 
     if(isset($username)) {
       $this->auth["uname"]=$username;        ## This provides access for "loginform.ihtml"
