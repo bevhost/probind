@@ -364,7 +364,7 @@ function update_servers($input)
 		$query = "UPDATE servers SET hostname = '$name', ipno = '$ipno', type = '$type', pushupdates = $push, mknsrec = $mkrec, zonedir = '$zonedir', chrootbase = '$chrootbase', template = '$template', script = '$script', descr = '$descr', state = 'OUT', options='$options' WHERE id = $id";
 		$rid = sql_query($query);
 		$count = mysql_affected_rows();
-		if ($updatet && is_file("$TEMPL_DIR/$template/named.tmpl")) {
+		if (isset($updatet) && is_file("$TEMPL_DIR/$template/named.tmpl")) {
 		    passthru("mkdir -p $HOST_DIR/$name/SEC");
 		    passthru("mv -f $HOST_DIR/$name/named.tmpl $HOST_DIR/$name/named.tmpl-old 2>& 1");
 		    passthru("cp $TEMPL_DIR/$template/*.* $HOST_DIR/$name/. 2>& 1");
