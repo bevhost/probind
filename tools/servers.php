@@ -327,19 +327,23 @@ function update_servers($input)
 	global $confirm_delete_form;
 	global $HOST_DIR;
 	global $TEMPL_DIR;
-	$id = $input['server'];
-	$name = $input['name'];
-	$ipno = $input['ipno'];
-	$type = ($input['type'] == 'Master' ? 'M' : 'S');
-	$push = ($input['push'] == 'Skip' ? 0 : 1);
-	$mkrec = ($input['mkrec'] == 'Skip' ? 0 : 1);
-	$zonedir = $input['zonedir'];
-	$chrootbase = $input['chrootbase'];
-	$template = $input['template'];
-	$script = $input['script'];
-	$descr = $input['description'];
+
+	if (isset($input['server'])) {$id = $input['server'];}
+	if (isset($input['name'])) {$name = $input['name'];}
+	if (isset($input['ipno'])) {$ipno = $input['ipno'];}
+	if (isset($input['type'])) {$type = ($input['type'] == 'Master' ? 'M' : 'S');}
+	if (isset($input['push'])) {$push = ($input['push'] == 'Skip' ? 0 : 1);}
+	if (isset($input['mkrec'])) {$mkrec = ($input['mkrec'] == 'Skip' ? 0 : 1);}
+	if (isset($input['zonedir'])) {$zonedir = $input['zonedir'];}
+	if (isset($input['chrootbase'])) {$chrootbase = $input['chrootbase'];}
+	if (isset($input['template'])) {$template = $input['template'];}
+	if (isset($input['script'])) {$script = $input['script'];}
+	if (isset($input['description'])) {$descr = $input['description'];}
 	if (isset($input['updatet'])) { $updatet=$input['updatet']; }
-	$options = strtr( $input['options'], "'", '"');
+	if (isset($input['options'])) {$options = strtr( $input['options'], "'", '"');}
+	
+	if (!isset($input['subaction'])) {return "INTERNAL ERROR<P>\n";}
+
 	switch (strtolower($input['subaction'])) {
 	case 'delete':
 		return sprintf($confirm_delete_form, $id, $name, $name);
