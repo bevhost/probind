@@ -104,6 +104,7 @@ function hash_auth($u,$p) {
         return addslashes($p);         // store passwords in clear text - not recommended.
         #return md5($p);                // better but still not great.
         #return sha1($p.$u);            // username used as a salt, and better hash
+        # # WARNING: DO NOT USE base64_encode'd methods, those WON'T be database safe
         #return base64_encode(hash("sha256",$p.md5($u),true));  // now this could be tricky to crack
         #return base64_encode(hash("sha512",sha1($p).md5($u),true));  // now this could be tricky to crack
 }
