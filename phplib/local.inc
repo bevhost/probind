@@ -59,10 +59,9 @@ class probind_Auth extends Auth {
   }
   
   function auth_validatelogin() {
-    global $username, $password;
 
     $username = trim(@$_POST["username"]);
-    $password = trim(@$_POST["password"]);
+    $password = hash_auth($user,@$_POST['password']);
 
     if(isset($username)) {
       $this->auth["uname"]=$username;        ## This provides access for "loginform.ihtml"
@@ -75,8 +74,8 @@ class probind_Auth extends Auth {
                              "       where username = '%s' ".
                              "         and password = '%s'",
                           $this->database_table,
-                          addslashes($username),
-                          addslashes($password)));
+                          $this->db->quote($username),
+                          $this->db->quote($password)));
 
     while($this->db->next_record()) {
       $uid = $this->db->f("user_id");
