@@ -71,7 +71,7 @@ function browse_settings()
 		$name = $setting['name'];
 		$value = $setting['value'];
 		$text = $settings_list[$name];
-		$bool = $is_bool[$name];
+		$bool = isset($is_bool[$name]);
 		if ($bool) {
 		    if ($value == 1) {
 			$s1 = " SELECTED";
