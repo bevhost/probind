@@ -49,6 +49,7 @@ class probind_Auth extends Auth {
   function auth_loginform() {
     global $sess;
     global $_PHPLIB;
+    if (php_sapi_name() === 'cli') return;
 
     include($_PHPLIB["local"] . "loginform.ihtml");
   }
