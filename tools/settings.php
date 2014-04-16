@@ -7,6 +7,7 @@
 <TABLE width="99%">
 <TR>
  <TD align="left"><H1>ProBIND Settings</H1></TD>
+ <TD align="right"><A HREF="../manual.html#settings">Help</A></TD>
 </TR>
 </TABLE>
 <HR><P>
