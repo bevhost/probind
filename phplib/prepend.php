@@ -33,6 +33,7 @@ if (array_key_exists("parameters",$_GET)) {
 }
 
 $_ENV["local"] = $_SERVER["DOCUMENT_ROOT"]."/phplib/"; 
+$_ENV["local"] = getcwd()."/phplib/";
 $_ENV["libdir"] = "/usr/share/phplib/";
 
 $QUERY_STRING="";
@@ -44,7 +45,13 @@ require($_ENV["libdir"] . "auth.inc");      /* Disable this, if you are not usin
 require($_ENV["libdir"] . "perm.inc");      /* Disable this, if you are not using permission checks. */
 require($_ENV["local"] . "local.inc");     /* Required, contains your local configuration. */
 require($_ENV["libdir"] . "page.inc");      /* Required, contains the page management functions. */
+require($_ENV["libdir"] . "tpl_form.inc");
+require($_ENV["libdir"] . "oohforms.inc");
+require($_ENV["libdir"] . "table.inc");
+require($_ENV["libdir"] . "sqlquery.inc");
 
+
+include($_ENV["local"] . "EventLog.inc");
 
 function EventLog($Description,$ExtraInfo="",$Level="Info") {
 	global $PHP_SELF, $argv, $REMOTE_ADDR, $auth;
@@ -85,7 +92,63 @@ function get_request_values($varlist) {
         if (!is_array($GLOBALS[$v])) $GLOBALS["q_".$v]="'".addslashes($GLOBALS[$v])."'";  // can't use database specific yet, not defined.
 }
 
+get_request_values("id,cmd,submit,rowcount,sortorder,sortdesc,startingwith,start,prev,next,last,cond,EditMode,WithSelected,widemode,Field,_http_referer,export_results");
+$orig_cmd=$cmd;
+
+
 if (array_key_exists("widemode",$_REQUEST)) $GLOBALS["widemode"]=$_REQUEST["widemode"];
+
+
+function check_view_perms() {
+        global $sess, $auth, $perm, $PERMS, $cmd, $submit;
+	$PermMaskBitValue = 1;
+	foreach(explode(",",$PERMS) as $p) {
+	        $perm->permissions[$p] = $PermMaskBitValue;
+        	$PermMaskBitValue *= 2;
+	}
+	if ($PermMaskBitValue<2) die('Please set permissions in configuration file');
+        $ok = false;
+        if (@$_ENV["view_requires"]) {
+                foreach(explode(",",$_ENV["view_requires"]) as $need) {
+                        if ($sess->have_perm($need)) $ok = true;
+                }
+        } else $ok = true;
+        if (!$ok) {
+                if ($auth) { $usrnm = $auth->auth["uname"]; $p = $auth->auth["perm"]; }
+                echo "<h3>Access Denied</h1>\n";
+                echo "<p class=error>User $usrnm does not have sufficient access privileges for this $cmd $submit operation on this page</p>\n";
+                echo "<p>$usrnm has $p rights</p>";
+                page_close();
+                exit;
+        }
+}
+
+function check_edit_perms() {
+        global $sess, $auth;
+        $ok = false;
+        if (@$_ENV["edit_requires"]) {
+                foreach(explode(",",$_ENV["edit_requires"]) as $need) {
+                        if ($sess->have_perm($need)) $ok = true;
+                }
+        } else $ok = true;
+        $_ENV["show_edit"] = $ok;
+        if (!$ok) {
+                if ($auth) { $usrnm = $auth->auth["uname"]; $p = $auth->auth["perm"]; }
+                echo "<h3>Permission Denied</h1>\n";
+                echo "<p class=error>User $usrnm does not have sufficient access privileges for this $cmd $submit operation on this page</p>\n";
+                echo "<p>$usrnm has $p rights</p>";
+                page_close();
+                exit;
+        }
+}
+function array_first_chunk($input,$narrow_chunk_size,$wide_chunk_size) {
+        $chunk_size = empty($globals["widemode"]) ? $narrow_chunk_size : $wide_chunk_size;  //get appropriate chunk size for screen width.
+        if (count($input)>$chunk_size) {
+                $chunks = array_chunk($input,$chunk_size);
+                return $chunks[0];
+        } else return $input;
+}
+
 
 function to_utf8( $string ) {
 // From http://w3.org/International/questions/qa-forms-utf-8.html
