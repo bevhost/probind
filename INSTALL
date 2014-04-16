@@ -93,11 +93,6 @@ $MYSQL_USER
 	The MySQL username that ProBIND should use to log into MySQL.
 $MYSQL_PASSWD
 	The MySQL password that ProBIND should use to log into MySQL.
-
-You will also need to create an user to access ProBIND. You should do that by
-running the tools/initialuser.php script. Edit it first in order to choose the
-username, password and permissions. DO NOT FORGET to delete that script
-afterwards.
 	
 At this point, you can load the ProBIND web interface. The final step for a
 working ProBIND configuration is described in the next section.

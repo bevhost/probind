@@ -33,7 +33,6 @@ if (array_key_exists("parameters",$_GET)) {
 }
 
 $_ENV["local"] = $_SERVER["DOCUMENT_ROOT"]."/phplib/"; 
-if (php_sapi_name() === 'cli') $_ENV["local"] = getcwd()."/phplib/";
 $_ENV["libdir"] = "/usr/share/phplib/";
 
 $QUERY_STRING="";
