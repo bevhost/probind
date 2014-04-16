@@ -18,6 +18,11 @@ $_ENV["RegisterMode"] = "Approve";  /* Auto, Approve or Email, see register.php 
 $_ENV["DocRoot"] = $_SERVER["DOCUMENT_ROOT"];
 $_ENV["SiteRoot"] = $_ENV["DocRoot"];
 if (isset($_ENV["SubFolder"])) $_ENV["SiteRoot"] .="/".$_ENV["SubFolder"];
+$_ENV["MyForeignKeys"]="LinkedTables";
+$_ENV["MyForeignKeysDB"]=$_ENV["DatabaseClass"];
+$_ENV["LogSqlTo"] = "z_audit_log";
+$_ENV["LogViewsTo"] = "z_audit_log";
+
 
 
 class probind_CT_Sql extends CT_Sql {
