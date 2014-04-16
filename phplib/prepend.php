@@ -32,9 +32,10 @@ if (array_key_exists("parameters",$_GET)) {
   }
 }
 
-$_ENV["local"] = $_SERVER["DOCUMENT_ROOT"]."/phplib/"; 
-$_ENV["local"] = getcwd()."/phplib/";
+
+$_ENV["local"]  = dirname(__FILE__)."/";
 $_ENV["libdir"] = "/usr/share/phplib/";
+
 
 $QUERY_STRING="";
 
