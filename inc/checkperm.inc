@@ -11,11 +11,5 @@ else
 
 page_open(array("sess" => "probind_Session", "auth" => "probind_Auth", "perm" => "probind_Perm"));
 
-$PermMaskBitValue = 1;
-foreach(explode(",",$PERMS) as $p) {
-	$perm->permissions[$p] = $PermMaskBitValue;
-	$PermMaskBitValue *= 2;
-}
-if ($PermMaskBitValue<2) die('Please set permissions in configuration file');
-
+check_view_perms();
 ?>

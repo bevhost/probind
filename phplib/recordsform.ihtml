@@ -1,0 +1,62 @@
+<?php
+  $this->form_data->start("recordsform");
+  if ($this->error) printf("<P class=error>Error: %s %s</p>\n", $ErrorFieldName, $this->error);  
+  if ($this->errors) foreach($this->errors as $error) printf("<P class=error>Error: %s</p>\n", $error);
+?>
+ <table class='tplform'>     <tr><td></td><td>
+		<?php $this->form_data->show_element('id'); ?> </td></tr>
+    <tr><td>Zone</td><td>
+		<?php $this->form_data->show_element('zone'); ?> </td></tr>
+    <tr><td>Domain</td><td>
+		<?php $this->form_data->show_element('domain'); ?> </td></tr>
+    <tr><td>Ttl</td><td>
+		<?php $this->form_data->show_element('ttl'); ?> </td></tr>
+    <tr><td>Type</td><td>
+		<?php $this->form_data->show_element('type'); ?> </td></tr>
+    <tr><td>Pref</td><td>
+		<?php $this->form_data->show_element('pref'); ?> </td></tr>
+    <tr><td>Data</td><td>
+		<?php $this->form_data->show_element('data'); ?> </td></tr>
+    <tr><td>Comment</td><td>
+		<?php $this->form_data->show_element('comment'); ?> </td></tr>
+    <tr><td>Mtime</td><td>
+		<?php $this->form_data->show_element('mtime'); ?> 
+                <?php if (!isset($this->form_data->elements['mtime']['frozen'])) { ?>
+			<a href="javascript:show_cal('recordsform', 'mtime');">
+			<img src=/image/cal.gif width=16 height=16 border=0 
+				alt="Click here to pick a date from the calendar"></a>
+                <?php } ?>
+		</td></tr>
+    <tr><td>Ctime</td><td>
+		<?php $this->form_data->show_element('ctime'); ?> 
+                <?php if (!isset($this->form_data->elements['ctime']['frozen'])) { ?>
+			<a href="javascript:show_cal('recordsform', 'ctime');">
+			<img src=/image/cal.gif width=16 height=16 border=0 
+				alt="Click here to pick a date from the calendar"></a>
+                <?php } ?>
+		</td></tr>
+    <tr><td>Weight</td><td>
+		<?php $this->form_data->show_element('weight'); ?> </td></tr>
+    <tr><td>Port</td><td>
+		<?php $this->form_data->show_element('port'); ?> </td></tr>
+    <tr><td>Genptr</td><td>
+		<?php $this->form_data->show_element('genptr'); ?> </td></tr>
+    <tr><td>Disabled</td><td>
+		<?php $this->form_data->show_element('disabled'); ?> </td></tr>
+    <tr><td>&nbsp;</td><td> 
+		<?php 
+                if ($cmd=="View") {
+                        $cmd="Back";
+                        echo "<a href=".$sess->url("records.php");
+                        echo $sess->add_query(array("cmd"=>"Edit","id"=>$GLOBALS["id"]));
+                        echo ">Edit</a>";
+                } else {
+                        if ($cmd=="Add") $cmd="Save";
+                        if ($cmd=="Edit") $cmd="Save";
+                        $this->form_data->show_element('submit',$cmd);
+                }
+		echo "&nbsp;<a href='".$sess->url("records.php")."'>Back</a>";
+		?> </td></tr>
+ </table>
+<?php $this->form_data->finish();
+?>

@@ -18,6 +18,11 @@ $_ENV["RegisterMode"] = "Approve";  /* Auto, Approve or Email, see register.php 
 $_ENV["DocRoot"] = $_SERVER["DOCUMENT_ROOT"];
 $_ENV["SiteRoot"] = $_ENV["DocRoot"];
 if (isset($_ENV["SubFolder"])) $_ENV["SiteRoot"] .="/".$_ENV["SubFolder"];
+$_ENV["MyForeignKeys"]="LinkedTables";
+$_ENV["MyForeignKeysDB"]=$_ENV["DatabaseClass"];
+$_ENV["LogSqlTo"] = "z_audit_log";
+$_ENV["LogViewsTo"] = "z_audit_log";
+
 
 
 class probind_CT_Sql extends CT_Sql {
@@ -54,10 +59,9 @@ class probind_Auth extends Auth {
   }
   
   function auth_validatelogin() {
-    global $username, $password;
 
     $username = trim(@$_POST["username"]);
-    $password = trim(@$_POST["password"]);
+    $password = hash_auth($user,@$_POST['password']);
 
     if(isset($username)) {
       $this->auth["uname"]=$username;        ## This provides access for "loginform.ihtml"
@@ -70,8 +74,8 @@ class probind_Auth extends Auth {
                              "       where username = '%s' ".
                              "         and password = '%s'",
                           $this->database_table,
-                          addslashes($username),
-                          addslashes($password)));
+                          $this->db->quote($username),
+                          $this->db->quote($password)));
 
     while($this->db->next_record()) {
       $uid = $this->db->f("user_id");
@@ -86,7 +90,22 @@ class probind_Auth extends Auth {
 
 class probind_Perm extends Perm {
   var $classname = "probind_Perm";
+
+  var $permissions = array(
+                                "admin" => 1,
+                                "owner" => 2,
+                          );
+
 }
 
+function hash_auth($u,$p) {
+        # it is recommended you come up with your own method here
+        # make sure it's database safe, as there is no additional escaping in password functions
+        return addslashes($p);         // store passwords in clear text - not recommended.
+        #return md5($p);                // better but still not great.
+        #return sha1($p.$u);            // username used as a salt, and better hash
+        #return base64_encode(hash("sha256",$p.md5($u),true));  // now this could be tricky to crack
+        #return base64_encode(hash("sha512",sha1($p).md5($u),true));  // now this could be tricky to crack
+}
 
 ?>
