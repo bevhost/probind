@@ -86,6 +86,12 @@ class probind_Auth extends Auth {
 
 class probind_Perm extends Perm {
   var $classname = "probind_Perm";
+
+  var $permissions = array(
+                                "admin" => 1,
+                                "owner" => 2,
+                          );
+
 }
 
 
