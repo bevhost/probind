@@ -38,7 +38,7 @@ $_ENV["libdir"] = "/usr/share/phplib/";
 
 $QUERY_STRING="";
 
-require($_ENV["libdir"] . "db_mysqli.inc");  /* Change this to match your database. */
+require($_ENV["libdir"] . "db_pdo.inc");  /* Change this to match your database. */
 require($_ENV["libdir"] . "ct_sql.inc");    /* Change this to match your data storage container */
 require($_ENV["libdir"] . "session.inc");   /* Required for everything below.      */
 require($_ENV["libdir"] . "auth.inc");      /* Disable this, if you are not using authentication. */
