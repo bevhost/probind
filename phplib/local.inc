@@ -59,31 +59,31 @@ class probind_Auth extends Auth {
   }
   
   function auth_validatelogin() {
+    if (isset($_POST["username"])) {
+      $username = trim(@$_POST["username"]);
+      $password = hash_auth($username,@$_POST['password']);
 
-    $username = trim(@$_POST["username"]);
-    $password = hash_auth($username,@$_POST['password']);
+      if(isset($username)) {
+        $this->auth["uname"]=$username;        ## This provides access for "loginform.ihtml"
+      }
+      
+      $uid = false;
+      
+      $this->db->query(sprintf("select user_id, perms ".
+                               "        from %s ".
+                               "       where username = '%s' ".
+                               "         and password = '%s'",
+                            $this->database_table,
+                            $this->db->quote($username),
+                            $this->db->quote($password)));
 
-    if(isset($username)) {
-      $this->auth["uname"]=$username;        ## This provides access for "loginform.ihtml"
+      while($this->db->next_record()) {
+        $uid = $this->db->f("user_id");
+        $this->auth["perm"] = $this->db->f("perms");
+      }
+      return $uid;
     }
-    
-    $uid = false;
-    
-    $this->db->query(sprintf("select user_id, perms ".
-                             "        from %s ".
-                             "       where username = '%s' ".
-                             "         and password = '%s'",
-                          $this->database_table,
-                          $this->db->quote($username),
-                          $this->db->quote($password)));
-
-    while($this->db->next_record()) {
-      $uid = $this->db->f("user_id");
-      $this->auth["perm"] = $this->db->f("perms");
-    }
-    return $uid;
   }
-
   
 }
 
