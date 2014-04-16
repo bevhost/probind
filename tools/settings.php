@@ -97,8 +97,8 @@ function browse_settings()
 	while ($setting = each($settings_list)) {
 		$name = $setting[0];
 		$text = $settings_list[$name];
-		if (!$seen[$name]) {
-		    $bool = $is_bool[$name];
+		if (!isset($seen[$name])) {
+		    $bool = isset($is_bool[$name]);
 		    if ($bool) {
 			if ($value == 1) {
 			    $s1 = " SELECTED";
