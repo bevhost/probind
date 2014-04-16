@@ -71,8 +71,8 @@ class probind_Auth extends Auth {
       
       $this->db->query(sprintf("select user_id, perms ".
                                "        from %s ".
-                               "       where username = '%s' ".
-                               "         and password = '%s'",
+                               "       where username = %s ".
+                               "         and password = %s",
                             $this->database_table,
                             $this->db->quote($username),
                             $this->db->quote($password)));
