@@ -162,7 +162,7 @@ $confirm_delete_form = '
 <INPUT type="hidden" name="subaction" value="realdelete">
 Do you really want to delete this DNS server from the database?<P>
 <B>%s</B><P>
-<INPUT type="submit" value="Really Delete";
+<INPUT type="submit" value="Really Delete">
 </FORM>
 ';
 
@@ -272,7 +272,7 @@ function mk_update_form($server)
 		$script = $row['script'];
 		$descr = $row['descr'];
 		$options = $row['options'];
-		$result .= sprintf($update_form,
+		$result = sprintf($update_form,
 			$id, $name, $name, $ipno, 
 			mk_select("type", array("Master", "Slave"), $type), 
 			mk_select("push", array("Skip", "Update"), $push), 
@@ -338,7 +338,7 @@ function update_servers($input)
 	$template = $input['template'];
 	$script = $input['script'];
 	$descr = $input['description'];
-	$updatet=$input['updatet'];
+	if (isset($input['updatet'])) { $updatet=$input['updatet']; }
 	$options = strtr( $input['options'], "'", '"');
 	switch (strtolower($input['subaction'])) {
 	case 'delete':
