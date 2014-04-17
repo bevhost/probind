@@ -1,7 +1,9 @@
 #!/usr/bin/php -q
 <?php
 
-require '../inc/lib.inc';
+require '../phplib/prepend.php';
+require '../inc/config.php';
+require '../inc/clilib.inc';
 require '../inc/getopt.inc';
 
 function usage()
