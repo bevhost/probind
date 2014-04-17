@@ -134,7 +134,6 @@ while (is_array($_POST)
 			$u_id=md5(uniqid($hash_secret));
 			$password = hash_auth($username,$password);
 			$permlist = addslashes(implode($perms,","));
-			$password = hash_auth($username,$password);
 			$query = "insert into auth_user values('$u_id','$username','$password','$permlist')";
 			$db->query($query);
 			if ($db->affected_rows() == 0) {
@@ -211,7 +210,7 @@ while (is_array($_POST)
  <tr valign=top align=left class=toplink>
   <th>Username</th>
   <th>Password</th>
-  <th>Level</th>
+  <th>Group(s)</th>
   <th align=right>Action</th>
  </tr>
 <?php 
