@@ -9,6 +9,8 @@ function getopts(&$argv, $argspec)
 	$errs = 0;
 	array_shift($argv);
 	$args = preg_split("/ */", $argspec, -1, PREG_SPLIT_NO_EMPTY);
+	// if there are no args, there's nothing to return, but it'n no reason to blow up...
+	if (!isset($argv[0])) return;
 	while (($item = $argv[0])
 	&& preg_match("/^-(.)(.*)/", $item, $matches)) {
 		list($full, $first, $rest) = $matches;
