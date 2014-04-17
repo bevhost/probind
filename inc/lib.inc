@@ -1,7 +1,12 @@
 <?php
 
-require_once("checkperm.inc");
-require_once("idna_convert.class.php");
+if (php_sapi_name() == 'cli' && isset($_SERVER["argc"])) {
+	include(dirname(__FILE__)."/../phplib/prepend.php");  		# Command line
+	include("config.php");
+} else {
+	require_once("checkperm.inc");					# web interface
+	require_once("idna_convert.class.php");
+}
 
 $db = new DB_probind;
 $MYSQL_HOST = $db->Host;
