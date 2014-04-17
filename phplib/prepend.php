@@ -51,8 +51,8 @@ require($_ENV["libdir"] . "oohforms.inc");
 require($_ENV["libdir"] . "table.inc");
 require($_ENV["libdir"] . "sqlquery.inc");
 
-
-include($_ENV["local"] . "EventLog.inc");
+// FIXME: There's no EventLog.inc
+// include($_ENV["local"] . "EventLog.inc");
 
 function EventLog($Description,$ExtraInfo="",$Level="Info") {
 	global $PHP_SELF, $argv, $REMOTE_ADDR, $auth;

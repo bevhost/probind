@@ -7,6 +7,7 @@
 <TABLE width="99%">
 <TR>
  <TD align="left"><H1>ProBIND Settings</H1></TD>
+ <TD align="right"><A HREF="../manual.html#settings">Help</A></TD>
 </TR>
 </TABLE>
 <HR><P>
@@ -70,7 +71,7 @@ function browse_settings()
 		$name = $setting['name'];
 		$value = $setting['value'];
 		$text = $settings_list[$name];
-		$bool = $is_bool[$name];
+		$bool = isset($is_bool[$name]);
 		if ($bool) {
 		    if ($value == 1) {
 			$s1 = " SELECTED";
@@ -97,8 +98,8 @@ function browse_settings()
 	while ($setting = each($settings_list)) {
 		$name = $setting[0];
 		$text = $settings_list[$name];
-		if (!$seen[$name]) {
-		    $bool = $is_bool[$name];
+		if (!isset($seen[$name])) {
+		    $bool = isset($is_bool[$name]);
 		    if ($bool) {
 			if ($value == 1) {
 			    $s1 = " SELECTED";

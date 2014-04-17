@@ -59,31 +59,31 @@ class probind_Auth extends Auth {
   }
   
   function auth_validatelogin() {
+    if (isset($_POST["username"])) {
+      $username = trim(@$_POST["username"]);
+      $password = hash_auth($username,@$_POST['password']);
 
-    $username = trim(@$_POST["username"]);
-    $password = hash_auth($user,@$_POST['password']);
+      if(isset($username)) {
+        $this->auth["uname"]=$username;        ## This provides access for "loginform.ihtml"
+      }
+      
+      $uid = false;
+      
+      $this->db->query(sprintf("select user_id, perms ".
+                               "        from %s ".
+                               "       where username = %s ".
+                               "         and password = %s",
+                            $this->database_table,
+                            $this->db->quote($username),
+                            $this->db->quote($password)));
 
-    if(isset($username)) {
-      $this->auth["uname"]=$username;        ## This provides access for "loginform.ihtml"
+      while($this->db->next_record()) {
+        $uid = $this->db->f("user_id");
+        $this->auth["perm"] = $this->db->f("perms");
+      }
+      return $uid;
     }
-    
-    $uid = false;
-    
-    $this->db->query(sprintf("select user_id, perms ".
-                             "        from %s ".
-                             "       where username = '%s' ".
-                             "         and password = '%s'",
-                          $this->database_table,
-                          $this->db->quote($username),
-                          $this->db->quote($password)));
-
-    while($this->db->next_record()) {
-      $uid = $this->db->f("user_id");
-      $this->auth["perm"] = $this->db->f("perms");
-    }
-    return $uid;
   }
-
   
 }
 
@@ -101,11 +101,12 @@ class probind_Perm extends Perm {
 function hash_auth($u,$p) {
         # it is recommended you come up with your own method here
         # make sure it's database safe, as there is no additional escaping in password functions
-        return addslashes($p);         // store passwords in clear text - not recommended.
-        #return md5($p);                // better but still not great.
-        #return sha1($p.$u);            // username used as a salt, and better hash
-        #return base64_encode(hash("sha256",$p.md5($u),true));  // now this could be tricky to crack
-        #return base64_encode(hash("sha512",sha1($p).md5($u),true));  // now this could be tricky to crack
+        return substr(addslashes($p), 0, 32);         // store passwords in clear text - not recommended.
+        #return substr(md5($p), 0, 32);                // better but still not great.
+        #return substr(sha1($p.$u), 0, 32);            // username used as a salt, and better hash
+        # # WARNING: DO NOT USE base64_encode'd methods, those WON'T be database safe
+        #return substr(base64_encode(hash("sha256",$p.md5($u),true)), 0, 32);  // now this could be tricky to crack
+        #return substr(base64_encode(hash("sha512",sha1($p).md5($u),true)), 0, 32);  // now this could be tricky to crack
 }
 
 ?>

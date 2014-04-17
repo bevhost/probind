@@ -67,10 +67,12 @@ You should also create a MySQL user for ProBIND.
 NOTE: You are not required to run MySQL on the same server as Apache.
 
 Once the database is created, you will need to load the initial database
-structure. You can do this by loading etc/mktables.sql file into the MySQL
-database you just created.
+structure. You can do this by loading etc/mktables.sql and
+etc/new-phplib-tables.sql files into the MySQL database you just created.
 
-Example: mysql -u probinduser -p probind < etc/mktables.sql
+Example: 
+$ mysql -u probinduser -p probind < etc/mktables.sql
+$ mysql -u probinduser -p probind < etc/new-phplib-tables.sql
 
 Configuring ProBIND
 -------------------
@@ -93,6 +95,11 @@ $MYSQL_USER
 	The MySQL username that ProBIND should use to log into MySQL.
 $MYSQL_PASSWD
 	The MySQL password that ProBIND should use to log into MySQL.
+
+We now have the database and application ready, but we still don't have an
+user. To create one, edit check_db_access.php to choose your desired username
+and password, and then run that script. Don't forget to remove your username or
+at least your password from the script afterwards.
 	
 At this point, you can load the ProBIND web interface. The final step for a
 working ProBIND configuration is described in the next section.
@@ -257,6 +264,3 @@ on bar. (or id_dsa.pub to known_hosts2).
 
 2)  Verify that you can ssh from root@foo to root@bar without being prompted 
 for a password.
-
-
-Last Update: 20140415

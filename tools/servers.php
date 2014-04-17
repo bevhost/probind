@@ -162,7 +162,7 @@ $confirm_delete_form = '
 <INPUT type="hidden" name="subaction" value="realdelete">
 Do you really want to delete this DNS server from the database?<P>
 <B>%s</B><P>
-<INPUT type="submit" value="Really Delete";
+<INPUT type="submit" value="Really Delete">
 </FORM>
 ';
 
@@ -178,6 +178,7 @@ function valid_server($name, $ipno, $type, $push, $zonedir, $chrootbase, $templa
 	global $TOP;
 	global $TEMPL_DIR;
 	$name = trim($name);
+	$warns = "";
 	if (!strlen($name))
 		$warns .= "You must specify a hostname<BR>\n";
 	if (!preg_match("/^[-\w._]+$/", $name) || preg_match('/\.\./',$name))
@@ -271,7 +272,7 @@ function mk_update_form($server)
 		$script = $row['script'];
 		$descr = $row['descr'];
 		$options = $row['options'];
-		$result .= sprintf($update_form,
+		$result = sprintf($update_form,
 			$id, $name, $name, $ipno, 
 			mk_select("type", array("Master", "Slave"), $type), 
 			mk_select("push", array("Skip", "Update"), $push), 
@@ -326,19 +327,23 @@ function update_servers($input)
 	global $confirm_delete_form;
 	global $HOST_DIR;
 	global $TEMPL_DIR;
-	$id = $input['server'];
-	$name = $input['name'];
-	$ipno = $input['ipno'];
-	$type = ($input['type'] == 'Master' ? 'M' : 'S');
-	$push = ($input['push'] == 'Skip' ? 0 : 1);
-	$mkrec = ($input['mkrec'] == 'Skip' ? 0 : 1);
-	$zonedir = $input['zonedir'];
-	$chrootbase = $input['chrootbase'];
-	$template = $input['template'];
-	$script = $input['script'];
-	$descr = $input['description'];
-	$updatet=$input['updatet'];
-	$options = strtr( $input['options'], "'", '"');
+
+	if (isset($input['server'])) {$id = $input['server'];}
+	if (isset($input['name'])) {$name = $input['name'];}
+	if (isset($input['ipno'])) {$ipno = $input['ipno'];}
+	if (isset($input['type'])) {$type = ($input['type'] == 'Master' ? 'M' : 'S');}
+	if (isset($input['push'])) {$push = ($input['push'] == 'Skip' ? 0 : 1);}
+	if (isset($input['mkrec'])) {$mkrec = ($input['mkrec'] == 'Skip' ? 0 : 1);}
+	if (isset($input['zonedir'])) {$zonedir = $input['zonedir'];}
+	if (isset($input['chrootbase'])) {$chrootbase = $input['chrootbase'];}
+	if (isset($input['template'])) {$template = $input['template'];}
+	if (isset($input['script'])) {$script = $input['script'];}
+	if (isset($input['description'])) {$descr = $input['description'];}
+	if (isset($input['updatet'])) { $updatet=$input['updatet']; }
+	if (isset($input['options'])) {$options = strtr( $input['options'], "'", '"');}
+	
+	if (!isset($input['subaction'])) {return "INTERNAL ERROR<P>\n";}
+
 	switch (strtolower($input['subaction'])) {
 	case 'delete':
 		return sprintf($confirm_delete_form, $id, $name, $name);
@@ -354,12 +359,12 @@ function update_servers($input)
 		
 		return "Deleted the '$name' server.<P>\n";
 	case 'update':
-		if ($warns = valid_server($name, $ipno, $type, $push, $zonedir, $chrootbase, $template, $script))
-			return $warns;
+		$warns = valid_server($name, $ipno, $type, $push, $zonedir, $chrootbase, $template, $script);
+		if (strlen($warns)) return $warns;
 		$query = "UPDATE servers SET hostname = '$name', ipno = '$ipno', type = '$type', pushupdates = $push, mknsrec = $mkrec, zonedir = '$zonedir', chrootbase = '$chrootbase', template = '$template', script = '$script', descr = '$descr', state = 'OUT', options='$options' WHERE id = $id";
 		$rid = sql_query($query);
 		$count = mysql_affected_rows();
-		if ($updatet && is_file("$TEMPL_DIR/$template/named.tmpl")) {
+		if (isset($updatet) && is_file("$TEMPL_DIR/$template/named.tmpl")) {
 		    passthru("mkdir -p $HOST_DIR/$name/SEC");
 		    passthru("mv -f $HOST_DIR/$name/named.tmpl $HOST_DIR/$name/named.tmpl-old 2>& 1");
 		    passthru("cp $TEMPL_DIR/$template/*.* $HOST_DIR/$name/. 2>& 1");
