@@ -25,10 +25,10 @@ $html_failure = '
 # Returns test form
 #
 function ns_test_form($id, $input) {
-	$name = $input['name'];
-	$zone = $input['zone'];
-	$rtype = $input['type'];
-	if (!$rtype)
+	if (isset($input['name'])) { $name = $input['name']; } else { $name = ""; }
+	if (isset($input['zone'])) $zone = $input['zone'];
+	if (isset($input['type'])) $rtype = $input['type'];
+	if (!isset($rtype))
 		$rtype = "SOA";
 	$result = "";
 	$query = "SELECT hostname, ipno, type FROM servers WHERE id = $id";
@@ -62,7 +62,7 @@ function ns_test_form($id, $input) {
 	$first = 1;
 	while (list($domain) = mysql_fetch_row($rid)) {
 		$array[] = $domain;
-		if (!$zone)
+		if (!isset($zone))
 		    $zone = $domain;
 		if ($first) {
 			$array[] = "";
@@ -91,7 +91,7 @@ get_input();
 
 $id = $INPUT_VARS['id'];
 print ns_test_form($id, $INPUT_VARS);
-if ( $INPUT_VARS['Test'] ) {
+if ( isset($INPUT_VARS['Test']) ) {
 	print "<HR>\n";
 	$host = $INPUT_VARS['host'];
 	$ip   = $INPUT_VARS['ip'];
