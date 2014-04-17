@@ -1,3 +1,7 @@
+<HTML><HEAD>
+<TITLE>Manage Logins</TITLE>
+<LINK rel="stylesheet" href="../style.css" type="text/css">
+</HEAD><BODY bgcolor="#cccc99" background="../images/BG-shadowleft.gif">
 <?php
 $debug=0;
 /*
@@ -35,7 +39,7 @@ $debug=0;
  *
  */
  
-include('inc/checkperm.inc');
+include('../inc/checkperm.inc');
 
 ## straight from the examples...
 
