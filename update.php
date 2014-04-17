@@ -341,6 +341,7 @@ function run_scripts($input, $push, $conf)
 	global $SBIN;
 	
 	$ret = '';
+	$error = 0;
 	
 	if (!$push && !$conf)
 		return;
