@@ -17,7 +17,7 @@ function getopts(&$argv, $argspec)
 		$pos = strpos($argspec, $first);
 # print "item = '$item', argv = '$argv[0]', first = '$first', rest  = '$rest'\n";
 		if ($pos >= 0) {
-			if ($args[$pos+1] && ($args[$pos+1] == ':')) {
+			if (isset($args[$pos+1]) && ($args[$pos+1] == ':')) {
 				array_shift($argv);
 				if ($rest == '') {
 					if (!$argv) ++$errs;

@@ -81,7 +81,7 @@ if (!$DEFAULT_PTR_DOMAIN)
 	$err .= "Could not find DEFAULT_PTR_DOMAIN setting in the database<P>\n";
 if (!$DEFAULT_ORIGIN)
 	$err .= "Could not find HOSTMASTER setting in the database<P>\n";
-if ($err)
+if (isset($err))
 	abort($err);
 
 # Just do it
