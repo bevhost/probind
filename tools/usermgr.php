@@ -1,7 +1,3 @@
-<HTML><HEAD>
-<TITLE>Bulk update</TITLE>
-<LINK rel="stylesheet" href="../style.css" type="text/css">
-</HEAD><BODY bgcolor="#cccc99" background="../images/BG-shadowleft.gif">
 <?php
 $debug=0;
 /*
@@ -39,9 +35,11 @@ $debug=0;
  *
  */
  
-include('../inc/checkperm.inc');
+include('inc/checkperm.inc');
 
-get_request_values("Field,letter,username,password,perms,u_id");
+## straight from the examples...
+
+get_request_values("letter,username,password,perms,u_id");
 
 ## Set this to something, just something different...
    $hash_secret = "Jabberwocky...";
@@ -50,6 +48,7 @@ get_request_values("Field,letter,username,password,perms,u_id");
 ### Utility functions
 ###
 
+check_view_perms();
 
 ## my_error($msg):
 ##
@@ -99,7 +98,7 @@ get_request_values("Field,letter,username,password,perms,u_id");
 ###
 
 ## Get a database connection
-$db = new DB_probind;
+$db = new $_ENV["DatabaseClass"];
 
 $QUERY_STRING="";
 
@@ -109,6 +108,7 @@ while (is_array($_POST)
 	if($debug == 1) {
 		printf("key +$key+, val +$val+<br>");
 	}
+	check_edit_perms();
 	switch ($key) {
 		case "create": // Create a new user
 			if (!$perm->have_perm("admin")) { // Do we have permission to do so?
@@ -129,6 +129,7 @@ while (is_array($_POST)
 			// Create a uid and insert the user...
 			$u_id=md5(uniqid($hash_secret));
 			$permlist = addslashes(implode($perms,","));
+			$password = hash_auth($username,$password);
 			$query = "insert into auth_user values('$u_id','$username','$password','$permlist')";
 			$db->query($query);
 			if ($db->affected_rows() == 0) {
@@ -136,10 +137,6 @@ while (is_array($_POST)
 				break;
 			}
 			my_msg("User \"$username\" created.<BR>");
-			$url=$sess->url("userinfo.php");
-			$url.=$sess->add_query(array("cmd"=>"Add","UserName"=>$username,"Password"=>$password,"Field"=>$Field));
-			echo "<a href=$url>Enter User Details</a>";
-			echo "<META HTTP-EQUIV=REFRESH CONTENT=\"1; URL=$url\">";
 			
 			break;
 
@@ -149,6 +146,7 @@ while (is_array($_POST)
 			if (!$perm->have_perm("admin")) {    // user is not admin
 				if($auth->auth["uid"] == $u_id) { // user changes his own account
 				   if($password) {
+					$password = hash_auth($username,$password);
 					$query = "update auth_user set password='$password' where user_id='$u_id'";
 					$db->query($query);
 					if ($db->affected_rows() == 0) {
@@ -167,7 +165,7 @@ while (is_array($_POST)
 				}
 				// Update user information.
 				$permlist = addslashes(implode($perms,","));
-				if (!empty($password)) $passquery = "password='$password',"; else $passquery="";
+				if (!empty($password)) $passquery = "password='".hash_auth($username,$password)."',"; else $passquery="";
 				$query = "update auth_user set username='$username', $passquery  perms='$permlist' where user_id='$u_id'";
 				$db->query($query);
 				if ($db->affected_rows() == 0) {
@@ -209,7 +207,7 @@ while (is_array($_POST)
  <tr valign=top align=left class=toplink>
   <th>Username</th>
   <th>Password</th>
-  <th>Group(s)</th>
+  <th>Level</th>
   <th align=right>Action</th>
  </tr>
 <?php 
@@ -219,7 +217,6 @@ while (is_array($_POST)
  ?>
  <!-- create a new user -->
  <form method="post" action="<?php $sess->pself_url() ?>">
- <input type="hidden" value='<?php echo $Field; ?>' name="Field">
  <tr valign=middle align=left>
   <td><input type="text" name="username" size=12 maxlength=64 value=""></td>
   <td><input type="text" name="password" size=12 maxlength=32 value=""></td>
