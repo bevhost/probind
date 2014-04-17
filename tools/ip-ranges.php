@@ -34,7 +34,7 @@ function subnet_view($subnet)
 	$prefix = $doms[0];
 	for ($i=1; $doms[$i] != "in-addr"; $i++)
 		$prefix = "$doms[$i].$prefix";
-	$query = "SELECT zones.domain AS zdom, zones.id AS zid, records.domain AS rdom, records.data AS rdata FROM zones, records WHERE zones.id = records.zone AND records.data LIKE '$prefix.%'";
+	$query = "SELECT zones.domain AS zdom, zones.id AS zid, records.domain AS rdom, records.data AS rdata FROM zones, records WHERE zones.id = records.zone AND records.data LIKE '$prefix.%'".access();
 	$rid = sql_query($query);
 	while ($row = mysql_fetch_array($rid)) {
 		if ($row['rdom'] == $row['zdom'].".")
@@ -59,7 +59,7 @@ function subnet_view($subnet)
 	$firstfree = 256;
 	$result = "<TABLE><TR align=left><TH>Host</TH><TH>Hostname</TH></TR>\n";
 	for ($i=1; $i<255; $i++) {
-		if ($hosts[$i]) {
+		if (@$hosts[$i]) {
 			if ($firstfree < $i) {
 				$lastfree = $i - 1;
 				if (($lastfree - $firstfree) >= 1)
@@ -90,7 +90,7 @@ function subnet_view($subnet)
 # MAIN
 #
 get_input();
-if ($subnet = $INPUT_VARS['subnet']) {
+if ($subnet = @$INPUT_VARS['subnet']) {
 
 	$query = "SELECT id FROM zones WHERE domain = '$subnet'";
 	$rid = sql_query($query);
