@@ -1039,7 +1039,7 @@ function fill_in_domain($id, $print_only)
 
 			}
 		}
-		if ($updated == 1) {
+		if (isset($updated) && $updated == 1) {
 			sql_query("UPDATE zones SET updated=1 WHERE zones.domain = '$subd'");
 			sql_query("UPDATE zones SET updated=1 WHERE id = $id");
 			$updated = 0;
