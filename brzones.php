@@ -418,7 +418,7 @@ function right_frame($vars)
 			$result .= sprintf($rr_form_top, $zone);
 			$result1 = "";
 			while ($record = mysql_fetch_array($rid)) {
-			if ( $vars['mode'] == 'edit' || $vars['mode'] == 'edit zone (total)') {
+			if (isset($vars['mode']) && ($vars['mode'] == 'edit' || $vars['mode'] == 'edit zone (total)')) {
 				$result .= record_form($record);
 			} else {
 				$result1 .= record_view($record);

@@ -1,6 +1,13 @@
 <?php
 
-require_once("checkperm.inc");
+//This script requires the CLI version of PHP, die if the CGI edition tries to run us
+if ( php_sapi_name() == 'cgi' || php_sapi_name() != 'cli')
+{
+	die ('Unsupported SAPI ('.php_sapi_name().') - please use the CLI binary');
+} 
+
+
+// require_once("checkperm.inc");
 require_once("idna_convert.class.php");
 
 $db = new DB_probind;
@@ -1039,7 +1046,7 @@ function fill_in_domain($id, $print_only)
 
 			}
 		}
-		if (isset($updated) && $updated == 1) {
+		if ($updated == 1) {
 			sql_query("UPDATE zones SET updated=1 WHERE zones.domain = '$subd'");
 			sql_query("UPDATE zones SET updated=1 WHERE id = $id");
 			$updated = 0;
