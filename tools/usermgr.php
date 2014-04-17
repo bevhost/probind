@@ -41,7 +41,9 @@ $debug=0;
  
 include('../inc/checkperm.inc');
 
-get_request_values("Field,letter,username,password,perms,u_id");
+## straight from the examples...
+
+get_request_values("letter,username,password,perms,u_id");
 
 ## Set this to something, just something different...
    $hash_secret = "Jabberwocky...";
@@ -50,6 +52,7 @@ get_request_values("Field,letter,username,password,perms,u_id");
 ### Utility functions
 ###
 
+check_view_perms();
 
 ## my_error($msg):
 ##
@@ -131,6 +134,7 @@ while (is_array($_POST)
 			$u_id=md5(uniqid($hash_secret));
 			$password = hash_auth($username,$password);
 			$permlist = addslashes(implode($perms,","));
+			$password = hash_auth($username,$password);
 			$query = "insert into auth_user values('$u_id','$username','$password','$permlist')";
 			$db->query($query);
 			if ($db->affected_rows() == 0) {
@@ -207,7 +211,7 @@ while (is_array($_POST)
  <tr valign=top align=left class=toplink>
   <th>Username</th>
   <th>Password</th>
-  <th>Group(s)</th>
+  <th>Level</th>
   <th align=right>Action</th>
  </tr>
 <?php 

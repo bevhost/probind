@@ -3,13 +3,15 @@
 
 $base = getenv("TOP");
 if ($base) {
+	require "$base/phplib/prepend.php";
 	require "$base/inc/config.php";
-	require "$base/inc/lib.inc";
+	require "$base/inc/clilib.inc";
 	require "$base/inc/getopt.inc";
 }
 else {
+	require "../../phplib/prepend.php";
 	require "../../inc/config.php";
-	require "../../inc/lib.inc";
+	require "../../inc/clilib.inc";
 	require "../../inc/getopt.inc";
 }
 
@@ -79,7 +81,7 @@ if (!$DEFAULT_PTR_DOMAIN)
 	$err .= "Could not find DEFAULT_PTR_DOMAIN setting in the database<P>\n";
 if (!$DEFAULT_ORIGIN)
 	$err .= "Could not find HOSTMASTER setting in the database<P>\n";
-if ($err)
+if (isset($err))
 	abort($err);
 
 # Just do it

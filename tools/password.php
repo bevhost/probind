@@ -13,7 +13,7 @@ if ($db->next_record()) { extract($db->Record); } else { die("Username not found
 
 $error = "";
 if ($op = @$_POST["old_pass"]) {
-	if ($op == $password) {
+	if (hash_auth($auth->auth["uname"],$op) == $password) {
 		$p1 = $_POST["Password"];
 		$p2 = $_POST["Password2"];
 		$uid = $_POST["user_id"];
@@ -26,14 +26,16 @@ if ($op = @$_POST["old_pass"]) {
 		else if ($l1>32) $error = "New Password Too Long";
 		else if ($p1<>$p2) $error = "New Passwords Don't Match";
 		else {
-			$op = addslashes($op);
-			$p1 = addslashes($p1);
+			$op = addslashes(hash_auth($auth->auth["uname"],$op));
+			$p1 = addslashes(hash_auth($auth->auth["uname"],$p1));
 			$db->query("select username from auth_user where password='$op' and user_id='$uid'");
 			if ($db->next_record()) {
 				$db->query("update auth_user set password='$p1' where user_id='$uid'");
 				echo "<p>Successfully updated password for $username.</p>";
 				page_close();
 				exit;
+			} else {
+				echo "<p>An error happened when trying to update the password for $username. Please contact your system's administrator.</p>";
 			}
 		}
 	} else {
@@ -44,7 +46,7 @@ if ($error) echo "<br><p class=error>$error</p>";
 
 ?>
 <form name=PasswordChangeForm method=post onsubmit="return PCFvalidator()">
-<input type=hidden name=user_id value='<?=$user_id?>'>
+<input type=hidden name=user_id value='<?php print "$user_id"; ?>'>
 <fieldset style="width:300px;margin:100px;";>
 <legend>Changing password for <?=$username?> </legend>
 <table>
