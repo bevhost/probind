@@ -5,13 +5,13 @@ $base = getenv("TOP");
 if ($base) {
 	require "$base/phplib/prepend.php";
 	require "$base/inc/config.php";
-	require "$base/inc/clilib.inc";
+	require "$base/inc/lib.inc";
 	require "$base/inc/getopt.inc";
 }
 else {
 	require "../../phplib/prepend.php";
 	require "../../inc/config.php";
-	require "../../inc/clilib.inc";
+	require "../../inc/lib.inc";
 	require "../../inc/getopt.inc";
 }
 
@@ -39,12 +39,14 @@ function write_zone_file($zone, $hostmaster, $origin, $servers, $update)
 	fputs($zf, auto_nsrecs($zone['domain'], seconds_to_ttl($zone['ttl']), $servers)).";\n";
 	# output the explicit records
 	fputs($zf, "; records from data base\n");
-	$query = "SELECT domain, ttl, type, pref, data FROM records WHERE zone = ".$zone['zoneid']." AND type != 'SOA' AND NOT disabled ORDER BY domain" ;
+	$query = "SELECT domain, ttl, type, pref, data, weight, port FROM records WHERE zone = ".$zone['zoneid']." AND type != 'SOA' AND NOT disabled ORDER BY domain" ;
 	$rid = sql_query($query);
 	while ($rr = mysql_fetch_array($rid)) {
 		$rrttl = seconds_to_ttl($rr['ttl']);
 		if ($rr['type'] == 'MX') {
 			fputs($zf, $rr['domain']."\t$rrttl IN\tMX\t".$rr['pref']." ".$rr['data']."\n");
+		} elseif ($rr['type'] == 'SRV') {
+			fputs($zf, $rr['domain']."\t$rrttl IN\tSRV\t".$rr['pref']." ".$rr['weight']." ".$rr['port']." ".$rr['data']."\n");
 		} elseif ($rr['type'] == 'TXT') {
 			fputs($zf, $rr['domain']."\t$rrttl IN\tTXT\t\"".$rr['data']."\"\n");
 		} else {
