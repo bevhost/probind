@@ -1,0 +1,13 @@
+<Files ~ "\.inc$">
+  Order allow,deny
+  Deny from all
+</Files>
+
+#
+# for nginx you'll want something like this in the server {} section
+# I actually put this in my /etc/nginx/php.conf
+#
+#location ~ \.inc$ {
+#        return 403;
+#}
+#
