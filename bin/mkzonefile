@@ -51,8 +51,11 @@ function write_zone_file($zone, $hostmaster, $origin, $servers, $update)
 			fputs($zf, $rr['domain']."\t$rrttl IN\tTXT\t\"".$rr['data']."\"\n");
 		} else {
 			fputs($zf, $rr['domain']."\t$rrttl IN\t".$rr['type']."\t".$rr['data']."\n");
-			if ($rr['type'] == 'PTR' || $rr['type'] == 'NS')
+			if ($rr['type'] == 'PTR' || $rr['type'] == 'NS') {
+				if (!isset($reversehosts)) $reversehosts = array();
+				if (!isset($reversehosts[$rr['domain']])) $reversehosts[$rr['domain']] = 0;
 				$reversehosts[$rr['domain']]++;
+			}
 		}
 	}
 	mysql_free_result($rid);
