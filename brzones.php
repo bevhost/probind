@@ -624,7 +624,7 @@ case 'addrrform':
 			print add_record($INPUT_VARS);
 			$info = get_zone($INPUT_VARS['zone']);
 			print sprintf($add_form, $info['domain'], $INPUT_VARS['zone'], type_menu("type", ''));
-	if (!$INPUT_VARS['mode'])
+	if (!isset($INPUT_VARS['mode']))
 		$INPUT_VARS['mode'] = 'view';
 	print right_frame($INPUT_VARS);
 			break;
