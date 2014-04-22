@@ -569,7 +569,18 @@ function upd_record($id, $domain, $ttlspec, $type, $data, $genptr, $comment = ''
 # MX records, use upd_record or upd_soa_record for all other record types.
 function upd_mx_record($id, $domain, $ttlspec, $pref, $data, $comment = '', $disabled = 0)
 {
-	$ttl = ttl_to_seconds($ttlspec);
+	$query = "SELECT zone FROM records WHERE id = $id";
+	$rid = sql_query($query);
+	$orec = mysql_fetch_array($rid);
+	mysql_free_result($rid);
+	$zone = $orec['zone'];
+	
+	if (!strlen($ttlspec)) {
+		$ttl = default_ttl($zone);
+	} else {
+		$ttl = ttl_to_seconds($ttlspec);
+	}
+
 	$data = strtr($data,"'",'.');
 	$comment = strtr($comment,"'",'.');
 	if (!$disabled)
@@ -587,11 +598,17 @@ function upd_mx_record($id, $domain, $ttlspec, $pref, $data, $comment = '', $dis
 # or upd_mx_record for all other record types.
 function upd_soa_record($id, $ttlspec)
 {
-	$ttl = ttl_to_seconds($ttlspec);
 	$query = "SELECT zone, ttl FROM records WHERE id = $id";
 	$rid = sql_query($query);
 	list($zoneid, $oldttl) = mysql_fetch_row($rid);
 	mysql_free_result($rid);
+
+	if (!strlen($ttlspec)) { 
+		$ttl = default_ttl($zoneid);
+	} else { 
+		$ttl = ttl_to_seconds($ttlspec);
+	} 
+
 	$query =  "UPDATE records SET ttl = $ttl WHERE zone = $zoneid AND ttl = $oldttl";
 	$rid = sql_query($query);
 	$query = "UPDATE records SET ttl = $ttl WHERE id = $id";
