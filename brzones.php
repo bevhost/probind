@@ -1,6 +1,8 @@
 <?php
 require 'inc/lib.inc';
 
+$html_top = "<html><body>";
+
 $start_form = '
 <HTML>
 <HEAD>
