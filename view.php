@@ -25,7 +25,8 @@ else
     $color = 'BLACK';
 
 print $html_top;
-$file = $INPUT_VARS['file'];
+$file = false;
+if (isset($INPUT_VARS['file']) $file = $INPUT_VARS['file'];
 if (!empty($INPUT_VARS['base']) && $INPUT_VARS['base'] == "LOGS") {
     $base = $LOG_DIR;
 	$tbase = "Log file";
@@ -43,8 +44,12 @@ if ($file) {
 	print "<H3>$tbase: $file</H3>\n";
 	print "<HR><PRE>\n";
     print "<FONT COLOR=$color>\n";
-	print join("",file("$base/$file"));
-	print "</FONT\n";
+	if (file_exists("$base/$file")) {
+		print join("",file("$base/$file"));
+	} else {
+		print "That file does not exist.";
+	}
+	print "</FONT>\n";
 	print "</PRE>\n";
 };
 print $html_bottom;
