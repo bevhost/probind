@@ -531,7 +531,18 @@ function upd_record($id, $domain, $ttlspec, $type, $data, $genptr, $comment = ''
 		$genptr = 0;
 	if (!$disabled)
 		$disabled = 0;
-	$ttl = ttl_to_seconds($ttlspec);
+
+	$query = "SELECT zone FROM records WHERE id = $id";
+	$rid = sql_query($query);
+	$zone = mysql_result($rid, 0);
+	mysql_free_result($rid);
+	
+	if (!strlen($ttlspec)) {
+		$ttl = default_ttl($zone);
+	} else { 
+		$ttl = ttl_to_seconds($ttlspec);
+	}
+
 	$query = "SELECT domain, type, data, genptr FROM records WHERE id = $id";
 	$rid = sql_query($query);
 	$orec = mysql_fetch_array($rid);
