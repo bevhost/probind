@@ -8,6 +8,7 @@
 # 20030110 alex      Version 2.1
 # 20070511 youngmug  Fixed to support newer MySQL versions
 # 20100614 youngmug  Added AAAA record type for IPv6
+# 20140422 marado    Added columns needed for SRV records
 
 DROP TABLE IF EXISTS zones, zoneattr, records, annotations, servers, deleted_domains, typesort, blackboard, active_sessions, auth_user, session_stats;
 
@@ -81,6 +82,10 @@ CREATE TABLE records (
     pref    CHAR(5),
 # RR Data
     data    CHAR(255) DEFAULT '' NOT NULL,
+# weight
+    weight CHAR(15),
+# port
+    port   CHAR(15),
 # Comment
     comment  CHAR(32),
 # Last modification time for this RR
