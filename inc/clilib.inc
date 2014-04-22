@@ -235,6 +235,7 @@ function leave_crit($lockname)
 # Return a HTML formatted list of currently held locks.
 function list_locks()
 {
+	$result = "";
 	$query = "SELECT name, value, ctime FROM blackboard WHERE name LIKE 'LOCK_%'";
 	$rid = sql_query($query);
 	if (!mysql_num_rows($rid))
@@ -404,7 +405,8 @@ function del_zone($zoneid)
 	sql_query("DELETE FROM deleted_domains WHERE domain = '$domain'");
 	sql_query("INSERT INTO deleted_domains SELECT domain, zonefile, owner FROM zones WHERE id = $zoneid");
 	#?bevhost says.. why did we backup the domain name but not the records?
-	sql_query("CREATE TABLE IF NOT EXISTS deleted_records SELECT * FROM records WHERE zone=$zoneid");
+	sql_query("CREATE TABLE IF NOT EXISTS deleted_records"); 
+	sql_query("SELECT * FROM records WHERE zone=$zoneid");
 	# Finally, zap records, annotations and the zone itself.
 	sql_query("DELETE FROM records WHERE zone = $zoneid");
 	$rrcount = mysql_affected_rows();
