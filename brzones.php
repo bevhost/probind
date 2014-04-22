@@ -427,10 +427,12 @@ function right_frame($vars)
 					$result .= $rr_form_hr;
 				}
 			}
-			if (($record['type'] == 'PTR' || $record['type'] == 'NS') && !$record['disabled'])
+				if (($record['type'] == 'PTR' || $record['type'] == 'NS') && !$record['disabled'] && isset($record['domain'])) {
+					if (!isset($explicit_ptrs[$record['domain']]) {$explicit_ptrs[$record['domain']] = 0;}
 					$explicit_ptrs[$record['domain']]++;
-				elseif ($record['type'] == 'SOA')
+				} elseif ($record['type'] == 'SOA') {
 					$soa_ttl = $record['ttl'];
+				}
 			}
 			mysql_free_result($rid);
 		$result .= $result1;
@@ -460,7 +462,9 @@ function perform_rr_action($input)
 {
 	global $REMOTE_USER, $update_in_progress;
 	
-	$done[id] = 0;
+	if (!isset($done)) $done = array();
+	if (isset($id)) $done[$id] = 0;
+	$result = "";
 	
 	while ($var = each($input)) {
 		if ($var['value'] == 'Upd') {
@@ -468,10 +472,14 @@ function perform_rr_action($input)
 			list($d, $id) = split("_", $var['key']);
 		if ($d != "op" && $d != "update")
 			continue;
-		if ($done[$id] == 1)
+		if (isset($done[$id]) && $done[$id] == 1)
 			continue;
 		$done[$id] = 1;
-		$status = $input["status_$id"];
+		if (isset($input["status_$id"])) {
+			$status = $input["status_$id"];
+		} else {
+			$status = '';
+		}
 		if ( $status == 'del' ) {
 		del_record($id);
 			   continue;
@@ -517,6 +525,13 @@ function perform_rr_action($input)
 				$result = "<HR><P><UL>$warn</UL>\n";
 				break;
 			}
+
+			if (!isset($input["domain_$id"])) $input["domain_$id"] = "";
+			if (!isset($input["ttl_$id"])) $input["ttl_$id"] = "";
+			if (!isset($input["type_$id"])) $input["type_$id"] = "";
+			if (!isset($input["data_$id"])) $input["data_$id"] = "";
+			if (!isset($input["genptr_$id"])) $input["genptr_$id"] = "";
+			if (!isset($input["comment_$id"])) $input["comment_$id"] = "";
 
 			upd_record($id, $input["domain_$id"],
 				$input["ttl_$id"], $input["type_$id"],
@@ -624,7 +639,7 @@ case 'addrrform':
 			print add_record($INPUT_VARS);
 			$info = get_zone($INPUT_VARS['zone']);
 			print sprintf($add_form, $info['domain'], $INPUT_VARS['zone'], type_menu("type", ''));
-	if (!$INPUT_VARS['mode'])
+	if (!isset($INPUT_VARS['mode']))
 		$INPUT_VARS['mode'] = 'view';
 	print right_frame($INPUT_VARS);
 			break;
