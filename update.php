@@ -511,12 +511,18 @@ if ( !$err && ($push || $conf)) {
 
 
 if ($err) {
-	print "<H3><FONT color=RED>Errors, see logs ";
-	print "<A TARGET=\"VIEW\" href=\"view.php?base=LOGS&file=$UPDATE_LOG_NAME\">here</A></FONT></H3>\n";
+	print "<H3><FONT color=RED>Errors";
+	if (file_exists($UPDATE_LOG)) {
+		print ", see logs ";
+		print "<A TARGET=\"VIEW\" href=\"view.php?base=LOGS&file=$UPDATE_LOG_NAME\">here</A></FONT></H3>\n";
+	}
 }
 else {
-	print "<H3><FONT color=GREEN>Completed, see logs ";
-	print "<A href=\"view.php?base=LOGS&file=$UPDATE_LOG_NAME\">here</A></FONT></H3>\n";
+	print "<H3><FONT color=GREEN>Completed";
+	if (file_exists($UPDATE_LOG)) {
+		print ", see logs ";
+		print "<A href=\"view.php?base=LOGS&file=$UPDATE_LOG_NAME\">here</A></FONT></H3>\n";
+	}
 };
 leave_crit('PUSH');
 

@@ -233,6 +233,7 @@ function leave_crit($lockname)
 # Return a HTML formatted list of currently held locks.
 function list_locks()
 {
+	$result = "";
 	$query = "SELECT name, value, ctime FROM blackboard WHERE name LIKE 'LOCK_%'";
 	$rid = sql_query($query);
 	if (!mysql_num_rows($rid))
@@ -402,7 +403,8 @@ function del_zone($zoneid)
 	sql_query("DELETE FROM deleted_domains WHERE domain = '$domain'");
 	sql_query("INSERT INTO deleted_domains SELECT domain, zonefile, owner FROM zones WHERE id = $zoneid");
 	#?bevhost says.. why did we backup the domain name but not the records?
-	sql_query("CREATE TABLE IF NOT EXISTS deleted_records SELECT * FROM records WHERE zone=$zoneid");
+	sql_query("CREATE TABLE IF NOT EXISTS deleted_records");
+	sql_query("SELECT * FROM records WHERE zone=$zoneid");
 	# Finally, zap records, annotations and the zone itself.
 	sql_query("DELETE FROM records WHERE zone = $zoneid");
 	$rrcount = mysql_affected_rows();
@@ -527,7 +529,18 @@ function upd_record($id, $domain, $ttlspec, $type, $data, $genptr, $comment = ''
 		$genptr = 0;
 	if (!$disabled)
 		$disabled = 0;
-	$ttl = ttl_to_seconds($ttlspec);
+
+	$query = "SELECT zone FROM records WHERE id = $id";
+	$rid = sql_query($query);
+	$zone = mysql_result($rid, 0);
+	mysql_free_result($rid);
+	
+	if (!strlen($ttlspec)) {
+		$ttl = default_ttl($zone);
+	} else { 
+		$ttl = ttl_to_seconds($ttlspec);
+	}
+
 	$query = "SELECT domain, type, data, genptr FROM records WHERE id = $id";
 	$rid = sql_query($query);
 	$orec = mysql_fetch_array($rid);
@@ -556,7 +569,18 @@ function upd_record($id, $domain, $ttlspec, $type, $data, $genptr, $comment = ''
 # MX records, use upd_record or upd_soa_record for all other record types.
 function upd_mx_record($id, $domain, $ttlspec, $pref, $data, $comment = '', $disabled = 0)
 {
-	$ttl = ttl_to_seconds($ttlspec);
+	$query = "SELECT zone FROM records WHERE id = $id";
+	$rid = sql_query($query);
+	$orec = mysql_fetch_array($rid);
+	mysql_free_result($rid);
+	$zone = $orec['zone'];
+	
+	if (!strlen($ttlspec)) {
+		$ttl = default_ttl($zone);
+	} else {
+		$ttl = ttl_to_seconds($ttlspec);
+	}
+
 	$data = strtr($data,"'",'.');
 	$comment = strtr($comment,"'",'.');
 	if (!$disabled)
@@ -574,11 +598,17 @@ function upd_mx_record($id, $domain, $ttlspec, $pref, $data, $comment = '', $dis
 # or upd_mx_record for all other record types.
 function upd_soa_record($id, $ttlspec)
 {
-	$ttl = ttl_to_seconds($ttlspec);
 	$query = "SELECT zone, ttl FROM records WHERE id = $id";
 	$rid = sql_query($query);
 	list($zoneid, $oldttl) = mysql_fetch_row($rid);
 	mysql_free_result($rid);
+
+	if (!strlen($ttlspec)) { 
+		$ttl = default_ttl($zoneid);
+	} else { 
+		$ttl = ttl_to_seconds($ttlspec);
+	} 
+
 	$query =  "UPDATE records SET ttl = $ttl WHERE zone = $zoneid AND ttl = $oldttl";
 	$rid = sql_query($query);
 	$query = "UPDATE records SET ttl = $ttl WHERE id = $id";
