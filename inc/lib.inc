@@ -741,15 +741,16 @@ function insert_record($zone, $domain, $ttlspec, $type, $pref, $data, $genptr, $
 	$query .= "data=:data, ";	$param[":data"] = $data;
 	$query .= "genptr=:genptr, ";	$param[":genptr"] = $genptr;
 	$query .= "comment=:comment";	$param[":comment"] = $comment;
-	if (strlen($pref)) {
+	if (isset($pref) && strlen($pref)) {
 	   $query .= ", pref=:pref";	$param[":pref"] = $pref;
 	}
-	if (strlen($port)) {
+	if (isset($port) && strlen($port)) {
 	   $query .= ", port=:port";	$param[":port"] = $port;
 	}
-	if (strlen($weight)) {
+	if (isset($weight) && strlen($weight)) {
 	  $query .= ", weight=:weight"; $param[":weight"] = $weight;
 	}
+	$db = new DB_probind;
 	$db->prepare($query);
 	$db->execute($param);
 	tag_zone_updated($db->lastInsertId());
