@@ -685,10 +685,14 @@ function validate_record($zone, &$domain, $ttl, &$type, &$pref, &$data)
 	$zone = get_zone($zone);
 	if ($type == 'CNAME' && (($zone['domain']."." == $domain) || $domain == '@'))
 		$warnings .= "<LI>A CNAME may not exist for the entire domain.\n";
-	if (preg_match("/\.$/i", $domain)
-	&& !preg_match("/".$zone['domain'].'.$/i', $domain))
-		$warnings .= "<LI>Domain '$domain' is outside the zone.\n";
-	return $warnings;
+	if (preg_match("/\.$/i", $domain)) {
+		if (!preg_match("/".$zone['domain'].'.$/i', $domain))
+			$warnings .= "<LI>Domain '$domain' is outside the zone.\n";
+	} else {
+		if (preg_match("/".$zone['domain'].'$/i', $domain))
+			$warnings .= "<LI>Domain '$domain' invalid: check if you didn't loose a dot or something...\n";
+	}
+	return $warnings;   
 }
 
 # Return the default TTL for a zone ID, as found in the SOA record.
