@@ -425,7 +425,8 @@ function del_zone($zoneid)
 	if ($db->next_record()) {
 		$db->query("INSERT INTO deleted_records SELECT * FROM records WHERE zone=$zoneid");
 	} else {
-		$db->query("CREATE TABLE IF NOT EXISTS deleted_records SELECT * FROM records WHERE zone=$zoneid");
+		$db->query("CREATE TABLE IF NOT EXISTS deleted_records");
+		$db->query("SELECT * FROM records WHERE zone=$zoneid");
 	}
 	# Finally, zap records, annotations and the zone itself.
 	$db->query("DELETE FROM records WHERE zone = $zoneid");
