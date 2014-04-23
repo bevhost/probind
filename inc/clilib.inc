@@ -174,7 +174,7 @@ function ttl_to_seconds($ttl)
 
 #
 # This function, and leave_crit() below, implements a form of
-# cooperative locking. Hard table locka are held only for a brief
+# cooperative locking. Hard table locks are held only for a brief
 # moment, while the lock notices are placed on the blackboard.
 # Critical sections exist during these operations : update,
 # add domain and delete domain.
