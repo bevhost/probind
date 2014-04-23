@@ -1,8 +1,6 @@
 #!/usr/bin/php -q
 <?php
-require '../phplib/prepend.php';
-require '../inc/config.php';
-require '../inc/clilib.inc';
+require '../inc/lib.inc';
 
 $query = "SELECT domain, id, master FROM zones WHERE domain != 'TEMPLATE' ORDER BY domain";
 $rid1 = sql_query($query);

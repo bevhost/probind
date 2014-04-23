@@ -7,9 +7,7 @@ if ( php_sapi_name() == 'cgi' )
 } 
 
 //Files we need to run this process
-require_once dirname(dirname(__FILE__)) . '/phplib/prepend.php';
-require_once dirname(dirname(__FILE__)) . '/inc/config.php';
-require_once dirname(dirname(__FILE__)) . '/inc/clilib.inc';
+require_once dirname(dirname(__FILE__)) . '/inc/lib.inc';
 require_once 'Console/Getopt.php';  //PEAR Console_Getopt
 
 //Global variables
