@@ -19,22 +19,10 @@
 		<?php $this->form_data->show_element('data'); ?> </td></tr>
     <tr><td>Comment</td><td>
 		<?php $this->form_data->show_element('comment'); ?> </td></tr>
-    <tr><td>Mtime</td><td>
-		<?php $this->form_data->show_element('mtime'); ?> 
-                <?php if (!isset($this->form_data->elements['mtime']['frozen'])) { ?>
-			<a href="javascript:show_cal('recordsform', 'mtime');">
-			<img src=/image/cal.gif width=16 height=16 border=0 
-				alt="Click here to pick a date from the calendar"></a>
-                <?php } ?>
-		</td></tr>
-    <tr><td>Ctime</td><td>
-		<?php $this->form_data->show_element('ctime'); ?> 
-                <?php if (!isset($this->form_data->elements['ctime']['frozen'])) { ?>
-			<a href="javascript:show_cal('recordsform', 'ctime');">
-			<img src=/image/cal.gif width=16 height=16 border=0 
-				alt="Click here to pick a date from the calendar"></a>
-                <?php } ?>
-		</td></tr>
+    <tr><td>Modified</td><td>
+		<?php $this->form_data->show_element('mtime'); ?> </td></tr>
+    <tr><td>Created</td><td>
+		<?php $this->form_data->show_element('ctime'); ?> </td></tr>
     <tr><td>Weight</td><td>
 		<?php $this->form_data->show_element('weight'); ?> </td></tr>
     <tr><td>Port</td><td>
