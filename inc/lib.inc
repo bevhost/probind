@@ -350,7 +350,7 @@ function add_domain($domain, $master, $eoptions = "", $owner)
 	# Add the domain to the zones table
 	$db->prepare("INSERT INTO zones SET domain=:domain, serial=:serial, refresh=:refresh, retry=:retry, expire=:expire, 
 			   master=:master, updated=1, zonefile=:zonefile, options=:options, owner=:owner, ctime=NOW(), mtime=NOW()");
-	$db->execute(array(":domain"=>$domain,":serial"=>$serial,":refresh",$refresh,":retry"=>$retry,":expire"=>$expire,
+	$db->execute(array(":domain"=>$domain,":serial"=>$serial,":refresh"=>$refresh,":retry"=>$retry,":expire"=>$expire,
 			   ":master"=>$master,":zonefile"=>$zonefile,":options"=>$options,":owner"=>$owner));
 	$newzone = $db->lastInsertId();
 	# Just in case a domain of the same name was recently deleted...
