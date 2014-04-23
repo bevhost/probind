@@ -170,6 +170,7 @@ function ttl_to_seconds($ttl)
                 eregi("([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+m)?([0-9]+s)?", $ttl, $fields);
                 return $fields[1]*$WEEKSECS + $fields[2]*$DAYSECS + $fields[3]*$HOURSECS + $fields[4]*$MINSECS + $fields[5];
         }
+	if (!ctype_digit("$ttl")) $ttl = "14400";
         return $ttl;
 }
 
@@ -558,10 +559,14 @@ function upd_record($id, $domain, $ttlspec, $type, $data, $genptr, $comment = ''
 		$genptr = 0;
 	if (!$disabled)
 		$disabled = 0;
-	$ttl = ttl_to_seconds($ttlspec);
-	$db->query("SELECT domain, type, data, genptr FROM records WHERE id = $id");
+	$db->query("SELECT zone, domain, type, data, genptr FROM records WHERE id = $id");
 	if (!$db->next_record()) die("Record $id not found");
 	extract($db->Record,EXTR_PREFIX_ALL,'old');
+	if (!strlen($ttlspec)) {
+		$ttl = default_ttl($old_zone);
+	} else {
+		$ttl = ttl_to_seconds($ttlspec);
+	}
 	if ($type == 'A') {
 		$tmp = valid_ip($data);
 		$data = $tmp;
@@ -737,7 +742,7 @@ function insert_record($zone, $domain, $ttlspec, $type, $pref, $data, $genptr, $
 	}
 	$db->prepare($query);
 	$db->execute($param);
-	tag_zone_updated($zone);
+	tag_zone_updated($db->lastInsertId());
 	if ($type == 'A')
 		affect_reverses($data);
 }
