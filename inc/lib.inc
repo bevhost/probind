@@ -665,10 +665,16 @@ function validate_record($zone, &$domain, $ttl, &$type, &$pref, &$data)
 			$warnings .= "<li>'$data' is not a valid IPv6 address.\n";
 	}
 	$type = strtoupper($type);
-	if ($type != 'MX')
+	if ($type != 'MX') {
 		$pref = '';
-	elseif ($pref < 0 || $pref > 65535 || !strlen($pref))
-		$warnings .= "<LI>You must specify an unsigned 16-bit preference for MX records.\n";
+	} else {
+		if ($pref < 0 || $pref > 65535 || !strlen($pref)) {
+			$warnings .= "<LI>You must specify an unsigned 16-bit preference for MX records.\n";
+		}
+		if ( preg_match("/^\d+\.\d+\.\d+\.\d+$/" , $data) ) {
+			$warnings .= "<li>You can not insert IPs on MX records!\n";
+		}
+	}
 	//
 	// This modification makes wrong result in the 'import' so turn it off. We always can use it on the high level if necessary.
 	//if (strchr($data, ".") && ($type != "TXT") && !valid_ip($data) && $data[strlen($data)-1] != ".")
