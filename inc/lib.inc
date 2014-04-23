@@ -503,7 +503,7 @@ function tag_zone_updated($recordid)
 #	sql_query("UPDATE zones SET updated = 1 WHERE id = $zone");
 	if (!ctype_digit("$recordid")) die('Invalid recordid.'); 
 	$db = new DB_probind;
-	$db->query("UPDATE zones JOIN records ON (zone.id=record.zone) SET zone.updated=1 WHERE records.id=$recordid");
+	$db->query("UPDATE zones JOIN records ON (zones.id=records.zone) SET zones.updated=1 WHERE records.id=$recordid");
 }
 
 # Set the 'updated' tag on a domain, ensuring that the next update will
