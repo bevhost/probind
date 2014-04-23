@@ -99,6 +99,45 @@ CREATE TABLE records (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE deleted_records (
+# Unique Resource Record ID
+    id    INT(11) NOT NULL AUTO_INCREMENT,
+# foreign key to the zones table
+    zone    INT(11) NOT NULL,
+# Origin of this record
+    domain    CHAR(100) DEFAULT '' NOT NULL,
+# This application only deals with the IN class, so we dont
+# bother representing the RR class in the database
+# Time To Live, must be non-null for SOA records
+    ttl    CHAR(15),
+# RR type, e.g. A, MX, SOA, CNAME or NS
+# NB: PTR records are _not_ stored explicitly, the reverse-lookup
+# zone files are generated automatically.
+    type    CHAR(10) DEFAULT '' NOT NULL,
+# Preference value for this MX record
+    pref    CHAR(5),
+# RR Data
+    data    CHAR(255) DEFAULT '' NOT NULL,
+# weight
+    weight CHAR(15),
+# port
+    port   CHAR(15),
+# Comment
+    comment  CHAR(32),
+# Last modification time for this RR
+    mtime    TIMESTAMP(14) NOT NULL,
+# Creation time for this RR
+    ctime    TIMESTAMP(14),
+# Should PTR be generated for this record
+    genptr  INT(1),
+# disabled?
+    disabled INT(1) DEFAULT '0',
+    PRIMARY KEY (id)
+);
+
+
+
+
 #
 # This table contains long annotations for zones or records. It is
 # basically eyecandy for the web interface, and an aid for forgetful

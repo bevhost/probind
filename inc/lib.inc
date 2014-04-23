@@ -176,7 +176,7 @@ function ttl_to_seconds($ttl)
 
 #
 # This function, and leave_crit() below, implements a form of
-# cooperative locking. Hard table locka are held only for a brief
+# cooperative locking. Hard table locks are held only for a brief
 # moment, while the lock notices are placed on the blackboard.
 # Critical sections exist during these operations : update,
 # add domain and delete domain.
@@ -350,7 +350,7 @@ function add_domain($domain, $master, $eoptions = "", $owner)
 	# Add the domain to the zones table
 	$db->prepare("INSERT INTO zones SET domain=:domain, serial=:serial, refresh=:refresh, retry=:retry, expire=:expire, 
 			   master=:master, updated=1, zonefile=:zonefile, options=:options, owner=:owner, ctime=NOW(), mtime=NOW()");
-	$db->execute(array(":domain"=>$domain,":serial"=>$serial,":refresh",$refresh,":retry"=>$retry,":expire"=>$expire,
+	$db->execute(array(":domain"=>$domain,":serial"=>$serial,":refresh"=>$refresh,":retry"=>$retry,":expire"=>$expire,
 			   ":master"=>$master,":zonefile"=>$zonefile,":options"=>$options,":owner"=>$owner));
 	$newzone = $db->lastInsertId();
 	# Just in case a domain of the same name was recently deleted...
@@ -425,7 +425,8 @@ function del_zone($zoneid)
 	if ($db->next_record()) {
 		$db->query("INSERT INTO deleted_records SELECT * FROM records WHERE zone=$zoneid");
 	} else {
-		$db->query("CREATE TABLE IF NOT EXISTS deleted_records SELECT * FROM records WHERE zone=$zoneid");
+		$db->query("CREATE TABLE IF NOT EXISTS deleted_records");
+		$db->query("SELECT * FROM records WHERE zone=$zoneid");
 	}
 	# Finally, zap records, annotations and the zone itself.
 	$db->query("DELETE FROM records WHERE zone = $zoneid");
@@ -502,7 +503,7 @@ function tag_zone_updated($recordid)
 #	sql_query("UPDATE zones SET updated = 1 WHERE id = $zone");
 	if (!ctype_digit("$recordid")) die('Invalid recordid.'); 
 	$db = new DB_probind;
-	$db->query("UPDATE zones JOIN records ON (zone.id=record.zone) SET zone.updated=1 WHERE records.id=$recordid");
+	$db->query("UPDATE zones JOIN records ON (zones.id=records.zone) SET zones.updated=1 WHERE records.id=$recordid");
 }
 
 # Set the 'updated' tag on a domain, ensuring that the next update will
@@ -576,7 +577,6 @@ function upd_record($id, $domain, $ttlspec, $type, $data, $genptr, $comment = ''
 	}
 	$db->prepare("UPDATE records SET domain=:domain, ttl=:ttl, type=:type, data=:data, genptr=:genptr, comment=:comment, disabled=:disabled WHERE id = $id");
 	$db->execute(array(":domain"=>$domain,":ttl"=>$ttl,":type"=>$type,":data"=>$data,":genptr"=>$genptr,":comment"=>$comment,":disabled"=>$disabled));
-	$rid = sql_query($query);
 	tag_zone_updated($id);
 	if ($type == 'A')
 		affect_reverses($data);
@@ -597,7 +597,6 @@ function upd_mx_record($id, $domain, $ttlspec, $pref, $data, $comment = '', $dis
 		$disabled = 0;
 	$db->prepare("UPDATE records SET domain = :domain, ttl = :ttl, type = 'MX', pref = :pref, data = :data, comment=:comment, disabled = :disabled WHERE id = $id");
 	$db->execute(array(":domain"=>$domain, ":ttl"=>$ttl, ":pref"=>$pref, ":data"=>$data, ":comment"=>$comment, ":disabled"=>$disabled));
-	$rid = sql_query($query);
 	tag_zone_updated($id);
 }
 
@@ -676,10 +675,16 @@ function validate_record($zone, &$domain, $ttl, &$type, &$pref, &$data)
 			$warnings .= "<li>'$data' is not a valid IPv6 address.\n";
 	}
 	$type = strtoupper($type);
-	if ($type != 'MX')
+	if ($type != 'MX') {
 		$pref = '';
-	elseif ($pref < 0 || $pref > 65535 || !strlen($pref))
-		$warnings .= "<LI>You must specify an unsigned 16-bit preference for MX records.\n";
+	} else {
+		if ($pref < 0 || $pref > 65535 || !strlen($pref)) {
+			$warnings .= "<LI>You must specify an unsigned 16-bit preference for MX records.\n";
+		}
+		if ( preg_match("/^\d+\.\d+\.\d+\.\d+$/" , $data) ) {
+			$warnings .= "<li>You can not insert IPs on MX records!\n";
+		}
+	}
 	//
 	// This modification makes wrong result in the 'import' so turn it off. We always can use it on the high level if necessary.
 	//if (strchr($data, ".") && ($type != "TXT") && !valid_ip($data) && $data[strlen($data)-1] != ".")
@@ -688,10 +693,15 @@ function validate_record($zone, &$domain, $ttl, &$type, &$pref, &$data)
 	$zone = get_zone($zone);
 	if ($type == 'CNAME' && (($zone['domain']."." == $domain) || $domain == '@'))
 		$warnings .= "<LI>A CNAME may not exist for the entire domain.\n";
-	if (preg_match("/\.$/i", $domain)
-	&& !preg_match("/".$zone['domain'].'.$/i', $domain))
-		$warnings .= "<LI>Domain '$domain' is outside the zone.\n";
-	return $warnings;
+	if (preg_match("/\.$/i", $domain)) {
+		if (!preg_match("/".$zone['domain'].'.$/i', $domain))
+			$warnings .= "<LI>Domain '$domain' is outside the zone.\n";
+	} else {
+		if (preg_match("/".$zone['domain'].'$/i', $domain))
+			$warnings .= "<LI>Domain '$domain' invalid: check if you didn't loose a dot or something...\n";
+	}
+	return $warnings;   
+
 }
 
 # Return the default TTL for a zone ID, as found in the SOA record.
@@ -731,15 +741,16 @@ function insert_record($zone, $domain, $ttlspec, $type, $pref, $data, $genptr, $
 	$query .= "data=:data, ";	$param[":data"] = $data;
 	$query .= "genptr=:genptr, ";	$param[":genptr"] = $genptr;
 	$query .= "comment=:comment";	$param[":comment"] = $comment;
-	if (strlen($pref)) {
+	if (isset($pref) && strlen($pref)) {
 	   $query .= ", pref=:pref";	$param[":pref"] = $pref;
 	}
-	if (strlen($port)) {
+	if (isset($port) && strlen($port)) {
 	   $query .= ", port=:port";	$param[":port"] = $port;
 	}
-	if (strlen($weight)) {
+	if (isset($weight) && strlen($weight)) {
 	  $query .= ", weight=:weight"; $param[":weight"] = $weight;
 	}
+	$db = new DB_probind;
 	$db->prepare($query);
 	$db->execute($param);
 	tag_zone_updated($db->lastInsertId());
