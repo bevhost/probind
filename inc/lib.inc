@@ -577,7 +577,6 @@ function upd_record($id, $domain, $ttlspec, $type, $data, $genptr, $comment = ''
 	}
 	$db->prepare("UPDATE records SET domain=:domain, ttl=:ttl, type=:type, data=:data, genptr=:genptr, comment=:comment, disabled=:disabled WHERE id = $id");
 	$db->execute(array(":domain"=>$domain,":ttl"=>$ttl,":type"=>$type,":data"=>$data,":genptr"=>$genptr,":comment"=>$comment,":disabled"=>$disabled));
-	$rid = sql_query($query);
 	tag_zone_updated($id);
 	if ($type == 'A')
 		affect_reverses($data);
@@ -598,7 +597,6 @@ function upd_mx_record($id, $domain, $ttlspec, $pref, $data, $comment = '', $dis
 		$disabled = 0;
 	$db->prepare("UPDATE records SET domain = :domain, ttl = :ttl, type = 'MX', pref = :pref, data = :data, comment=:comment, disabled = :disabled WHERE id = $id");
 	$db->execute(array(":domain"=>$domain, ":ttl"=>$ttl, ":pref"=>$pref, ":data"=>$data, ":comment"=>$comment, ":disabled"=>$disabled));
-	$rid = sql_query($query);
 	tag_zone_updated($id);
 }
 
