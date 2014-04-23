@@ -99,7 +99,7 @@ function add_master_domain($input)
 		    $result = "<HR><P>Domain '<A HREF=\"brzones.php?frame=records&zone=$id\">$domain</A>' successfully added.<P>\n";
 			if ($res1) {
 				$result .= "<HR>\n<H3>Records found in other domains which should be moved into the new domain</H3>\n";
-			    $result .= "<br><FORM action=\"addzone.php\"><INPUT type=\"HIDDEN\" name=\"id\" value=\"$id\"><INPUT type=\"HIDDEN\" name=\"type\" value=\"fill\">\n";
+				$result .= "<br><FORM action=\"addzone.php\"><INPUT type=\"HIDDEN\" name=\"id\" value=\"$id\"><INPUT type=\"HIDDEN\" name=\"type\" value=\"fill\">\n";
 				$result .= "<INPUT type=\"submit\" value=\"Move records into the new zone\"> <INPUT type=\"submit\" value=\"Cancel\" name=\"Cancel\"></FORM>\n";
 				$result .= $res1."<HR>\n";
 			}
@@ -116,10 +116,10 @@ function add_slave_domain($input)
 	$warnings .= validate_master($master);
 	# Enough validation, lets do it.
 	if (strlen($warnings)) {
-		$result .= "The domain was not created, for the following reasons:<P><UL>\n$warnings</UL>\n";
+		$result = "The domain was not created, for the following reasons:<P><UL>\n$warnings</UL>\n";
 	} else {
 		$id = add_domain($domain, $master, '', $input['owner']);
-		$result .= "<HR><P>Domain '<A HREF=\"brzones.php?frame=records&zone=$id\">$domain</A>' successfully added.<P>\n";
+		$result = "<HR><P>Domain '<A HREF=\"brzones.php?frame=records&zone=$id\">$domain</A>' successfully added.<P>\n";
 	}
 	$result .= "<hr><p>\n";
 	return $result;
