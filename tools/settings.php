@@ -70,7 +70,7 @@ function browse_settings()
 	while ($setting = mysql_fetch_array($rid)) {
 		$name = $setting['name'];
 		// some settings don't belong here: 
-		if ($name = 'DOMAIN_LOCK') continue;
+		if ($name == 'DOMAIN_LOCK') continue;
 		$value = $setting['value'];
 		$text = ""; if (isset($settings_list[$name])) $text = $settings_list[$name];
 		$bool = isset($is_bool[$name]);
