@@ -15,12 +15,15 @@ class DB_probind extends DB_Sql {
   var $Database = "probind";
   var $User     = "probinduser";
   var $Password = "CHANGEME";
+  #var $Debug	= 1;
 }
 
 $idn_version = 2008;  // internationalisation version for punycode converter
 
 include ("lang.php");
-$language = 'en';
+if (!$language = @$_SERVER["HTTP_ACCEPT_LANGUAGE"]) $language = $_SERVER["LANG"];
+$language = substr($language,0,2);
+if (empty($tr[$language])) $language = "en";
 
 // Optional settings are below. These are safe defaults, but you can adjust
 // them if you need to.
