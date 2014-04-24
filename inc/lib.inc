@@ -644,6 +644,7 @@ function update_zone($id, $serial, $refresh, $retry, $expire, $master, $zonefile
 {
 	global $SLAVE_ON_SLAVES;
 	if (!ctype_digit("$id")) die("Invalid zone id: $id."); 
+	$db = new DB_probind;
 	if (!$zonefile) {
 		$db->query("SELECT zonefile FROM zones WHERE id=$id");
 		if ($db->next_record()) extract($db->Record); else die("Zone $id not found for update");
