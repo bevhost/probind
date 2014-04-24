@@ -561,7 +561,7 @@ function upd_record($id, $domain, $ttlspec, $type, $data, $genptr, $comment = ''
 	$db->query("SELECT zone, domain, type, data, genptr FROM records WHERE id = $id");
 	if (!$db->next_record()) die("Record $id not found");
 	extract($db->Record,EXTR_PREFIX_ALL,'old');
-	if (!strlen($ttlspec)) {
+	if (!isset($ttlspec) || !strlen($ttlspec)) {
 		$ttl = default_ttl($old_zone);
 	} else {
 		$ttl = ttl_to_seconds($ttlspec);
@@ -633,7 +633,7 @@ function update_zone($id, $serial, $refresh, $retry, $expire, $master, $zonefile
 		if ($db->next_record()) extract($db->Record); else die("Zone $id not found for update");
 	}
 
-	if (!strlen($master)) {
+	if (!isset($master) || !strlen($master)) {
 		$db->prepare("UPDATE zones SET serial = :serial, refresh = :refresh, retry = :retry, expire = :expire, zonefile = :zonefile, updated = 1, disabled=:disabled WHERE id = $id");
 		$db->execute(array(":serial"=>$serial,":refresh"=>$refresh,":retry"=>$retry,":expire"=>$expire,":zonefile"=>$zonefile,":disabled"=>$disabled));
 	} else {
@@ -650,7 +650,7 @@ function validate_record($zone, &$domain, $ttl, &$type, &$pref, &$data)
 {
 	global $DOMAIN_RE, $IPNO_RE, $IPV6_RE;
 	$warnings = "";
-	if (!strlen($domain))
+	if (!isset($domain) || !strlen($domain))
 		$domain = '@';
 	if ($domain != '@'
 	&& $domain != '*'
@@ -658,7 +658,7 @@ function validate_record($zone, &$domain, $ttl, &$type, &$pref, &$data)
 		$warnings .= "<LI>The domain '$domain' name is invalid.\n";
 	if (!ereg("^[a-zA-Z]+$", $type))
 		$warnings .= "<LI>You must specify valid a type.\n";
-	if (!strlen($data))
+	if (!isset($data) || !strlen($data))
 		$warnings .= "<LI>You must specify data.\n";
 	if ($type == 'A') {
 		$rc = preg_match($IPNO_RE, $data, $bytes);
@@ -676,7 +676,7 @@ function validate_record($zone, &$domain, $ttl, &$type, &$pref, &$data)
 	if ($type != 'MX') {
 		$pref = '';
 	} else {
-		if ($pref < 0 || $pref > 65535 || !strlen($pref)) {
+		if (!isset($pref) || $pref < 0 || $pref > 65535 || !strlen($pref)) {
 			$warnings .= "<LI>You must specify an unsigned 16-bit preference for MX records.\n";
 		}
 		if ( preg_match("/^\d+\.\d+\.\d+\.\d+$/" , $data) ) {
@@ -721,7 +721,7 @@ function insert_record($zone, $domain, $ttlspec, $type, $pref, $data, $genptr, $
 {
 	if ( $type != 'A' )
 		$genptr = 0;
-	if (!strlen($ttlspec))
+	if (!isset($ttlspec) || !strlen($ttlspec))
 		$ttl = default_ttl($zone);
 	else
 		$ttl = ttl_to_seconds($ttlspec);
@@ -1007,13 +1007,13 @@ function database_state()
 	$warn = array();
 	global $DEFAULT_EXTERNAL_DNS, $HOSTMASTER;
 	global $DEFAULT_ORIGIN, $DEFAULT_PTR_DOMAIN;
-	if (!strlen($DEFAULT_EXTERNAL_DNS))
+	if (!isset($DEFAULT_EXTERNAL_DNS) || !strlen($DEFAULT_EXTERNAL_DNS))
 		$warn[] = "Default MNAME not set.";
-	if (!strlen($HOSTMASTER))
+	if (!isset($HOSTMASTER) || !strlen($HOSTMASTER))
 		$warn[] = "Default RNAME not set.";
-	if (!strlen($DEFAULT_ORIGIN))
+	if (!isset($DEFAULT_ORIGIN) || !strlen($DEFAULT_ORIGIN))
 		$warn[] = "Default ORIGIN not set.";
-	if (!strlen($DEFAULT_PTR_DOMAIN))
+	if (!isset($DEFAULT_PTR_DOMAIN) || !strlen($DEFAULT_PTR_DOMAIN))
 		$warn[] = "Default PTR Domain not set.";
 	$db = new DB_probind;
 	$db->query("SELECT * FROM servers");
