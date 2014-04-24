@@ -48,7 +48,7 @@ domains which are pushed onto the DNS servers after the update. Some changes (su
 changing primary server to the secondary) need bulk update function to be applied.
 It is a good practice to clean all generated files in the HOSTS/server_name directory,
 check <B>Update host from template</B> box, and
-run a <B>Bulk Update</B> function after the sugnificant changes.
+run a <B>Bulk Update</B> function after the significant changes.
 <BR>
 ';
 

@@ -22,8 +22,6 @@ $query = "SELECT zones.id AS zid, zones.domain AS zdom, records.id AS rid, recor
 $rid = sql_query($query);
 print "<UL>";
 while ($row = mysql_fetch_array($rid)) {
-	if (!strstr($row['zdom'], "in-addr.arpa"))
-		next;
 	eregi("^(.*)\.in-addr\.arpa$", $row['zdom'], $matches);
 	$bytes = explode(".", $matches[1]);
 	$ip = $bytes[count($bytes)-1];

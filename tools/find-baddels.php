@@ -57,9 +57,10 @@ function end_domain($begin, $domainform, $serverform, $end, $noservers, &$counte
 	global $current_domain, $name_servers, $servers;
 	$nomatches = 0;
 	$row = "";
-	if (count($name_servers)) while ($ns = each($name_servers)) {
-		$row .= sprintf($serverform, $ns[1]);
-		if (!$servers[$ns[1]])
+	$result = "";
+	foreach($name_servers as $ns) {
+		$row .= sprintf($serverform, $ns);
+		if (!array_key_exists($ns,$servers))
 			$nomatches++;
 	}
 	if ($nomatches) {
