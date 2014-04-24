@@ -58,7 +58,7 @@ function end_domain($begin, $domainform, $serverform, $end, $noservers, &$counte
 	$nomatches = 0;
 	$row = "";
 	$result = "";
-	foreach($name_servers as $ns) {
+	while ($name_servers && ($ns = each($name_servers))) {
 		$row .= sprintf($serverform, $ns);
 		if (!array_key_exists($ns,$servers))
 			$nomatches++;
@@ -144,6 +144,7 @@ fclose($listfile);
 mysql_free_result($rid);
 print $search_prologue;
 $pipe = popen("$BIN/nsrecs -h $nameserver < $TMP/domains", "r");
+$badcounter = 0;
 while (!feof($pipe)) {
 	$result = fgets($pipe, 1000);
 	$hostnames = explode(" ", $result);
