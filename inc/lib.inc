@@ -335,12 +335,10 @@ function add_domain($domain, $master, $eoptions = "", $owner)
 		else die("TEMPLATE zone not found in database<P>\n");
 	if (!$master) {
 		$zonefile = "$domain.dns";
-		$master = "''";
 		if ($eoptions)
 			$options = $eoptions; // If options are specified, set up them instead of template options
 	} else {
 		$zonefile = "SEC/$domain.dns";
-		$master = "'$master'";
 		$options = ""; // No options from TEMPLATE for the secondary zones
 	}
 	# Make sure that no one else is working on the domain list while
@@ -358,7 +356,7 @@ function add_domain($domain, $master, $eoptions = "", $owner)
 	$db->execute($domain);
 
 
-	if ($master != "''") {
+	if ($master) {
 		if ($SLAVE_ON_SLAVES)
 		    $db->query("UPDATE servers SET state = 'OUT'");
 		else
@@ -377,7 +375,7 @@ function add_domain($domain, $master, $eoptions = "", $owner)
 	$db->query("INSERT INTO records (domain, zone, ttl, type, pref, data, port, weight, comment, genptr, ctime, mtime) ".
 		   "SELECT domain, $newzone, ttl, type, pref, data, port, weight, '', 1, NOW(), NOW() FROM records WHERE zone=$templateid");
 
-	if ($master != "''" && !$SLAVE_ON_SLAVES)
+	if ($master && !$SLAVE_ON_SLAVES)
 		$db->query("UPDATE servers SET state = 'OUT' WHERE type = 'M'");
 	else
 	    $db->query("UPDATE servers SET state = 'OUT' WHERE type = 'M' OR type = 'S'");
