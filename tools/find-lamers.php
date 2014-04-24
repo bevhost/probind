@@ -135,6 +135,7 @@ fclose($listfile);
 mysql_free_result($rid);
 print $search_prologue;
 $pipe = popen("$BIN/nsrecs -h $nameserver < $TMP/domains", "r");
+$lamecounter = 0;
 while (!feof($pipe)) {
 	$result = fgets($pipe, 1000);
 	$hostnames = explode(" ", $result);
@@ -145,6 +146,7 @@ while (!feof($pipe)) {
 		for ($i=1; $i<count($hostnames); $i++) {
 			domain_name_server($hostnames[$i]);
 		}
+		$lamecounter++;
 		print end_domain("", "$domstr is delegated to these servers:<UL>", "<LI>%s", "</UL><BR>\n", "<P>No NS records found", $lamecounter);
 	}
 }
