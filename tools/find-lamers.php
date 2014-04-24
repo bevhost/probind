@@ -146,7 +146,6 @@ while (!feof($pipe)) {
 		for ($i=1; $i<count($hostnames); $i++) {
 			domain_name_server($hostnames[$i]);
 		}
-		$lamecounter++;
 		print end_domain("", "$domstr is delegated to these servers:<UL>", "<LI>%s", "</UL><BR>\n", "<P>No NS records found", $lamecounter);
 	}
 }
