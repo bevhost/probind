@@ -50,9 +50,10 @@ function end_domain($begin, $domainform, $serverform, $end, $noservers, &$counte
 	global $current_domain, $name_servers, $servers;
 	$matches = 0;
 	$row = "";
-	while ($name_servers && ($ns = each($name_servers))) {
-		$row .= sprintf($serverform, $ns[1]);
-		if ($servers[$ns[1]])
+	$result = "";
+	foreach($name_servers as $ns) {
+		$row .= sprintf($serverform, $ns);
+		if (isset($servers[$ns]))
 			$matches++;
 	}
 	if (!$matches) {
@@ -64,13 +65,13 @@ function end_domain($begin, $domainform, $serverform, $end, $noservers, &$counte
 			$result =  $begin.$dom.$noservers.$end;
 	}
 	$current_domain = "";
-	$name_servers = array();
 	return $result;
 }
 
 function begin_domain($domain)
 {
 	global $current_domain, $name_servers;
+	$name_servers = array();
 	if ($current_domain) 
 		end_domain();
 	$current_domain = $domain;
@@ -134,6 +135,7 @@ while ($row = mysql_fetch_row($rid)) {
 fclose($listfile);
 mysql_free_result($rid);
 print $search_prologue;
+#TODO: There are now PHP functions for doing this so opening a pipe to a perl process, is not really required.
 $pipe = popen("$BIN/nsrecs -h $nameserver < $TMP/domains", "r");
 $lamecounter = 0;
 while (!feof($pipe)) {
