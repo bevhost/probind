@@ -894,6 +894,7 @@ function auto_ptrs($domain, $ttl, $reversehosts)
 	preg_match("/(.*)\.in-addr\.arpa(\.)?/", $domain, $matches);
 	$bytes = explode(".", $matches[1]);
 	$iptop = join('.', array_reverse($bytes));
+	$ips = array();
 	$octets = count($bytes);
 	$query = "	
 	SELECT zones.id AS zid, records.domain AS rdom, zones.domain AS zdom, data 
