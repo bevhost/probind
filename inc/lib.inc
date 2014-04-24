@@ -736,6 +736,7 @@ function insert_record($zone, $domain, $ttlspec, $type, $pref, $data, $genptr, $
 	$query .= "zone=:zone, "; 	$param[":zone"] = $zone;
 	$query .= "domain=:domain, ";	$param[":domain"] = $domain;
 	$query .= "ttl=:ttl, ";		$param[":ttl"] = $ttl;
+	$query .= "type=:type, ";	$param[":type"] = $type;
 	$query .= "data=:data, ";	$param[":data"] = $data;
 	$query .= "genptr=:genptr, ";	$param[":genptr"] = $genptr;
 	$query .= "comment=:comment";	$param[":comment"] = $comment;
