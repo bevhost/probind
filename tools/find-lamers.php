@@ -135,6 +135,7 @@ fclose($listfile);
 mysql_free_result($rid);
 print $search_prologue;
 $pipe = popen("$BIN/nsrecs -h $nameserver < $TMP/domains", "r");
+$lamecounter = 0;
 while (!feof($pipe)) {
 	$result = fgets($pipe, 1000);
 	$hostnames = explode(" ", $result);

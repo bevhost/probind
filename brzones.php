@@ -1,8 +1,6 @@
 <?php
 require 'inc/lib.inc';
 
-$html_top = "<html><body>";
-
 $start_form = '
 <HTML>
 <HEAD>
@@ -550,18 +548,18 @@ function perform_zone_update($INPUT_VARS)
 {
 	$id = $INPUT_VARS['id'];
 	$serial = $INPUT_VARS['serial'];
-	$refresh = ttl_to_seconds($INPUT_VARS['refresh']);
-	$retry = ttl_to_seconds($INPUT_VARS['retry']);
-	$expire = ttl_to_seconds($INPUT_VARS['expire']);
-	$master = $INPUT_VARS['master'];
-	$zonefile = $INPUT_VARS['zonefile'];
-	$disabled = $INPUT_VARS['disabled'];
+	if (isset($INPUT_VARS['refresh'])) { $refresh = ttl_to_seconds($INPUT_VARS['refresh']); } else { $refresh = ttl_to_seconds(""); }
+	if (isset($INPUT_VARS['retry'])  ) { $retry   = ttl_to_seconds($INPUT_VARS['retry']);   } else { $retry   = ttl_to_seconds(""); }
+	if (isset($INPUT_VARS['expire']) ) { $expire  = ttl_to_seconds($INPUT_VARS['expire']);  } else { $expire  = ttl_to_seconds(""); }
+	$master   = ""  ; if (isset($INPUT_VARS['master']))   $master   = $INPUT_VARS['master']  ;
+	$zonefile = null; if (isset($INPUT_VARS['zonefile'])) $zonefile = $INPUT_VARS['zonefile'];
+	$disabled = 0   ; if (isset($INPUT_VARS['disabled'])) $disabled = $INPUT_VARS['disabled'];
 	update_zone($id, $serial, $refresh, $retry, $expire, $master, $zonefile, $disabled ? 1 : 0);
 }
 
 function add_record($INPUT_VARS)
 {
-	global $REMOTE_USER, $update_in_progress;
+	global $REMOTE_USER, $update_in_progress, $html_top;
 	$zone = ltrim(rtrim($INPUT_VARS['zone']));
 	$domain = ltrim(rtrim($INPUT_VARS['domain']));
 	$ttl = ltrim(rtrim($INPUT_VARS['ttl']));

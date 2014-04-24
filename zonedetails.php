@@ -9,17 +9,6 @@
 
 require('inc/lib.inc');
 
-# Convert the special mysql timestamp format to something more readable
-function fmt_timestamp($timestamp)
-{
-	return substr($timestamp, 6, 2)
-		."/".substr($timestamp, 4, 2)
-		."/".substr($timestamp, 0, 4)
-		." ".substr($timestamp, 8, 2)
-		.":".substr($timestamp, 10, 2)
-		." CET";
-}
-
 function update_description($domain, $descrip, $options)
 {
 	if (strlen($options) > 254) {
@@ -47,8 +36,8 @@ function domain_details($domain)
 	($zone = mysql_fetch_array($rid))
 		or die("No such domain: $domain<P>\n");
 	mysql_free_result($rid);
-	$mtime = fmt_timestamp($zone['mtime']);
-	$ctime = fmt_timestamp($zone['ctime']);
+	$mtime = $zone['mtime'];
+	$ctime = $zone['ctime'];
 	$id = $zone['id'];
 	$options = htmlspecialchars($zone['options']);
 	$result = "<H1>$domain</H1>\n";
@@ -88,7 +77,7 @@ at the top.
 get_input();
 
 if ($domain = $INPUT_VARS['domain']) {
-	if ($INPUT_VARS['action'] == "textupdate") {
+	if (isset($INPUT_VARS['action']) && ($INPUT_VARS['action'] == "textupdate")) {
 		update_description($INPUT_VARS['domain'],
 			htmlspecialchars($INPUT_VARS['description']), $INPUT_VARS['options']);
 	}

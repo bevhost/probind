@@ -26,5 +26,4 @@ while(<>) {
 			print $delim, $rr->nsdname;
 	       }
 	}
-	print "\n";
 }
