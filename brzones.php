@@ -1,8 +1,6 @@
 <?php
 require 'inc/lib.inc';
 
-$html_top = "<html><body>";
-
 $start_form = '
 <HTML>
 <HEAD>
@@ -561,7 +559,7 @@ function perform_zone_update($INPUT_VARS)
 
 function add_record($INPUT_VARS)
 {
-	global $REMOTE_USER, $update_in_progress;
+	global $REMOTE_USER, $update_in_progress, $html_top;
 	$zone = ltrim(rtrim($INPUT_VARS['zone']));
 	$domain = ltrim(rtrim($INPUT_VARS['domain']));
 	$ttl = ltrim(rtrim($INPUT_VARS['ttl']));
