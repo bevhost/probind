@@ -88,7 +88,7 @@ at the top.
 get_input();
 
 if ($domain = $INPUT_VARS['domain']) {
-	if ($INPUT_VARS['action'] == "textupdate") {
+	if (isset($INPUT_VARS['action']) && ($INPUT_VARS['action'] == "textupdate")) {
 		update_description($INPUT_VARS['domain'],
 			htmlspecialchars($INPUT_VARS['description']), $INPUT_VARS['options']);
 	}
