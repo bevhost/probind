@@ -588,7 +588,14 @@ function upd_mx_record($id, $domain, $ttlspec, $pref, $data, $comment = '', $dis
 {
 	if (!ctype_digit("$id")) die('Invalid record id.'); 
 	$db = new DB_probind;
-	$ttl = ttl_to_seconds($ttlspec);
+	$db->query("SELECT zone FROM records WHERE id = $id");
+	if (!$db->next_record()) die("Record $id not found");
+	extract($db->Record,EXTR_PREFIX_ALL,'old');
+	if (!isset($ttlspec) || !strlen($ttlspec)) {
+		$ttl = default_ttl($old_zone);
+	} else {
+		$ttl = ttl_to_seconds($ttlspec);
+	}
 	$data = strtr($data,"'",'.');
 	$comment = strtr($comment,"'",'.');
 	if (!$disabled)
@@ -608,18 +615,27 @@ function upd_soa_record($id, $ttlspec)
 {
 	if (!ctype_digit("$id")) die('Invalid record id.'); 
 	$db = new DB_probind;
-	$ttl = ttl_to_seconds($ttlspec);
 
 	# update all other records in the zone that have the same ttl
 	$db->query("SELECT zone, ttl as old_ttl FROM records WHERE id = $id");
 	if ($db->next_record()) extract($db->Record); else die("SOA Record $id not found");
-	$db->prepare("UPDATE records SET ttl = :ttl WHERE zone = :zone AND ttl = :old_ttl");
-	$db->execute(array(":ttl"=>$ttl, ":zone"=>$zone, ":old_ttl"=>$old_ttl));
 
-	# now update soa ttl to match
-	$db->prepare("UPDATE records SET ttl = ? WHERE id = $id");
-	$db->execute($ttl);
+	if (isset($ttlspec)) {
+		$ttl = ttl_to_seconds($ttlspec);
+	} else {
+		$ttl = $old_ttl;
+	}
 
+	if ($ttl != $old_ttl) {
+		$db->prepare("UPDATE records SET ttl = :ttl WHERE zone = :zone AND ttl = :old_ttl");
+		$db->execute(array(":ttl"=>$ttl, ":zone"=>$zone, ":old_ttl"=>$old_ttl));
+
+		# now update soa ttl to match
+		$db->prepare("UPDATE records SET ttl = ? WHERE id = $id");
+		$db->execute($ttl);
+	}
+
+	// Maybe we shouldn't even tag the zone as updated, if the ttl didn't change
 	tag_zone_updated($id);
 }
 
