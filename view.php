@@ -26,7 +26,7 @@ else
 
 print $html_top;
 $file = false;
-if (isset($INPUT_VARS['file']) $file = $INPUT_VARS['file'];
+if (isset($INPUT_VARS['file'])) $file = $INPUT_VARS['file'];
 if (!empty($INPUT_VARS['base']) && $INPUT_VARS['base'] == "LOGS") {
     $base = $LOG_DIR;
 	$tbase = "Log file";
