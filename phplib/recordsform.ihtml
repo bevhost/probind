@@ -2,6 +2,7 @@
   $this->form_data->start("recordsform");
   if ($this->error) printf("<P class=error>Error: %s %s</p>\n", $ErrorFieldName, $this->error);  
   if ($this->errors) foreach($this->errors as $error) printf("<P class=error>Error: %s</p>\n", $error);
+  $this->freeze(array('ctime','mtime'));
 ?>
  <table class='tplform'>     <tr><td></td><td>
 		<?php $this->form_data->show_element('id'); ?> </td></tr>

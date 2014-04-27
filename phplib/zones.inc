@@ -53,11 +53,17 @@ class zonesform extends tpl_form {
     $this->form_data->add_element(array("type"=>"text","name"=>"updated","size"=>"12",
 		"valid_regex"=>"^[0-9|\-]+$|^$","field"=>"updated",
 		"valid_e"=>"Updated must be a whole number containing digits 0-9 only. May also start with negative symbol -",
-		"extrahtml"=>"","value"=>"0"));
+		"extrahtml"=>"",
+                "options"=>array( array("label"=>"Yes","value"=>"1"),
+                                  array("label"=>"No","value"=>"0"),
+                                ), "value"=>"No"));
     $this->form_data->add_element(array("type"=>"text","name"=>"disabled","size"=>"12",
 		"valid_regex"=>"^[0-9|\-]+$","field"=>"disabled",
 		"valid_e"=>"Disabled must be a whole number containing digits 0-9 only. May also start with negative symbol -",
-		"extrahtml"=>"","value"=>"0"));
+		"extrahtml"=>"",
+                "options"=>array( array("label"=>"Yes","value"=>"1"),
+                                  array("label"=>"No","value"=>"0"),
+                                ), "value"=>"No"));
     $this->form_data->add_element(array("type"=>"text","name"=>"owner","maxlength"=>"32","size"=>"10"
 		,"minlength"=>1,"length_e"=>"Owner must not be blank.  Required field.",
 		"field"=>"owner","extrahtml"=>""
