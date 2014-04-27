@@ -17,6 +17,9 @@ mb_language('uni');
 mb_regex_encoding('UTF-8');
 ob_start('mb_output_handler');
 ini_set('default_charset', 'UTF-8');
+ini_set('magic_quotes_gpc', 0);
+ini_set("arg_separator.input",";&");
+
 
 ini_set('display_errors', 'On');
 
@@ -32,6 +35,8 @@ if (array_key_exists("parameters",$_GET)) {
   }
 }
 
+$dev = false;
+#$dev = true;
 
 $_ENV["local"]  = dirname(__FILE__)."/";
 $_ENV["libdir"] = "/usr/share/phplib/";
@@ -52,6 +57,14 @@ require($_ENV["libdir"] . "table.inc");
 require($_ENV["libdir"] . "sqlquery.inc");
 
 include($_ENV["local"] . "EventLog.inc");
+
+ini_set('unserialize_callback_func', 'mycallback'); // set your callback_function
+function mycallback($classname)
+{
+        $classname = str_replace("_Sql_Query","",$classname);
+        $inc_file = $_ENV["local"].$classname.".inc";
+        require_once($inc_file);
+}
 
 function EventLog($Description,$ExtraInfo="",$Level="Info") {
 	global $PHP_SELF, $argv, $REMOTE_ADDR, $auth;
