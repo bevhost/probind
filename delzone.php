@@ -10,7 +10,7 @@ $html_top = '
 <BODY bgcolor="#cccc99" background="images/BG-shadowleft.gif">
 <TABLE width="100%">
 <TR>
- <TD align=left><H1>Deleting a zone</H1></TD>
+ <TD align=left><H1>Deleting a zone: '.$_REQUEST["trashdomain"].'</H1></TD>
  <TH align=right><A HREF="manual.html#del">Help</A></TH>
 </TR>
 </TABLE>
@@ -44,14 +44,16 @@ $start_form = "
 get_input();
 $extra="";
 if (($domain = @$INPUT_VARS['domain']) || !@$INPUT_VARS['trashdomain']) {
-	if (@$INPUT_VARS['frame'] == "delzone")
+	if (@$INPUT_VARS['frame'] == "delzone") {
+		include('header.php');
 		print $html_top.sprintf($start_form, $domain, display_if_international($domain));
-	else {
+	} else {
 		if ($domain)
 			$extra = "&domain=$domain";
 		print sprintf($start_frame, $extra);
 	}
 } else {
+	include('header.php');
 	print $html_top;
 	$trashdomain = $INPUT_VARS['trashdomain'];
 

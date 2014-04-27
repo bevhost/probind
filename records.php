@@ -1,13 +1,13 @@
 <?php
 include('inc/lib.inc');
-include('phplib/records.inc');
+include_once('phplib/records.inc');
 $_ENV["MyForeignKeys"]="LinkedTables";
 $_ENV["MyForeignKeysDB"]="DB_probind";
 error_reporting(E_ALL^(E_STRICT|E_NOTICE));
-$EditMode='on';
+#$EditMode='on';
 
 
-
+/*
 if ($export_results) {
         page_open(array("sess"=>$_ENV["SessionClass"],"auth"=>$_ENV["AuthClass"],"perm"=>$_ENV["PermClass"],"silent"=>"silent"));
 } else {
@@ -18,9 +18,11 @@ if ($export_results) {
 	echo "<BODY bgcolor=\"#999966\">";
 	echo "<style> .hide {display:none;} </style>";
 	echo "<span class='big'>Probind Records$by</span>";
-	#if (empty($Field)) include("menu.html");
+	if (empty($Field)) include("menu.php");
 }
 check_view_perms();
+*/
+include('header.php');
 
 $db = new DB_probind;
 $f = new recordsform;
@@ -133,7 +135,10 @@ if (window.opener) {
 
 
 if ($export_results) $f->setup();
-else $f->javascript();
+else {	
+	$f->javascript();
+	javascript_translations($language);
+}
 
 
 switch ($cmd) {
@@ -166,10 +171,10 @@ switch ($cmd) {
 	$t->add_insert = $f->classname;  /* Add a blank row ontop of table allowing insert or search */
 	$t->add_insert_buttons = 'Add,Search';   /* Control which buttons appear on the add_insert row eg: Add,Search */
 	/* See below - EditMode can also be turned on/off by user if section below uncommented */
-	$t->edit = $f->classname;   /* Allow rows to be editable with a save button that appears onchange */
+	#$t->edit = $f->classname;   /* Allow rows to be editable with a save button that appears onchange */
 	#$t->ipe_table = 'records';   /* Make in place editing changes immediate without a save button */
-	#$t->checkbox_menu = Array('Print');
-	#$t->check = 'id';  /* Display a column of checkboxes with value of key field*/
+	$t->checkbox_menu = Array('Print','Delete');
+	$t->check = 'id';  /* Display a column of checkboxes with value of key field*/
 	#$t->extra_html = array('fieldname'=>'extrahtml');  			/* better to put this in .inc */
 	#$t->align      = array('fieldname'=>'right', 'otherfield'=>'center');	/* better to put this in .inc */
 

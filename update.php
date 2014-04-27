@@ -1,5 +1,6 @@
 <?php
 require 'inc/lib.inc';
+require 'header.php';
 
 $start_frame = '
 <HTML>
@@ -214,6 +215,7 @@ function generate_files($input)
 			print "(as slave)</H4>\n";
 
 		# This server need real file update
+		if (!file_exists("$HOST_DIR/$server")) mkdir("$HOST_DIR/$server");
 		chdir("$HOST_DIR/$server") || die("$!: $HOST_DIR/$server<P>\n");
 		$cmd = "TOP=$TOP $BIN/mknamed.conf $server named.conf ";
 		print $cmd;

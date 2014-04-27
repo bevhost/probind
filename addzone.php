@@ -87,16 +87,18 @@ function validate_master($master)
 
 function add_master_domain($input)
 {
-	$domains = explode("\n", $input['newdomain']);
+echo "<h3>";
+	$domains = mb_split("\n", $input["newdomain"]);
+	$result = $res1 = "";
 	while(list($d, $line) = each($domains)) {
 	    $domain = trim(ltrim($line));
 	    $warnings = validate_domain($domain);
 	    if (strlen($warnings)) {
-		    $result = "The '$domain' domain was not created, for the following reasons:<P><UL>\n$warnings</UL>\n";
+		    $result .= "The '$domain' domain was not created, for the following reasons:<P><UL>\n$warnings</UL>\n";
 	    } else {
 		    $id = add_domain($domain, '', '', $input['owner']);
-		    $res1   = fill_in_domain($id, 1);
-		    $result = "<HR><P>Domain '<A HREF=\"brzones.php?frame=records&zone=$id\">$domain</A>' successfully added.<P>\n";
+		    $res1   .= fill_in_domain($id, 1);
+		    $result .= "<HR><P>Domain '<A HREF=\"brzones.php?frame=records&zone=$id\">$domain</A>' successfully added.<P>\n";
 			if ($res1) {
 				$result .= "<HR>\n<H3>Records found in other domains which should be moved into the new domain</H3>\n";
 				$result .= "<br><FORM action=\"addzone.php\"><INPUT type=\"HIDDEN\" name=\"id\" value=\"$id\"><INPUT type=\"HIDDEN\" name=\"type\" value=\"fill\">\n";
@@ -142,6 +144,8 @@ if(isset($INPUT_VARS['type']))
 {
 	$inputtype = $INPUT_VARS['type'];
 }
+
+if (isset($INPUT_VARS)) include('header.php');
 
 switch ($inputtype) {
 case 'master':
