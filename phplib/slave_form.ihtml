@@ -1,0 +1,59 @@
+<?php
+  $this->form_data->start("slave_form");
+  $this->freeze(array('ctime','mtime','domain','updated','disabled'));
+?>
+<TABLE border="0" width="100%" cellspacing="0" cellpadding="3" bgcolor="#666633">
+<TR><TH><FONT color="#cccc99" size="+1"><?php 
+	$this->form_data->show_element('domain');
+	echo " ".display_if_international($GLOBALS["domain"]);
+?></FONT>
+<INPUT type='button' value='Delete Zone' name='formname' style='float:right; margin:3px;'
+                onclick='location.href="delzone.php?trashdomain=<?php echo $GLOBALS["domain"];?>"'
+                class='button' onmouseover='this.className="buttonhover"' onmouseout='this.className="button"'>
+</TH></TR>
+<TR><TD valign=top>
+<TABLE border="0" width="100%" cellspacing="3" cellpadding="3" bgcolor="#cccc99">
+<TR><TD>
+<TABLE id="recordsTable" border="0" width="100%">
+<?php
+  if ($this->error) printf("<P class=error>Error: %s %s</p>\n", $ErrorFieldName, $this->error);
+  if ($this->errors) foreach($this->errors as $error) printf("<P class=error>Error: %s</p>\n", $error);
+  $this->form_data->show_element('id'); 
+  if (!$perm->have_perm('admin')) $this->freeze(array('owner'));
+?>
+<TR>
+  <TD valign=bottom><INPUT type="submit" value="Options" name="formname" class="button" onmouseover="this.className=\'buttonhover\'" onmouseout="this.className=\'button\'"></TD>
+  <TH align=left>Zonefile</TH>
+  <TH align=left colspan="4">Type</TH>
+  <TH align=left></TH>
+  <TH align=left>Created</TH>
+  <TH align=left>Updated</TH>
+</TR>
+<TR>
+  <TD></TD>
+  <TD><?php $this->form_data->show_element('zonefile'); ?></TD>
+  <TD colspan="4">Slave</TD>
+  <TD></TD>
+  <TD><?php $this->form_data->show_element('ctime'); ?></TD>
+  <TD><?php $this->form_data->show_element('updated'); ?></TD>
+</TR>
+
+<TR>
+  <TD rowspan="2" valign=bottom><INPUT type="submit" value="Update" name="formname" class="button" onmouseover="this.className=\'buttonhover\'" onmouseout="this.className=\'button\'"></TD>
+  <TH align=left>Owner</TH>
+  <TH align=left colspan="4">Master</TH>
+  <TH align=left></TH>
+  <TH align=left>Modified</TH>
+  <TH align=left>Disabled</TH>
+</TR>
+<TR>
+  <TD><?php $this->form_data->show_element('owner'); ?></TD>
+  <TD colspan="4"><?php $this->form_data->show_element('master'); ?></TD>
+  <TD></TD>
+  <TD><?php $this->form_data->show_element('mtime'); ?></TD>
+  <TD><?php $this->form_data->show_element('disabled'); ?></TD>
+</TR>
+<!--
+    <tr><td>Options</td><td>
+                <?php $this->form_data->show_element('options'); ?> </td></tr>
+-->
