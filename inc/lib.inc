@@ -26,6 +26,7 @@ $IPV4_RE_JS = '^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01
 // From http://forums.dartware.com/viewtopic.php?t=452
 $IPV6_RE_JS = '^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$';
 $IPV6_RE = "/$IPV6_RE_JS/";
+$IPV4_RE = "/$IPV4_RE_JS/";
 
 $MINSECS = 60;
 $HOURSECS = 60*$MINSECS;
@@ -450,6 +451,8 @@ function domain_list($lookfor, $type, $format)
 {
 	$db = new DB_probind;
 	$result = "";
+	$result1 = "";
+	$result2 = "";
 	$query = "SELECT id, domain, master, disabled FROM zones";
 	switch ($type) {
 	case '*':
@@ -470,7 +473,6 @@ function domain_list($lookfor, $type, $format)
 	$db->prepare($query);
 	$db->execute($lookfor);
 	$typestr = "";
-	$result1 = "";
 	while ($db->next_record()) {
 		extract($db->Record);
 		if ($disabled)
@@ -483,10 +485,12 @@ function domain_list($lookfor, $type, $format)
 		if (preg_match("/\.in-addr\.arpa(\.)?$/", $domain))
 			$result1 .= sprintf($format, $id, $d.$domain , $typestr);
 		else
-			$result .= sprintf($format, $id, $d.$domain, $typestr);
+			if (preg_match("/\.ip6\.arpa(\.)?$/", $domain))
+				$result2 .= sprintf($format, $id, $d.$domain , $typestr);
+			else
+				$result .= sprintf($format, $id, $d.$domain, $typestr);
 	}
-	$result .= $result1;
-	return $result;
+	return $result.$result1.$result2;
 }
 
 # Set the 'updated' tag on a domain, ensuring that the next update will
@@ -782,8 +786,9 @@ function get_input()
 	$IDN = new idna_convert(array('idn_version' => $idn_version));
 	foreach($_REQUEST as $k=>$v) {
 		$utf8 = to_utf8($v);
-		$punycode = $IDN->encode($utf8);
-		$INPUT_VARS[$k] = $db->escape_string($punycode);
+		$lines = mb_split("[\r\n]+",$utf8);
+		foreach ($lines as $key=>$val) $lines[$key] = $IDN->encode($val);
+		$INPUT_VARS[$k] = implode("\n",$lines);
 	}
 }
 
