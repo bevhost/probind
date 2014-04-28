@@ -308,14 +308,10 @@ switch ($cmd) {
 	if ($cmd=="Copy") $id="";
 	$noShow=true;
     case "Edit":
-	#echo "<font class='bigTextBold'>$cmd Zones</font>\n<hr />\n";
 	$f->display();
-#	echo "<TR><TD valign=bottom><INPUT type='button' value='Delete Zone' name='formname' 
-#		onclick='location.href=\"delzone.php?trashdomain=$domain\"'
-#		class='button' onmouseover='this.className=\"buttonhover\"' onmouseout='this.className=\"button\"'></TD></tr>";
-	if (!empty($master) or $noShow) { # If there is a master then we hold no local data.
+	if (!empty($master) or $noShow) { 	# If there is a master then we hold no local data.
 		echo "</TABLE>";
-		break;
+		break;				# stop here
 	}
 	echo "<tr><td></td>
         <TH align=left>".trans('Domain')."</TH>
@@ -327,6 +323,8 @@ switch ($cmd) {
         <TH align=left>".trans('Comment')."</TH>
         <TH>\n        </TH>\n</TR>";
 
+	$PTRs = array();  #contains real PTR records, so we can fill in the blanks later with auto generated ones.
+
 	#SELECT id, zone, domain, ttl, records.type, pref, port, weight, data, genptr, comment, lpad(pref, 5, '0') AS sortpref, records.disabled
         $db->query("
 	SELECT records.*, lpad(pref, 5, '0') AS sortpref
@@ -337,10 +335,28 @@ switch ($cmd) {
 	while ($db->next_record()) {
 		$f = new MyRecordView;
 		$f->display($row=$db->Record);
+		switch($row['type']){
+		    case "SOA":	
+			$soa_ttl = $row['ttl'];
+			break;
+		    case "PTR": 
+			if ($d = $row['domain']) $PTRs[$d]=true;
+			break;
+		}
 	}
 	foreach ($row as $k=>$v) $row[$k]=''; $row['type']='Add New'; $f = new MyRecordView; $f->display($db->Record);  // blank record for adding
-	#TODO: explicit PTRs
 	echo "</TABLE>";
+
+	# show implied records.
+	$servers = published_servers();
+	$ttl = default_ttl($zone);
+	echo "<PRE>";
+	echo auto_nsrecs($domain, seconds_to_ttl($ttl), $servers);
+	if (preg_match("/\.ip6\.arpa(\.)?$/", $domain))
+		echo auto_ip6_ptrs($domain, seconds_to_ttl($soa_ttl), $PTRs);
+	if (preg_match("/\.in-addr\.arpa(\.)?$/", $domain))
+		echo auto_ptrs($domain, seconds_to_ttl($soa_ttl), $PTRs);
+	echo "</PRE>";
 	break;
     default:
 	$cmd="Query";
