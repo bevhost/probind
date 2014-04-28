@@ -145,7 +145,8 @@ if(isset($INPUT_VARS['type']))
 	$inputtype = $INPUT_VARS['type'];
 }
 
-if (isset($INPUT_VARS)) include('header.php');
+// In a "frames use case" there are INPUT_VARS and the header is being included anyway, breaking addzone
+// if (isset($INPUT_VARS)) include('header.php');
 
 switch ($inputtype) {
 case 'master':
