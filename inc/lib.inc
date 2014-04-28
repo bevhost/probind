@@ -944,7 +944,6 @@ function auto_ptrs($domain, $ttl, $reversehosts)
 		$result .= "$host\t$ttl IN\tPTR\t$fixedhost\n";
 		$ips[$host] = 1;
 	}
-	mysql_free_result($rid);
 	# Output PTR's with bullshit data for all IP numbers not covered
 	# by explicit PTR records in the database or implicit ones from A's
 	if ($reversehosts) {
