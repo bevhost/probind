@@ -18,6 +18,9 @@ The following minimum software versions are required for running ProBIND:
 - Perl 5.005
 - David Beveridge's phplib
 
+If you wish to use the development version of the interface, you'll also need:
+- PHPExcel via PEAR
+
 For pushing updates with the included scripts, the following additional
 software is required:
 - OpenSSH
