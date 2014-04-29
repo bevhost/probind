@@ -236,6 +236,7 @@ if ($submit) {
     if ($id) $submit = "Edit";
     else $submit = "Add";
    case "Add":
+	if ($submit=='Add') $_POST['ctime'] = 'now';
    case "Edit":
     if (isset($auth)) {
      check_edit_perms();
@@ -251,6 +252,9 @@ if ($submit) {
      {
         echo "Saving....";
         $id = $f->save_values();
+	if ($submit=='Add') {
+		if ($id) $db->query("INSERT INTO records (domain, zone, ttl, type, pref, data, port, weight, comment, genptr, ctime, mtime) SELECT domain, $id, ttl, type, pref, data, port, weight, '', 1, NOW(), NOW() FROM records WHERE zone=(SELECT id FROM zones WHERE domain='TEMPLATE')");
+	}
         echo "<b>Done!</b><br />\n";
         if (!$dev) echo "<META HTTP-EQUIV=REFRESH CONTENT=\"2; URL=".$sess->self_url()."\">";
         echo "&nbsp;<a href=\"".$sess->self_url()."\">Back to zones.</a><br />\n";
@@ -314,6 +318,14 @@ switch ($cmd) {
     case "Delete":
 	$f->freeze();
     case "Add":
+	if ($cmd=='Add') {
+		$f->find_values('TEMPLATE','domain');   # get default values.
+		unset($id);
+		unset($domain); #these fields in template must be ignored.
+		unset($ctime);
+		unset($mtime);
+		$f->freeze(array('ctime','mtime'));  # user cannot set these.
+	}
     case "Copy":
 	if ($cmd=="Copy") $id="";
 	$noShow=true;

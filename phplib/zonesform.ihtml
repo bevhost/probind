@@ -8,7 +8,8 @@
     <tr><td>Domain</td><td>
 		<?php $this->form_data->show_element('domain'); ?> </td></tr>
     <tr><td>Serial</td><td>
-		<?php $this->form_data->show_element('serial'); ?> </td></tr>
+		<?php 	$this->form_data->elements['serial']['ob']->value = date('YmdHis01');
+			$this->form_data->show_element('serial'); ?> </td></tr>
     <tr><td>Refresh</td><td>
 		<?php $this->form_data->show_element('refresh'); ?> </td></tr>
     <tr><td>Retry</td><td>
@@ -16,33 +17,23 @@
     <tr><td>Expire</td><td>
 		<?php $this->form_data->show_element('expire'); ?> </td></tr>
     <tr><td>Master</td><td>
-		<?php $this->form_data->show_element('master'); ?> </td></tr>
+		<?php $this->form_data->show_element('master'); ?> (if slave zone)</td></tr>
     <tr><td>Zonefile</td><td>
 		<?php $this->form_data->show_element('zonefile'); ?> </td></tr>
     <tr><td>Options</td><td>
 		<?php $this->form_data->show_element('options'); ?> </td></tr>
     <tr><td>Mtime</td><td>
 		<?php $this->form_data->show_element('mtime'); ?> 
-                <?php if (!isset($this->form_data->elements['mtime']['frozen'])) { ?>
-			<a href="javascript:show_cal('zonesform', 'mtime');">
-			<img src=/image/cal.gif width=16 height=16 border=0 
-				alt="Click here to pick a date from the calendar"></a>
-                <?php } ?>
 		</td></tr>
     <tr><td>Ctime</td><td>
 		<?php $this->form_data->show_element('ctime'); ?> 
-                <?php if (!isset($this->form_data->elements['ctime']['frozen'])) { ?>
-			<a href="javascript:show_cal('zonesform', 'ctime');">
-			<img src=/image/cal.gif width=16 height=16 border=0 
-				alt="Click here to pick a date from the calendar"></a>
-                <?php } ?>
 		</td></tr>
     <tr><td>Updated</td><td>
 		<?php $this->form_data->show_element('updated'); ?> </td></tr>
     <tr><td>Disabled</td><td>
 		<?php $this->form_data->show_element('disabled'); ?> </td></tr>
     <tr><td>Owner</td><td>
-		<?php $this->form_data->show_element('owner'); ?> </td></tr>
+		<?php echo owner(@$GLOBALS['owner']); ?> </td></tr>
     <tr><td>&nbsp;</td><td> 
 		<?php 
                 if ($cmd=="View") {
