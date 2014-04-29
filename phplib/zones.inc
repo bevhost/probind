@@ -31,7 +31,6 @@ class zonesform extends tpl_form {
 		"valid_e"=>"Expire must be a whole number containing digits 0-9 only. May also start with negative symbol -",
 		"extrahtml"=>""));
     $this->form_data->add_element(array("type"=>"text","name"=>"master","maxlength"=>"32","size"=>"10"
-		,"minlength"=>1,"length_e"=>"Master must not be blank.  Required field.",
 		"field"=>"master","extrahtml"=>""
 		));
     $this->form_data->add_element(array("type"=>"text","name"=>"zonefile","maxlength"=>"80","size"=>"26"

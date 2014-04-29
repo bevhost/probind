@@ -19,7 +19,6 @@ check_view_perms();
 $db = new DB_probind;
 
 class Zone_form extends zonesform {
-	var $classname="Zone_form";
 }
 $f = new Zone_form;
 
@@ -315,7 +314,6 @@ switch ($cmd) {
     case "Delete":
 	$f->freeze();
     case "Add":
-	if ($cmd=='Add') $f->classname='zonesform';
     case "Copy":
 	if ($cmd=="Copy") $id="";
 	$noShow=true;
