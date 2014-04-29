@@ -394,7 +394,7 @@ switch ($cmd) {
     #   $t->add_extra = array(                                    # or specify parameters as well.
     #                      "View" => array("target"=>"PayPal.php","key"=>"id","perm"=>"admin","display"=>"view","class"=>"ae_view"),
     #                      );
-	$t->add_total = 'on';   /* add a grand total row to the bottom of the table on the numeric columns */
+	#	$t->add_total = 'on';   /* add a grand total row to the bottom of the table on the numeric columns */
 	$t->add_insert = $f->classname;  /* Add a blank row ontop of table allowing insert or search */
 	$t->add_insert_buttons = 'Search';   /* Control which buttons appear on the add_insert row eg: Add,Search */
 	/* See below - EditMode can also be turned on/off by user if section below uncommented */
