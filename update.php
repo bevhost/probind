@@ -1,6 +1,6 @@
 <?php
 require 'inc/lib.inc';
-require 'header.php';
+if ($INTERFACE!=="stable") require 'header.php';
 
 $start_frame = '
 <HTML>

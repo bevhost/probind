@@ -1,4 +1,7 @@
-<?php include("inc/checkperm.inc"); ?>
+<?php 
+	include("inc/checkperm.inc"); 
+	if ($INTERFACE!=="stable") require 'header.php';
+?>
 <HTML>
 <HEAD>
 <TITLE>ProBIND</TITLE>

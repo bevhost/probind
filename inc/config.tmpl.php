@@ -48,4 +48,7 @@ $LOG_URL  = "LOGS/";
 $DEFAULT_PUSH = "push.remote";
 $DEFAULT_DIR  = "/var/named9";
 $DEFAULT_TMPL = "v9-master";
+
+// Interface version
+$INTERFACE = "stable"; // options: stable, dev
 ?>

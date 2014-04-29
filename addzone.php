@@ -145,7 +145,7 @@ if(isset($INPUT_VARS['type']))
 	$inputtype = $INPUT_VARS['type'];
 }
 
-if (isset($INPUT_VARS)) include('header.php');
+if (isset($INPUT_VARS) && ($INTERFACE!=="stable")) include('header.php');
 
 switch ($inputtype) {
 case 'master':
