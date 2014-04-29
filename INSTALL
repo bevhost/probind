@@ -14,7 +14,7 @@ Prerequisites
 The following minimum software versions are required for running ProBIND:
 - MySQL 3.23
 - PHP 4.30
-- Apache 1.3
+- Apache 1.3 (or nginx)
 - Perl 5.005
 - David Beveridge's phplib
 
@@ -60,6 +60,19 @@ Unpack the ProBIND tarball somewhere that is reachable by your Apache
 server. Usually, this would be in a directory in the document root for
 your Apache installation, e.g. /www/htdocs/probind. Change to this
 directory.
+
+Installation of PHP and Excel Modules in PEAR
+---------------------------------------------
+
+Make sure these (or similar) are installed. (In cPanel use EasyApache)
+# yum install php-mbstring php-gd php-imap php-xml php-snmp php-mysql php-mcrypt
+
+New installation:
+# pear channel-discover pear.pearplex.net
+# pear install pearplex/PHPExcel
+
+Or if you've already installed PHPExcel before:
+# pear upgrade pearplex/PHPExcel
 
 Configuring MySQL
 -----------------
