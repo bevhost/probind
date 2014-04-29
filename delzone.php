@@ -48,8 +48,7 @@ get_input();
 $extra="";
 if (($domain = @$INPUT_VARS['domain']) || !@$INPUT_VARS['trashdomain']) {
 	if (@$INPUT_VARS['frame'] == "delzone") {
-		// this ruins framed use
-		// include('header.php');
+		if ($INTERFACE!=="stable") include('header.php');
 		print $html_top.sprintf($start_form, $domain, display_if_international($domain));
 	} else {
 		if ($domain)
@@ -57,8 +56,7 @@ if (($domain = @$INPUT_VARS['domain']) || !@$INPUT_VARS['trashdomain']) {
 		print sprintf($start_frame, $extra);
 	}
 } else {
-	// this ruins framed use
-	// include('header.php');
+	if ($INTERFACE!=="stable") include('header.php');
 	print $html_top;
 	$trashdomain = $INPUT_VARS['trashdomain'];
 

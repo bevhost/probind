@@ -1,7 +1,6 @@
 <?php
 require 'inc/lib.inc';
-# this breaks framed view
-# require 'header.php';
+if ($INTERFACE!=="stable") require 'header.php';
 
 $start_frame = '
 <HTML>
