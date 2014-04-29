@@ -160,7 +160,7 @@ switch ($cmd) {
 	$t->heading = 'on';
 	$t->sortable = 'on';
 	$t->trust_the_data = false;   /* if true, send raw data without htmlspecialchars */
-	$t->limit = 200; 	 /* max length of field data before trucation and add ... */
+	$t->limit = 50; 	 /* max length of field data before trucation and add ... */
     	$t->add_extra = 'on';   /* or set to base url of php file to link to, defaults to PHP_SELF */
     #   $t->add_extra = "SomeFile.php";                           # use defaults, but point to a different target file.
     #   $t->add_extra = array("View","Edit","Copy","Delete");     # just specify the command names.
@@ -187,7 +187,7 @@ switch ($cmd) {
                 $sess->register("records_fields,records_funcs,records_group_by");
 	}
         if (empty($records_fields)) {
-                $records_fields = array_first_chunk($t->default,7,11);
+                $records_fields = array_first_chunk($t->default,6,11);
 		$records_funcs = array();
 		$records_group_by = "";
                 $sess->register("records_fields,records_funcs,records_group_by");

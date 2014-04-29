@@ -34,7 +34,7 @@
   <TD><?php $this->form_data->show_element('zonefile'); ?></TD>
   <TD colspan="4">Slave</TD>
   <TD></TD>
-  <TD><?php $this->form_data->show_element('ctime'); ?></TD>
+  <TD><?php echo short_date('ctime'); ?></TD>
   <TD><?php $this->form_data->show_element('updated'); ?></TD>
 </TR>
 
@@ -50,7 +50,7 @@
   <TD><?php $this->form_data->show_element('owner'); ?></TD>
   <TD colspan="4"><?php $this->form_data->show_element('master'); ?></TD>
   <TD></TD>
-  <TD><?php $this->form_data->show_element('mtime'); ?></TD>
+  <TD><?php echo short_date('mtime'); ?></TD>
   <TD><?php $this->form_data->show_element('disabled'); ?></TD>
 </TR>
 <!--

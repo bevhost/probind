@@ -141,7 +141,7 @@ class MyRecordView extends recordsform {
 		$this->form_data->elements[$key]["ob"]->class="hide";
           }
 	}
-#        $this->form_data->elements[$key]["ob"]->class="ipe";		# PHPLIB's "In Place Edit" special class
+        $this->form_data->elements[$key]["ob"]->class="ipe";		# PHPLIB's "In Place Edit" special class
 	if ($key=='data') {
 		if ($row['type']<>'SRV') {
 			$this->form_data->elements["weight"]["ob"]->extrahtml="style='display:none'";
@@ -172,6 +172,17 @@ class MyRecordView extends recordsform {
     echo "</tr>\n";
     return true;
   }
+}
+
+function short_date($var) {
+	$dval = isset($GLOBALS[$var]) ? $GLOBALS[$var] : $var;
+        if (date("Y-m-d") == substr($dval,0,10)) {
+                // Date Field (Today)
+                return substr($dval,11,10);	# HH:MM:SS
+        } else {
+                // Date Field (Not Today)
+                return date("d M Y",strtotime($dval));   # DD Mmm YYYY 
+        }   
 }
 
 if ($WithSelected) {
@@ -344,7 +355,7 @@ switch ($cmd) {
 			break;
 		}
 	}
-	foreach ($row as $k=>$v) $row[$k]=''; $row['type']='Add New'; $f = new MyRecordView; $f->display($db->Record);  // blank record for adding
+	foreach ($row as $k=>$v) $row[$k]=''; $row['type']='Add New'; $f = new MyRecordView; $f->display($row);  // blank record for adding
 	echo "</TABLE>";
 
 	# show implied records.

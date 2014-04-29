@@ -36,7 +36,7 @@ class zonesform extends tpl_form {
 		));
     $this->form_data->add_element(array("type"=>"text","name"=>"zonefile","maxlength"=>"80","size"=>"26"
 		,"minlength"=>1,"length_e"=>"Zonefile must not be blank.  Required field.",
-		"field"=>"zonefile","extrahtml"=>""
+		"field"=>"zonefile","extrahtml"=>"","class"=>"ipe"
 		));
     $this->form_data->add_element(array("type"=>"text","name"=>"options","maxlength"=>"255","size"=>"85"
 		,"minlength"=>1,"length_e"=>"Options must not be blank.  Required field.",
@@ -66,7 +66,7 @@ class zonesform extends tpl_form {
                                 ), "value"=>"No"));
     $this->form_data->add_element(array("type"=>"text","name"=>"owner","maxlength"=>"32","size"=>"10"
 		,"minlength"=>1,"length_e"=>"Owner must not be blank.  Required field.",
-		"field"=>"owner","extrahtml"=>""
+		"field"=>"owner","extrahtml"=>"","class"=>"ipe"
 		));
     $this->form_data->add_element(array("type"=>"submit","name"=>"submit","value"=>"Submit"));
   }

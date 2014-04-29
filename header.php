@@ -19,7 +19,7 @@
                 display: block;
                 padding: 10px;
                 height: 100%;
-                overflow-y: auto;
+                overflow: auto;
         }
 
         #header {

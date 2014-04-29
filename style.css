@@ -81,3 +81,19 @@ SELECT, OPTION {
 {
 	color: #ff0000;
 }
+
+
+td.ae a {
+        display: block;
+        float: left;
+        width:16px;
+        height:16px;
+        overflow:hidden;
+        text-indent:99px;
+}
+td.ae a.ae_view { background: url('/images/icons/view.png'); }
+td.ae a.ae_copy { background: url('/images/icons/copy.png'); }
+td.ae a.ae_edit { background: url('/images/icons/edit.png'); }
+td.ae a.ae_print { background: url('/images/icons/printer.png'); }
+td.ae a.ae_delete { background: url('/images/icons/delete.png'); }
+
