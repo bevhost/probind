@@ -55,8 +55,9 @@ require($_ENV["libdir"] . "tpl_form.inc");
 require($_ENV["libdir"] . "oohforms.inc");
 require($_ENV["libdir"] . "table.inc");
 require($_ENV["libdir"] . "sqlquery.inc");
-
 include($_ENV["local"] . "EventLog.inc");
+include($_ENV["local"] . "zones.inc");
+include($_ENV["local"] . "records.inc");
 
 ini_set('unserialize_callback_func', 'mycallback'); // set your callback_function
 function mycallback($classname)
