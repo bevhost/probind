@@ -30,7 +30,7 @@ class zonesform extends tpl_form {
 		"valid_regex"=>"^[0-9|\-]+$|^$","field"=>"expire",
 		"valid_e"=>"Expire must be a whole number containing digits 0-9 only. May also start with negative symbol -",
 		"extrahtml"=>""));
-    $this->form_data->add_element(array("type"=>"text","name"=>"master","maxlength"=>"32","size"=>"10"
+    $this->form_data->add_element(array("type"=>"text","name"=>"master","maxlength"=>"32","size"=>"10",
 		"field"=>"master","extrahtml"=>""
 		));
     $this->form_data->add_element(array("type"=>"text","name"=>"zonefile","maxlength"=>"80","size"=>"26"
