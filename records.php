@@ -282,7 +282,7 @@ switch ($cmd) {
 
   // When we hit that page a second time, the array named
   // by $base will be set and we must generate the $query.
-  // Ah, and don\'t set $base to "q" when $q is your Sql_Query
+  // Ah, and don't set $base to "q" when $q is your Sql_Query
   // object... :-)
   if (array_key_exists("x",$_POST)) {
     get_request_values("x");
