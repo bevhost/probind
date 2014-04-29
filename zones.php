@@ -315,6 +315,7 @@ switch ($cmd) {
     case "Delete":
 	$f->freeze();
     case "Add":
+	if ($cmd=='Add') $f->classname='zonesform';
     case "Copy":
 	if ($cmd=="Copy") $id="";
 	$noShow=true;
