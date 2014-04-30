@@ -996,13 +996,9 @@ function auto_ptrs($domain, $ttl, $reversehosts)
 # Return a list of BIND servers which should appear as NS records
 function published_servers()
 {
-	$servers = Array();
 	$db = new DB_probind;
 	$db->query("SELECT hostname FROM servers WHERE mknsrec");
-	#return array_keys($db->sth->fetchAll(PDO::FETCH_GROUP));  #we could write it like this, but it's too complicated.
-	while ($db->next_record()) 
-		$servers[] = $db->Record[0];
-	return $servers;
+	return $db->fetchAll();
 }
 
 # Format and return the NS records for the BIND servers in the list
@@ -1016,9 +1012,8 @@ function auto_nsrecs($domain, $ttl, $servers)
 		return "";
 	} # otherwise...
 	$result = ";\n; NS's implied by server records in the database\n;\n";
-	if ( count($servers) ) {
-	while ($server = each($servers))
-		$result .= $domain.".\t$ttl IN\tNS\t$server[1].\n";
+	foreach($servers as $server) {
+		$result .= $domain.".\t$ttl IN\tNS\t$server.\n";
 	}
 	return $result;
 }
