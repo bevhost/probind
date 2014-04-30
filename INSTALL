@@ -13,7 +13,7 @@ Prerequisites
 
 The following minimum software versions are required for running ProBIND:
 - MySQL 3.23
-- PHP 4.30
+- PHP 5.2.0
 - Apache 1.3 (or nginx)
 - Perl 5.005
 - David Beveridge's phplib
