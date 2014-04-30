@@ -9,7 +9,17 @@ $html_top = '
 <HEAD>
 <TITLE>Deleting a zone</TITLE>
 <LINK rel="stylesheet" href="style.css" type="text/css">
+<script type="text/javascript" src="/js/scripts.js" ></script>
 </HEAD>
+<SCRIPT type="text/javascript">
+function set(v) {
+	e = document.getElementById("domain");
+	e.value=v;
+	hidepopup();
+	document.getElementById("ZoneOk").innerHTML="";
+	e.focus();
+}
+</SCRIPT>
 <BODY bgcolor="#cccc99" background="images/BG-shadowleft.gif">
 <TABLE width="100%">
 <TR>
@@ -35,10 +45,13 @@ $start_frame = '
 $start_form = "
 <FORM method=\"post\" action=\"delzone.php\">
 <TABLE width=\"100%%\">
-<TR><TD>Domain name</TD><TD><INPUT name=\"trashdomain\" size=32 value=\"%s\"> %s</TD>
+<TR><TD>Domain name</TD><TD><INPUT id='domain' name=\"trashdomain\" size=32 value=\"%s\" 
+onfocus='this.select()' onkeyup=\"ajax('find.php?SetZone='+this.value,'popup')\"
+onblur=\"ajax('/find.php?ZoneExists='+this.value,'ZoneOk')\"> %s&#160;<span id='ZoneOk'></TD>
 <TR><TD colspan=2 align=center><INPUT type=submit value=\"Delete zone from database\"></TD>
 </TABLE>
 </FORM>
+<div id=popup></div>
 ";
 
 #

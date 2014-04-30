@@ -106,6 +106,12 @@ html {overflow-x: auto; overflow-y: hidden;}
 
 </div>
 <script type='text/javascript'>
+<?php 
+	get_request_values("domtype");
+	if (!preg_match('/[MSA*]/',$domtype)) $domtype='M'; 
+	echo "var domtype='$domtype';\n"; 
+	if ($SHOW_ALL) {
+?>
 function update_list(lookfor) {
   var nav = document.getElementById("navigation");
   var a = nav.getElementsByTagName("a");
@@ -118,6 +124,11 @@ function update_list(lookfor) {
     }
   }
 }
+<?php	} else { ?>
+function update_list(lookfor) {
+	ajax('find.php?DomType='+domtype+';SrchZone='+lookfor,'domlist');
+}
+<?php	} ?>
 </script>
 <div id="navigation">
 <?php
@@ -133,21 +144,23 @@ switch ($s) {
 
 	get_request_values("domtype");
 
-        if (!$domtype) $domtype = "M";
 
 	echo trans('Search')."<BR />\n";
-        echo "<SELECT name='domtype' onchange=\"location='/zones.php?domtype='+this.options[this.selectedIndex].value\">\n";
+        if ($SHOW_ALL) echo "<SELECT name='domtype' onchange=\"location='/zones.php?domtype='+this.options[this.selectedIndex].value\">\n";
+	else echo "<SELECT name='domtype' onchange=\"domtype=this.options[this.selectedIndex].value\">\n";
         echo sprintf("<OPTION value='*'%s>".trans('All zones')."</OPTION>\n", (($domtype == '*') ? ' selected' : ''));
 	echo sprintf("<OPTION value='M'%s>".trans('Master zones')."</OPTION>\n", (($domtype == 'M') ? ' selected' : ''));
 	echo sprintf("<OPTION value='S'%s>".trans('Slave zones')."</OPTION>\n", (($domtype == 'S') ? ' selected' : ''));
 	echo sprintf("<OPTION value='A'%s>".trans('Annotations')."</OPTION>\n", (($domtype == 'A') ? ' selected' : ''));
 	echo "</SELECT><BR />\n";
 	echo trans('For')."<BR />\n";
-	echo "<INPUT type=text name='lookfor' value='' SIZE='16' onkeyup='update_list(this.value)'>\n";
+	echo "<INPUT type=text name='lookfor' value='' SIZE='16' onkeyup='update_list(this.value)' autocomplete='off'>\n";
 
 	$lookfor = "%";
 	$format = "<a href='/zones.php?domtype=$domtype;zone=%s'>%s%s</A>\n";
-	echo  domain_list($lookfor, $domtype, $format);
+	echo "<div id=domlist>";
+	if ($SHOW_ALL) echo  domain_list($lookfor, $domtype, $format);
+	echo "</div>";
       break;
   default:
 ?>

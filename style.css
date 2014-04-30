@@ -97,3 +97,43 @@ td.ae a.ae_edit { background: url('/images/icons/edit.png'); }
 td.ae a.ae_print { background: url('/images/icons/printer.png'); }
 td.ae a.ae_delete { background: url('/images/icons/delete.png'); }
 
+
+.ipe {
+        border: none;
+        border: 0px;
+        margin: 0px 0px 0px 0px;
+}
+.ipeh {
+        display: none;
+}
+.ipeb {
+        display: inline;
+}
+a#close {
+        position: absolute;
+        top: 0px;
+        right: 4px;
+}
+div#popup {
+        float: left;
+        display: none;
+        position:absolute;
+        background: url('/images/popup.gif') repeat;
+        height: auto;
+        z-index: 350;
+        border: 1px solid;
+        margin: 1px;
+}
+div#popup ul {
+        padding: 2px 20px 2px 10px;
+        margin: 0px;
+}
+div#popup ul li {
+        z-index: 12;
+        padding: 1px;
+        list-style-type: none;
+}
+div#popup ul li:hover {
+        background: #FFFFFF;
+}
+

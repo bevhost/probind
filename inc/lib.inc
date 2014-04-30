@@ -469,7 +469,7 @@ function domain_list($lookfor, $type, $format)
 		break;
 	}
 	$query .= access();
-	$query .= " ORDER BY domain";
+	$query .= " ORDER BY domain LIMIT 1000";
 	$db->prepare($query);
 	$db->execute($lookfor);
 	$typestr = "";
@@ -1173,7 +1173,9 @@ function close_database()
 mysql_select_db($MYSQL_DB, $DBLINK)
 	or die("Database $MYSQL_DB not found<P>\n");
 
-# Get the constants from the blackboard
+# Set some contants in case they aren't on the blackboard in the database
+$SHOW_ALL = false;
+# Get the constants from the blackboard and overwrite hard coded defaults
 $db = new DB_probind;
 $db->query("SELECT name, value FROM blackboard");
 while ($db->next_record()) {
