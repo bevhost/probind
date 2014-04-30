@@ -11,31 +11,32 @@ require('inc/lib.inc');
 
 function update_description($domain, $descrip, $options)
 {
+	$db = new DB_probind;
 	if (strlen($options) > 254) {
 		print "<FONT color=RED size=+2>Too much options; maximum options length is 255 symbols</FONT><BR>\n";
 		return;
 	}
-	$query = "SELECT id FROM zones WHERE domain = '$domain'";
-	$rid = sql_query($query);
-	($zone = mysql_fetch_array($rid))
-		or die("No such domain: $domain<P>\n");
-	mysql_free_result($rid);
+	$db->prepare("SELECT id FROM zones WHERE domain = ?");
+	$db->execute($domain);
+	if ($db->next_record()) $zone=$db->Record;
+		else die("No such domain: $domain<P>\n");
 	$id = $zone['id'];
-	$query = "DELETE FROM annotations WHERE zone = $id";
-	$rid = sql_query($query);
-	$query = "INSERT INTO annotations (zone, descr) VALUES ($id, '$descrip')";
-	$rid = sql_query($query);
+	$db->prepare("DELETE FROM annotations WHERE zone = ?");
+	$db->execute($id);
+	$db->prepare("INSERT INTO annotations (zone, descr) VALUES (?, ?)");
+	$db->execute($id,$descrip);
 	$options = strtr($options, "'",'"');
-	$rid = sql_query("UPDATE zones SET options='$options', updated=1 WHERE id=$id");
+	$db->prepare("UPDATE zones SET options=?, updated=1 WHERE id=?");
+	$db->execute($options,$id);
 }
 
 function domain_details($domain)
 {
-	$query = "SELECT id, mtime, ctime, options FROM zones WHERE domain = '$domain'";
-	$rid = sql_query($query);
-	($zone = mysql_fetch_array($rid))
-		or die("No such domain: $domain<P>\n");
-	mysql_free_result($rid);
+	$db = new DB_probind;
+	$db->prepare("SELECT id, mtime, ctime, options FROM zones WHERE domain = ?");
+	$db->execute($domain);
+	if ($db->next_record()) $zone=$db->Record;
+		else die("No such domain: $domain<P>\n");
 	$mtime = $zone['mtime'];
 	$ctime = $zone['ctime'];
 	$id = $zone['id'];
@@ -51,15 +52,14 @@ words about what was done (and perhaps why). Please add new entries
 at the top.
 <HR>
 ";
-	$query = "SELECT descr from annotations WHERE zone = $id";
-	$rid = sql_query($query);
+	$db->prepare("SELECT descr from annotations WHERE zone = ?");
+	$db->execute($id);
 	$result .= "
 <INPUT type=\"hidden\" name=\"action\" value=\"textupdate\">
 <INPUT type=\"hidden\" name=\"domain\" value=\"$domain\">
 <TEXTAREA name=\"description\" rows=10 cols=60>\n";
-	if ($annotation = mysql_fetch_array($rid)) {
-		$result .= $annotation['descr'];
-	}	
+	if ($db->next_record())
+		$result .= $db->Record['descr'];
 	$result .= "</TEXTAREA>
 </TR><TR>
 <TD><INPUT type=reset></TD>
@@ -67,7 +67,6 @@ at the top.
 </TR></TABLE>
 </FORM>
 ";
-	mysql_free_result($rid);
 	return $result;
 }
 

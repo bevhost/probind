@@ -87,12 +87,12 @@ function main_update_menu($input)
 	global $TWO_STEP_UPDATE;
 	global $HOST_URL;
 
+	$db = new DB_probind;
 	adjust_serials();
-	$rid = sql_query("SELECT id FROM zones WHERE updated ");
-	$zones = mysql_num_rows($rid);
-	mysql_free_result($rid);
+	$db->query("SELECT id FROM zones WHERE updated ");
+	$zones = $db->num_rows();
 
-	$rid = sql_query("SELECT id,hostname,ipno,type,state FROM servers WHERE pushupdates = 1");
+	$db->query("SELECT id,hostname,ipno,type,state FROM servers WHERE pushupdates = 1");
 	print "<FORM TARGET=\"VIEW\" action=\"update.php\"><INPUT type=\"HIDDEN\" name=\"frame\" value=\"VIEW\">\n";
 	$res = "<TABLE BORDER=2 width=\"70%\">\n";
 	$res .= "<TR><TH>name</TH><TH>ip address</TH><TH>type</TH><TH>state</TH><TH>Do not apply</TH><TH>View</TH><TH>Test</TH></TR>\n";
@@ -100,7 +100,8 @@ function main_update_menu($input)
 	$push_c = "";
 	$conf_c = "";
 	$appl_c = "CHECKED";
-	while ( list($id,$hostname, $ipno, $type, $state) = mysql_fetch_row($rid)) {
+	while ($db->next_record()) {
+		extract($db->Record);
 
 		$T = $state;
 		$B = "";
@@ -192,16 +193,21 @@ function generate_files($input)
 	$error = 0;
 	$err = '';
 
-	$query = "SELECT id, hostname, type, zonedir FROM servers WHERE (state = 'OUT' OR state = 'ERR') AND pushupdates";
-	$rid = sql_query($query);
+	$db = new DB_probind;
 
-	$query = "SELECT id, domain, master, zonefile FROM zones WHERE updated AND domain != 'TEMPLATE' ORDER BY domain";
-	$rid1 = sql_query($query);
+	$db->prepare("SELECT id, domain, master, zonefile FROM zones WHERE updated AND domain != 'TEMPLATE' ORDER BY domain");
+	$db->execute();
+	$zones = $db->fetchAll();
 
-	$query = "SELECT domain, zonefile FROM deleted_domains";
-	$rid2 = sql_query($query);
+	$db->prepare("SELECT domain, zonefile FROM deleted_domains");
+	$db->execute();
+	$deleted_domains = $db->fetchAll();
 
-	while (list($servid, $server, $type,  $zonedir) = mysql_fetch_row($rid)) {
+	$db->query("SELECT id as servid, hostname as server, type, zonedir FROM servers ".
+			"WHERE (state = 'OUT' OR state = 'ERR') AND pushupdates");
+
+	while ($db->next_record()) {
+		extract($db->Record);
 		if (!empty($input["skip_$servid"])) {
 			print "<FONT COLOR=BROWN>Skipping $server</FONT><BR>\n";
 			$skipped = 1;
@@ -231,24 +237,18 @@ function generate_files($input)
 		if ($type == 'M') {
 			print "<UL>\n";
 
-			if (mysql_num_rows($rid2)) {
-			    mysql_data_seek($rid2, 0) || die("Something wrong, data seek 2");
-			    while ($trash = mysql_fetch_array($rid2)) {
+			foreach($deleted_domains as $trash) {
 			    	$zonefile = $trash['zonefile'];
 				$domain = $trash['domain'];
 
 				$cmd = "mkdir -p DELETED;rm -f DELETED/'$zonefile'; mv '$zonefile' DELETED/. && echo '$zonefile' >> deleted_files";
 				exec($cmd);
 				print "<LI><A TARGET=\"VIEW\" href=\"view.php?file=$server/DELETED/$zonefile\">$domain deleted</A>\n";
-			    }
 			}
 
 			$out= "";
 			$list = "";
-			if (mysql_num_rows($rid1)) {
-			//----------------------------------------------------//
-			    mysql_data_seek($rid1, 0) || die("Something wrong, data seek 1");
-			    while ($zone = mysql_fetch_array($rid1)) {
+			foreach($zones as $zone) {
 				 $domain = $zone['domain'];
 				 if (!$zone['master'])
 					$domains[] = $zone['domain'];
@@ -272,7 +272,6 @@ function generate_files($input)
 				 }
 				 $out .=  "<LI><A TARGET=\"VIEW\" href=\"view.php?file=$server/$zonefile\">$domain</A> updated\n";
 				 $err .= "<LI><A TARGET=\"VIEW\" href=\"view.php?file=$server/$zonefile\">$domain</A> <FONT color=RED>error</FONT>\n";
-				}
 			    if (count($domains)) {
 				 $cmd =  "TOP=$TOP $BIN/mkzonefile -d $HOST_DIR/$server -u ".join(" ", $domains);
 				 // print "<I>$cmd</I><BR>\n";
@@ -302,25 +301,22 @@ function generate_files($input)
 
 		print "$text<A TARGET=\"VIEW\" href=\"$HOST_URL/$server/\">$server</A><HR>\n";
 		if ($error) {
-			sql_query("UPDATE servers SET state='ERR' WHERE id = $servid");
+			$db->prepare("UPDATE servers SET state='ERR' WHERE id = ?");
+			$db->execute($servid);
 			break;
 		}
 		else {
-			sql_query("UPDATE servers SET state='CHG' WHERE id = $servid");
+			$db->prepare("UPDATE servers SET state='CHG' WHERE id = ?");
+			$db->execute($servid);
 		}
 	};
 
-
-	mysql_free_result($rid);
-	mysql_free_result($rid1);
-	mysql_free_result($rid2);
 
 	if (!$error) {
 		patient_enter_crit('INTERNAL1', 'DOMAIN');
 		if (!$skipped)
 			updates_completed();
-		$query = "DELETE FROM deleted_domains";
-		$rid = sql_query($query);
+		$db->query("DELETE FROM deleted_domains");
 		leave_crit('DOMAIN');
 	};
 
@@ -348,11 +344,15 @@ function run_scripts($input, $push, $conf)
 	if (!$push && !$conf)
 		return;
 
-	$query = "SELECT id, hostname, ipno, type, zonedir, chrootbase, script, state FROM servers WHERE pushupdates != 0";
-	$rid = sql_query($query);
+	$db = new DB_probind;
 
-	while (list($servid, $server, $ipno, $type, $zonedir, $chrootbase, $script, $state ) = mysql_fetch_row($rid)) {
+	$db->query("
+	SELECT id as servid, hostname as server, ipno, type, zonedir, chrootbase, script, state 
+	FROM servers 
+	WHERE pushupdates != 0");
 
+	while ($db->next_record()) {
+		extract($db->Record);
 
 		$cmd = "";
 		if ( ($state == 'CHG' || $state == 'ERR') && $push ) {
@@ -392,15 +392,16 @@ function run_scripts($input, $push, $conf)
 		}
 
 		if ($error) {
-			sql_query("UPDATE servers SET state='ERR' WHERE id = $servid");
+			$db->prepare("UPDATE servers SET state='ERR' WHERE id = ?");
+			$db->execute($servid);
 			break;
 		}
 		else {
-			sql_query("UPDATE servers SET state='$new' WHERE id = $servid");
+			$db->prepare("UPDATE servers SET state=? WHERE id = ?");
+			$db->execute($new,$servid);
 		}
 	};
 
-	mysql_free_result($rid);
 
     if  ($error)
 	    $err_text="&error=1";

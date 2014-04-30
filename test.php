@@ -25,27 +25,29 @@ $html_failure = '
 # Returns test form
 #
 function ns_test_form($id, $input) {
-	if (isset($input['name'])) { $name = $input['name']; } else { $name = ""; }
-	if (isset($input['zone'])) $zone = $input['zone'];
-	if (isset($input['type'])) $rtype = $input['type'];
-	if (!isset($rtype))
+        if (!ctype_digit("$id")) die('Invalid server id.');
+
+        $db = new DB_probind;
+
+	$name = $input['name'];
+	$zone = $input['zone'];
+	$rtype = $input['type'];
+	if (!$rtype)
 		$rtype = "SOA";
 	$result = "";
-	$query = "SELECT hostname, ipno, type FROM servers WHERE id = $id";
-	$rid = sql_query($query);
-	if (!mysql_num_rows($rid)) {
+	$db->query("SELECT hostname as host, ipno, type FROM servers WHERE id = $id");
+	if (!$db->next_record()) {
 		return "<FONT color=RED>NO NS SERVER ID=$id</FONT><BR>\n";
 	}
 			
-	list($host, $ip, $type) = mysql_fetch_row($rid);
-	mysql_free_result($rid);
+	extract($db->Record);
 	
 	if ($type == "S")
 		$query = "SELECT domain FROM zones WHERE domain != 'TEMPLATE' AND master = '' ORDER BY mtime DESC";
 	else
 		$query = "SELECT domain FROM zones WHERE domain != 'TEMPLATE'  ORDER BY master ASC, mtime DESC";
 			
-	$rid = sql_query($query);
+	$db->query($query);
 	
 	$result .= "<FORM action=\"test.php\"><INPUT type=\"HIDDEN\" name=\"id\" value=\"$id\">\n";
 	$result .= "<INPUT type=\"HIDDEN\" name=\"host\" value=\"$host\">\n";
@@ -60,16 +62,16 @@ function ns_test_form($id, $input) {
 	$result .= "<TD>";
 	$array = array();
 	$first = 1;
-	while (list($domain) = mysql_fetch_row($rid)) {
+	while ($db->next_record()) {
+		$domain = $db->Record['domain'];
 		$array[] = $domain;
-		if (!isset($zone))
+		if (!$zone)
 		    $zone = $domain;
 		if ($first) {
 			$array[] = "";
 			$first = 0;
 		}
 	}
-	mysql_free_result($rid);
 	$result .= mk_select_a("zone", $array, $zone);
 	
 	$array = array('ANY', 'SOA', 'A', 'PTR', 'CNAME', 'MX', 'NS', 'TXT', 'HINFO', 'SRV');
@@ -91,7 +93,7 @@ get_input();
 
 $id = $INPUT_VARS['id'];
 print ns_test_form($id, $INPUT_VARS);
-if ( isset($INPUT_VARS['Test']) ) {
+if ( $INPUT_VARS['Test'] ) {
 	print "<HR>\n";
 	$host = $INPUT_VARS['host'];
 	$ip   = $INPUT_VARS['ip'];
