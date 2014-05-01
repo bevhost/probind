@@ -6,12 +6,11 @@
 
 function getopts(&$argv, $argspec) 
 {
-    $errs = 0;
-    $values = array();
-    array_shift($argv);
-    $args = preg_split("/ */", $argspec, -1, PREG_SPLIT_NO_EMPTY);
-    if (isset($argv[0])) {
-	while (($item = $argv[0]) && preg_match("/^-(.)(.*)/", $item, $matches)) {
+	$errs = 0;
+	$values = array();
+	array_shift($argv);
+	$args = preg_split("/ */", $argspec, -1, PREG_SPLIT_NO_EMPTY);
+	while (($item = @$argv[0]) && preg_match("/^-(.)(.*)/", $item, $matches)) {
 		list($full, $first, $rest) = $matches;
 		$pos = strpos($argspec, $first);
 # print "item = '$item', argv = '$argv[0]', first = '$first', rest  = '$rest'\n";
@@ -40,6 +39,5 @@ function getopts(&$argv, $argspec)
 				array_shift($argv);
 		}
 	}
-    }
-    return $values;
+	return $values;
 }
