@@ -42,8 +42,9 @@ if (empty($INPUT_VARS['iamserious']) || $INPUT_VARS['iamserious'] != 'true') {
 	exit();
 }
 
-sql_query("UPDATE zones SET updated = 1 WHERE NOT master AND domain != 'TEMPLATE'".access());
-sql_query("UPDATE servers SET state = 'OUT' WHERE type = 'M' OR type = 'S'");
+$db = new DB_probind;
+$db->query("UPDATE zones SET updated = 1 WHERE NOT master AND domain != 'TEMPLATE'".access());
+$db->query("UPDATE servers SET state = 'OUT' WHERE type = 'M' OR type = 'S'");
 
 print "<P>Done. Now you need to push the updates.<P><HR>\n";
 print "</BODY></HTML>\n";
