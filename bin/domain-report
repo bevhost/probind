@@ -2,29 +2,29 @@
 <?php
 require '../inc/lib.inc';
 
+$db = new DB_probind;
+
+$count = $db->prepare("SELECT COUNT(*) FROM records WHERE zone = ?");
+$annotations = $db->prepare("SELECT descr FROM annotations WHERE zone = ?");
+
 $query = "SELECT domain, id, master FROM zones WHERE domain != 'TEMPLATE' ORDER BY domain";
-$rid1 = sql_query($query);
-while(list($domain, $id, $master) = mysql_fetch_array($rid1)) {
+$db->query($query);
+while($db->next_record()) {
+	extract($db->Record);
 	print "$domain\n";
 	if ($master) 
 		print "\t[Slave zone, master = $master]\n";
 	else {
-		$query = "SELECT COUNT(*) FROM records WHERE zone=$id";
-		$rid2 = sql_query($query);
-		list($rrs) = mysql_fetch_row($rid2);
-		mysql_free_result($rid2);
+                $count->execute($id);
+                $rrs = $count->fetchColumn();
 		print "\t[Authoritative zone, contains $rrs Resource Records]\n";
 	}
-	$query = "SELECT descr FROM annotations WHERE zone = $id";
-	$rid2 = sql_query($query);
-	if ($row = mysql_fetch_array($rid2)) {
-		$descr = $row['descr'];
+        $annotations->execute($id);
+        if ($descr = $annotations->fetchColumn()) {
 		$text = join("\n\t", explode("\n", $descr));
 		print "\n\t$text\n";
 	}
-	mysql_free_result($rid2);
 	print "\n";
 }
-mysql_free_result($rid1);
 
 ?>
