@@ -97,13 +97,11 @@ if (count($argv)) {
 	$query .= " AND zones.domain != 'TEMPLATE'";
 }
 $query .= " ORDER BY zones.domain";
-$rid = sql_query($query);
-
-while ($zone = mysql_fetch_array($rid)) {
-	write_zone_file($zone, $HOSTMASTER, $DEFAULT_ORIGIN,
+$db->query($query);
+while ($db->next_record()) {
+	write_zone_file($db->Record, $HOSTMASTER, $DEFAULT_ORIGIN,
 		$servers, isset($opts['u']));
 }
-mysql_free_result($rid);
 
 # Done, shutdown & exit
 exit(99);
