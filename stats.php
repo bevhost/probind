@@ -26,55 +26,55 @@ adjust_serials();
 // Begin check for changes.
 $update = FALSE;
 
-$rid = sql_query("SELECT domain, id, zonefile FROM zones WHERE updated AND domain != 'TEMPLATE'".access()." ORDER BY zonefile");
+$db->query("SELECT domain, id, zonefile FROM zones WHERE updated AND domain != 'TEMPLATE'".access()." ORDER BY zonefile");
 
-$count = mysql_num_rows($rid);
+$count = $db->num_rows();
 
 if ($count) {
 	print "<P>The database contains changes to $count domains.<P><UL>";
-	while ($row = mysql_fetch_row($rid)) {
-		print "<LI><A HREF=\"../brzones.php?frame=records&zone=$row[1]\">$row[0]</A>\n";
+	while ($db->next_record()) {
+		extract($db->Record);
+		print "<LI><A HREF=\"../brzones.php?frame=records&zone=$id\">$domain</A>\n";
 	}
 	print "</UL>\n";
 	$update = TRUE;
 }
 
-mysql_free_result($rid);
-$rid = sql_query("SELECT domain FROM deleted_domains WHERE 1 ".access());
-$count = mysql_num_rows($rid);
+$db->query("SELECT domain FROM deleted_domains WHERE 1 ".access());
+$count = $db->num_rows();
 if ($count) {
 	print "<P>The following domains have been deleted from the database.<P><UL>\n";
-	while ($row = mysql_fetch_row($rid)) {
-		print "<LI>$row[0]\n";
+	while ($db->next_record()) {
+		extract($db->Record);
+		print "<LI>$domain</LI>\n";
 	}
 	print "</UL><HR>\n";
 	$update = TRUE;
 }
-mysql_free_result($rid);
 if ($update)
 	print "These changes have not been pushed out to the actual DNS servers. Click the 'Update' button above to execute the changes to these zones:<P><HR><P>\n";
 
 # Bragging ...
 print "<TABLE width=\"100%\"><TR><TD>\n";
 print "<TABLE border cellpadding=4><TR><TH>Statistic</TH><TH>Count</TH></TR>\n";
-$rid = sql_query("SELECT COUNT(id) FROM zones WHERE (master IS NULL OR NOT master) AND domain != 'TEMPLATE'");
-$count = mysql_result($rid, 0);
-mysql_free_result($rid);
+$db->query("SELECT COUNT(id) FROM zones WHERE (master IS NULL OR NOT master) AND domain != 'TEMPLATE'");
+if ($db->next_record()) $count=$db->Record[0]; else $count='unknown';
 print "<TR><TD>Authoritative domains</TD><TD align=right>$count</TD></TR>\n";
-$rid = sql_query("SELECT COUNT(id) FROM zones WHERE master");
-$count = mysql_result($rid, 0);
-mysql_free_result($rid);
+
+$db->query("SELECT COUNT(id) FROM zones WHERE master");
+if ($db->next_record()) $count=$db->Record[0]; else $count='unknown';
 print "<TR><TD>Slave domains</TD><TD align=right>$count</TD></TR>\n";
-$rid = sql_query("SELECT COUNT(records.id) FROM records, zones WHERE zones.domain != 'TEMPLATE' AND records.zone = zones.id ");
-$count = mysql_result($rid, 0);
-mysql_free_result($rid);
+
+$db->query("SELECT COUNT(records.id) FROM records, zones WHERE zones.domain != 'TEMPLATE' AND records.zone = zones.id ");
+if ($db->next_record()) $count=$db->Record[0]; else $count='unknown';
 print "<TR><TD>Resource records</TD><TD align=right>$count</TD></TR>\n";
 print "</TABLE></TD><TD>\n";
 
-$rid = sql_query("SELECT id, hostname, ipno, type, pushupdates, mknsrec, state FROM servers ORDER BY hostname");
+$db->query("SELECT id, hostname, ipno, type, pushupdates, mknsrec, state FROM servers ORDER BY hostname");
 print "<TABLE border cellpadding=4><TR><TH colspan=7>Managed DNS Servers</TH></TR>\n";
 print "<TR><TH>Server</TH><TH>Ip number</TH><TH>Type</TH><TH>Update?</TH><TH>NS record?</TH><TH>state</TH><TH>test</TH></TR>\n";
-while ($row = mysql_fetch_row($rid)) {
+while ($db->next_record()) {
+	$row = $db->Record;
 	$id = $row[0];
 	$type = ($row[3] == 'M' ? 'Master' : 'Slave');
 	$push = ($row[4] ? 'Yes' : 'No');

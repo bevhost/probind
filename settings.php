@@ -59,18 +59,20 @@ function browse_settings()
 {
 	$seen = array();
 	
+	$db = new DB_probind;
 	global $settings_list, $preamble, $is_bool;
 	$query = "SELECT name, value FROM blackboard ORDER BY name";
-	$rid = sql_query($query);
+	$db->query($query);
 	$result = $preamble;
 	$result .= "<FORM action=\"settings.php\" method=\"post\">
 <INPUT type=\"hidden\" name=\"action\" value=\"update\">
 <TABLE>\n";
-	while ($setting = mysql_fetch_array($rid)) {
-		$name = $setting['name'];
+	while ($db->next_record()) {
+		
+		$name = $db->Record['name'];
 		// some settings don't belong here: 
 		if ($name == 'DOMAIN_LOCK') continue;
-		$value = $setting['value'];
+		$value = $db->Record['value'];
 		$text = ""; if (isset($settings_list[$name])) $text = $settings_list[$name];
 		$bool = isset($is_bool[$name]);
 		if ($bool) {
@@ -121,7 +123,6 @@ function browse_settings()
 	}
 	}
 	$result .= "<TR><TD><INPUT type=\"submit\" value=\"Update settings\"></TD></TR></TABLE>\n</FORM>\n";
-	mysql_free_result($rid);
 	if (strlen($locks = list_locks()))
 		$result .= $locks;
 	return $result;
@@ -143,8 +144,9 @@ function update_settings($input)
 	}
 	if (strlen($warnings)) 
 		return "<UL>$warnings</UL>\n";
+	$db = new DB_probind;
 	while ($q = each($sql)) {
-		sql_query($q[1]);
+		$db->query($q[1]);
 	}
 	return browse_settings();
 }

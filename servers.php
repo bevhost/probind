@@ -201,6 +201,7 @@ function valid_server($name, $ipno, $type, $push, $zonedir, $chrootbase, $templa
 # go into the database, otherwise insert it and return 0.
 function add_servers($input)
 {
+	$db = new DB_probind;
 	global $HOST_DIR;
 	global $TEMPL_DIR;
 	$res = '';
@@ -217,14 +218,25 @@ function add_servers($input)
 	$warnings = valid_server($name, $ipno, $type, $push, $zonedir, $chrootbase, $template, $script);
 	if (strlen($warnings)) 
 		return $warnings;
-	$query = "SELECT * FROM servers WHERE hostname = '$name'";
-	$rid = sql_query($query);
-	$count = mysql_num_rows($rid);
-	mysql_free_result($rid);
+	$db->prepare("SELECT * FROM servers WHERE hostname = ?");
+	$db->execute($name);
+	$count = $db->num_rows();
 	if ($count)
 		return "$name already exists in the database.<BR>\n";
-	$query = "INSERT INTO servers (hostname, ipno, type, pushupdates, mknsrec, zonedir, chrootbase, template, script, descr, state) VALUES ('$name', '$ipno', '$type', $push, $mkrec, '$zonedir', '$chrootbase', '$template', '$script', '$descr', 'OUT')";
-	sql_query($query);
+	$query = "INSERT INTO servers SET "; 		$param = array();
+	$query .= "hostname = :hostname, ";		$param[":hostname"]=$name;
+	$query .= "ipno = :ipno, ";			$param[":ipno"]=$ipno;
+	$query .= "type = :type, ";			$param[":type"]=$type;
+	$query .= "pushupdates = :pushupdates, ";	$param[":pushupdates"]=$push;
+	$query .= "mknsrec = :mknsrec, ";		$param[":mknsrec"]=$mkrec;
+	$query .= "zonedir = :zonedir, ";		$param[":zonedir"]=$zonedir;
+	$query .= "chrootbase = :chrootbase, ";		$param[":chrootbase"]=$chrootbase;
+	$query .= "template = :template, ";		$param[":template"]=$template;
+	$query .= "script = :script, ";			$param[":script"]=$script;
+	$query .= "descr = :descr, ";			$param[":descr"]=$descr;
+	$query .= "state = 'OUT'";
+	$db->prepare($query);
+	$db->execute($param);
 
 	if (is_file("$TEMPL_DIR/$template/named.tmpl")) {
 	    // Create directory for the host (use script if it exists)
@@ -241,8 +253,8 @@ function add_servers($input)
 	    if ($res)
 	        return "<br>Error running script $HOST_DIR/add_script<br>";
 
-	    sql_query("UPDATE zones SET updated = 1 WHERE NOT master AND domain != 'TEMPLATE'");
-	    sql_query("UPDATE servers SET state = 'OUT' WHERE type = 'M' OR type = 'S'");
+	    $db->query("UPDATE zones SET updated = 1 WHERE NOT master AND domain != 'TEMPLATE'");
+	    $db->query("UPDATE servers SET state = 'OUT' WHERE type = 'M' OR type = 'S'");
 
 	return 0;
 	}
@@ -251,22 +263,16 @@ function add_servers($input)
 # Return a HTML form with the current makeup of the server
 function mk_update_form($server)
 {
+	if (!ctype_digit("$server")) die('Invalid server id.');
+
 	global $update_form, $template_list, $script_list;
-	$query = "SELECT id, hostname, ipno, type, pushupdates, mknsrec, zonedir, chrootbase, template, script, descr, options FROM servers WHERE id = $server";
-	$rid = sql_query($query);
-	if ($row = mysql_fetch_array($rid)) {
-		$id = $row['id'];
-		$name = $row['hostname'];
-		$ipno = $row['ipno'];
-		$type = (int)($row['type'] == 'S');
-		$push = $row['pushupdates'];
-		$mkrec = $row['mknsrec'];
-		$zonedir = $row['zonedir'];
-		$chrootbase = $row['chrootbase'];
-		$template = $row['template'];
-		$script = $row['script'];
-		$descr = $row['descr'];
-		$options = $row['options'];
+	$db = new DB_probind;
+	$query = "SELECT id, hostname as name, ipno, type, pushupdates as push, mknsrec as mkrec, 
+		zonedir, chrootbase, template, script, descr, options FROM servers WHERE id = $server";
+	$db->query($query);
+	if ($db->next_record()) {
+		extract($db->Record);
+		$type = (int)($type == 'S');
 		$result = sprintf($update_form,
 			$id, $name, $name, $ipno, 
 			mk_select("type", array("Master", "Slave"), $type), 
@@ -279,14 +285,14 @@ function mk_update_form($server)
 	} else {
 		$result = "No such server in the database: $server.<P>\n";
 	}
-	mysql_free_result($rid);
 	return $result;
 }
 
 function browse_servers()
 {
+	$db = new DB_probind;
 	$query = "SELECT id, hostname, ipno, type, pushupdates, mknsrec FROM servers ORDER BY hostname";
-	$rid = sql_query($query);
+	$db->query($query);
 	$result = "<FORM action=\"servers.php\" method=\"post\">
 <INPUT type=\"hidden\" name=\"action\" value=\"addform\">
 <TABLE><TR align=left>
@@ -296,7 +302,8 @@ function browse_servers()
  <TH>Update</TH>
  <TH>NS record</TH>
 </TR>\n";
-	while ($server = mysql_fetch_array($rid)) {
+	while ($db->next_record()) {
+		$server = $db->Record;
 		$id = $server['id'];
 		$name = $server['hostname'];
 		$ipno = $server['ipno'];
@@ -313,7 +320,6 @@ function browse_servers()
 	}
 	$result .= "<TR><TD><INPUT type=\"submit\" value=\"Add another server\"></TD></TR>\n";
 	$result .= "</TABLE>\n</FORM>\n";
-	mysql_free_result($rid);
 	return $result;
 }
 
@@ -322,6 +328,8 @@ function update_servers($input)
 	global $confirm_delete_form;
 	global $HOST_DIR;
 	global $TEMPL_DIR;
+
+	$db = new DB_probind;
 
 	if (isset($input['server'])) {$id = $input['server'];}
 	if (isset($input['name'])) {$name = $input['name'];}
@@ -341,11 +349,13 @@ function update_servers($input)
 
 	switch (strtolower($input['subaction'])) {
 	case 'delete':
+		if (!ctype_digit("$id")) die('Invalid server id.');
 		return sprintf($confirm_delete_form, $id, $name, $name);
 		break;
 	case 'realdelete':
+		if (!ctype_digit("$id")) die('Invalid server id.');
 		$query = "DELETE FROM servers WHERE id = $id";
-		$rid = sql_query($query);
+		$db->query($query);
 		if (is_file("$HOST_DIR/$name/named.tmpl")) {
 		    if(is_executable("$HOST_DIR/delete_script"))
 		        passthru("$HOST_DIR/delete_script $name 2>& 1");
@@ -356,9 +366,22 @@ function update_servers($input)
 	case 'update':
 		$warns = valid_server($name, $ipno, $type, $push, $zonedir, $chrootbase, $template, $script);
 		if (strlen($warns)) return $warns;
-		$query = "UPDATE servers SET hostname = '$name', ipno = '$ipno', type = '$type', pushupdates = $push, mknsrec = $mkrec, zonedir = '$zonedir', chrootbase = '$chrootbase', template = '$template', script = '$script', descr = '$descr', state = 'OUT', options='$options' WHERE id = $id";
-		$rid = sql_query($query);
-		$count = mysql_affected_rows();
+		$query = "UPDATE servers SET "; 		$param = array();
+		$query .= "hostname = :hostname, ";		$param[":hostname"]=$name;
+		$query .= "ipno = :ipno, ";			$param[":ipno"]=$ipno;
+		$query .= "type = :type, ";			$param[":type"]=$type;
+		$query .= "pushupdates = :pushupdates, ";	$param[":pushupdates"]=$push;
+		$query .= "mknsrec = :mknsrec, ";		$param[":mknsrec"]=$mkrec;
+		$query .= "zonedir = :zonedir, ";		$param[":zonedir"]=$zonedir;
+		$query .= "chrootbase = :chrootbase, ";		$param[":chrootbase"]=$chrootbase;
+		$query .= "template = :template, ";		$param[":template"]=$template;
+		$query .= "script = :script, ";			$param[":script"]=$script;
+		$query .= "descr = :descr, ";			$param[":descr"]=$descr;
+		$query .= "options = :options, ";		$param[":options"]=$options;
+		$query .= "state = 'OUT' WHERE id = :id";	$param[":id"]=$id;
+		$db->prepare($query);
+		$db->execute($param);
+		$count = $db->affected_rows();
 		if (isset($updatet) && is_file("$TEMPL_DIR/$template/named.tmpl")) {
 		    passthru("mkdir -p $HOST_DIR/$name/SEC");
 		    passthru("mv -f $HOST_DIR/$name/named.tmpl $HOST_DIR/$name/named.tmpl-old 2>& 1");
