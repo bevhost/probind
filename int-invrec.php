@@ -19,6 +19,7 @@ $html_bottom = "
 
 function verify_mx()
 {
+	$db = new DB_probind;
 	$query = "
 	SELECT zones.id AS zid, zones.domain AS zdom, records.domain AS rdom, pref, data
 	FROM zones, records 
@@ -30,20 +31,20 @@ function verify_mx()
 		".access()."
 	ORDER BY zones.domain, records.domain
 	";
-	$result = "";
 
-	$rid = sql_query($query);
-	if (mysql_num_rows($rid)) while ($row = mysql_fetch_array($rid)) {
-		$result .= $row['rdom'].".".$row['zdom'];
-		$result .= " IN MX ".$row['data']."<BR>\n";
-	} else
-		$result = "All MX records are valid.<P>\n";
-	mysql_free_result($rid);
+	$result = "";
+	$db->query($query);
+	while ($db->next_record()) {
+		$result .= $db->Record['rdom'].".".$db->Record['zdom'];
+		$result .= " IN MX ".$db->Record['data']."<BR>\n";
+	} 
+	if (!$result) $result = "All MX records are valid.<P>\n";
 	return $result;
 }
 
 function verify_a()
 {
+	$db = new DB_probind;
 	$query = "
 	SELECT zones.id AS zid, zones.domain AS zdom, records.domain AS rdom, data
 	FROM zones, records 
@@ -55,16 +56,14 @@ function verify_a()
 	";
 	$result = "";
 
-	$rid = sql_query($query);
-	while ($row = mysql_fetch_array($rid)) {
-		if (!strlen($row['data']) || !valid_ip($row['data'])) {
-			$result .= $row['rdom'].".".$row['zdom'];
-			$result .= " IN A ".$row['data']."<BR>\n";
+	$db->query($query);
+	while ($db->next_record()) {
+		if (!strlen($db->Record['data']) || !valid_ip($db->Record['data'])) {
+			$result .= $db->Record['rdom'].".".$db->Record['zdom'];
+			$result .= " IN A ".$db->Record['data']."<BR>\n";
 		}
 	} 
-	mysql_free_result($rid);
-	if (!strlen($result))
-		$result = "All A records point to valid IP addresses<P>\n";
+	if (!$result) $result = "All A records point to valid IP addresses<P>\n";
 	return $result;
 }
 

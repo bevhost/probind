@@ -17,12 +17,18 @@ $html_bottom = "
 </HTML>
 ";
 
+$db1 = new DB_probind;
+$db2 = new DB_probind;
+
 $lastzone="";
 print $html_top;
-$query = "SELECT zones.id AS zid, zones.domain AS zdom, records.id AS rid, records.domain AS rdom, records.data AS rdata FROM zones, records WHERE zones.id = records.zone AND zones.domain != 'TEMPLATE' AND records.type = 'PTR' AND data NOT LIKE 'host-%' ORDER BY zone";
-$rid = sql_query($query);
+$query1 = "SELECT zones.id AS zid, zones.domain AS zdom, records.id AS rid, records.domain AS rdom, records.data AS rdata FROM zones, records WHERE zones.id = records.zone AND zones.domain != 'TEMPLATE' AND records.type = 'PTR' AND data NOT LIKE 'host-%' ORDER BY zone";
+$query2 = "SELECT zones.domain AS zdom, zones.id AS zid, records.domain AS rdom, data FROM zones, records WHERE zones.id = records.zone AND zones.domain != 'TEMPLATE' AND type = 'A' AND data = ?";
+$db2->prepare($query2);
+$db1->query($query1);
 print "<UL>";
-while ($row = mysql_fetch_array($rid)) {
+while ($db1->next_record()) {
+	$row = $db1->Record;
 	eregi("^(.*)\.in-addr\.arpa$", $row['zdom'], $matches);
 	$bytes = explode(".", $matches[1]);
 	$ip = $bytes[count($bytes)-1];
@@ -31,9 +37,8 @@ while ($row = mysql_fetch_array($rid)) {
 	$bytes = explode(".", $row['rdom']);
 	for ($i = count($bytes)-1; $i>=0; $i--)
 		$ip .= ".".$bytes[$i];
-	$query2 = "SELECT zones.domain AS zdom, zones.id AS zid, records.domain AS rdom, data FROM zones, records WHERE zones.id = records.zone AND zones.domain != 'TEMPLATE' AND type = 'A' AND data = '$ip'";
-	$rid2 = sql_query($query2);
-	if (!mysql_num_rows($rid2)) {
+	$db2->execute($ip);
+	if (!$db2->next_record()) {
 		if ($lastzone != $row['zdom']) {
 			print "</UL>\n<A HREF=\"../brzones.php?frame=records&zone=".$row['zid']."\">";
 			print $row['zdom']."</A><UL>";
@@ -48,9 +53,7 @@ while ($row = mysql_fetch_array($rid)) {
 		}
 		$lastzone = $row['zdom'];
 	}
-	mysql_free_result($rid2);
 }
-mysql_free_result($rid);
 print "</UL>\n";
 
 print $html_bottom;

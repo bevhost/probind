@@ -93,11 +93,10 @@ function domain_name_server($nameserver)
 
 function entrance_page($text = "")
 {
+	$db = new DB_probind;
 	global $html_top, $entrance_prologue, $entrance_body, $html_bottom;
-	$query = "SELECT value FROM blackboard WHERE name = 'default_external_dns'";
-	$rid = sql_query($query);
-	list($default_resolver) = mysql_fetch_row($rid);
-	mysql_free_result($rid);
+	$db->query("SELECT value FROM blackboard WHERE name = 'default_external_dns'");
+	$default_resolver =  $db->next_record() ? $db->Record[0] : "8.8.8.8";
 	print $html_top;
 	print $entrance_prologue;
 	print $text;
@@ -108,12 +107,13 @@ function entrance_page($text = "")
 
 function initialize_servers()
 {
+	$db = new DB_probind;
 	global $servers;
-	$rid = sql_query("SELECT hostname FROM servers WHERE mknsrec");
-	while ($row = mysql_fetch_row($rid)) {
-		$servers[$row[0]] = 1;
+	$db->query("SELECT hostname FROM servers WHERE mknsrec");
+	while ($db->next_record()) {
+		$hostname = $db->Record[0];
+		$servers[$hostname] = 1;
 	}
-	mysql_free_result($rid);
 }
 
 #
@@ -133,18 +133,18 @@ if (!$INPUT_VARS['nameserver']) {
 		entrance_page("Invalid hostname.<P>\n");
 }
 
+$db = new DB_probind;
+
 print sprintf($html_top, "#dcdcdc");
 initialize_servers();
-$rid = sql_query("SELECT domain FROM zones WHERE (master IS NULL OR NOT master) AND domain != 'TEMPLATE' AND domain != '0.0.127.in-addr.arpa'".access()." ORDER BY domain");
+$db->query("SELECT domain FROM zones WHERE (master IS NULL OR NOT master) AND domain != 'TEMPLATE' AND domain != '0.0.127.in-addr.arpa' ".access()." ORDER BY domain");
 $listfile = fopen("$TMP/domains", "w");
-while ($row = mysql_fetch_row($rid)) {
-	$domain = sprintf("%s\n", $row[0]);
+while ($db->next_record()) {
+	$domain = sprintf("%s\n", $db->Record[0]);
 	fwrite($listfile, $domain);
 }
 fclose($listfile);
-mysql_free_result($rid);
 print $search_prologue;
-#TODO: There are now PHP functions for doing this so opening a pipe to a perl process, is not really required.
 $pipe = popen("$BIN/nsrecs -h $nameserver < $TMP/domains", "r");
 $badcounter = 0;
 while (!feof($pipe)) {

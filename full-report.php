@@ -17,26 +17,24 @@ require 'header.php';
 #
 get_input();
 
-$query = "SELECT domain, id, master FROM zones WHERE domain != 'TEMPLATE'".access()." ORDER BY domain";
-$rid = sql_query($query);
-while (list($dom, $id, $master) = mysql_fetch_row($rid)) {
+$count = $db->prepare("SELECT COUNT(*) FROM records WHERE zone = ?");
+$annotations = $db->prepare("SELECT descr FROM annotations WHERE zone = ?");
+
+$db->query("SELECT domain, id, master FROM zones WHERE domain != 'TEMPLATE'".access()." ORDER BY domain");
+while ($db->next_record()) {
+	extract($db->Record);
 	if ($master)
 		$zonedetails = "[Slave zone, master = $master]";
 	else {
-		$query = "SELECT COUNT(*) FROM records WHERE zone = $id";
-		$rid2 = sql_query($query);
-		list($rrs) = mysql_fetch_row($rid2);
-		mysql_free_result($rid2);
+		$count->execute($id);
+		$rrs = $count->fetchColumn();
 		$zonedetails = "[Authoritative zone, contains $rrs Resource Records]";
 	}
-	$query = "SELECT descr FROM annotations WHERE zone = $id";
-	$rid2 = sql_query($query);
-	list($descr) = mysql_fetch_row($rid2);
-	mysql_free_result($rid2);
+	$annotations->execute($id);
+	$descr = $annotations->fetchColumn();
 	$html = join("<BR>\n", explode("\n", $descr));
-	print "<B>$dom</B> $zonedetails<P>\n<UL>$html</UL>\n<P>\n";
+	print "<B>$domain</B> $zonedetails<P>\n<UL>$html</UL>\n<P>\n";
 }
-mysql_free_result($rid);
 
 ?>
 

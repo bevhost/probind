@@ -17,41 +17,49 @@ $html_bottom = "
 </HTML>
 ";
 
+$count=0;
 function list_record($record)
 {
-	print $record['rdom'].".";
+	$GLOBALS["count"]++;
+	if ($record['rdom']<>'@' and substr($record['rdom'],-1)<>'.') print $record['rdom']."." ;
 	print "<A HREF=\"../brzones.php?frame=records&zone=".$record['zid'];
 	print "\">".$record['zdom']."</A><BR>\n";
 }
 
 $ul=0;
 print $html_top;
-# List all A records, sorted by IP number
-$query = "SELECT zones.id AS zid, zones.domain AS zdom, records.id AS rid, records.domain AS rdom, records.data AS rdata FROM zones, records WHERE zones.id = records.zone AND records.type = 'A' AND zones.domain != 'TEMPLATE'".access()." ORDER BY records.data";
-$rid = sql_query($query);
-$lastrow['rdata'] = "";
-$first = 1;
-while ($row = mysql_fetch_array($rid)) {
-	if ($row['rdata'] == $lastrow['rdata']) {
-		if ($first) {
-			print "<B>".$lastrow['rdata']."</B><UL>\n";
-			list_record($lastrow);
-			$first = 0;
-			$ul++;
-		}
-		list_record($row);
-	} else if ($ul) {
-		print "</UL>\n";
-		$first = 1;
-		$ul--;
-	}
-	$lastrow = $row;
-}
-if ($ul)
-	print "</UL>\n";
-print "<HR><P>".mysql_num_rows($rid)." A records examined.<BR>\n";
-mysql_free_result($rid);
+$query="
+SELECT records.data, records.domain as rdom, zones.domain as zdom, zones.id as zid
+FROM zones 
+JOIN records ON (zones.id=records.zone) 
+WHERE zones.disabled=0
+and records.disabled=0
+AND data IN (
+	SELECT data 
+	FROM records 
+	WHERE type IN ('A','AAAA') 
+	AND domain<>'TEMPLATE'
+	AND disabled=0
+	GROUP BY data
+	HAVING count(*)>1
+		)
+".access()." 
+ORDER BY records.type, records.data, zones.domain, records.domain";
 
+$last = "";
+$db = new DB_probind;
+$db->query($query);
+while ($db->next_record()) {
+	$data = $db->Record["data"];
+	if ($last<>$data) {
+		if ($last) echo "</UL><br>";
+		echo "<B>$data</B><UL>\n";
+	}
+	list_record($db->Record);
+	$last = $data;
+}
+if ($last) echo "</UL>";
+print "<HR><P>".$db->num_rows()." ($count) records.<BR>\n";
 print $html_bottom;
 
 ?>

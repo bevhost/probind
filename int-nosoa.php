@@ -20,19 +20,18 @@ $html_bottom = '
 ';
 
 print $html_top;
-$query = "SELECT zones.id AS zid, zones.domain AS zdom, records.id AS rid, records.domain AS rdom FROM zones, records WHERE zones.id = records.zone AND zones.domain != 'TEMPLATE' AND records.type = 'SOA' AND LENGTH(master) = 0 ORDER BY zone";
-$rid = sql_query($query);
-while ($row = mysql_fetch_array($rid)) {
-	$soas[$row['zdom']] = $row['rid'];
+$db = new DB_probind;
+$db->query("SELECT zones.id AS zid, zones.domain AS zdom, records.id AS rid, records.domain AS rdom FROM zones, records WHERE zones.id = records.zone AND zones.domain != 'TEMPLATE' AND records.type = 'SOA' AND LENGTH(master) = 0 ORDER BY zone");
+while ($db->next_record()) {
+	$soas[$db->Record['zdom']] = $db->Record['rid'];
 }
-mysql_free_result($rid);
 
-$query = "SELECT id, domain FROM zones WHERE domain != 'TEMPLATE' AND LENGTH(master) = 0 ORDER BY domain";
-$rid = sql_query($query);
-while ($row = mysql_fetch_array($rid)) {
-	if (!$soas[$row['domain']]) {
+$count=0;
+$db->query("SELECT id, domain FROM zones WHERE domain != 'TEMPLATE' AND LENGTH(master) = 0 ORDER BY domain");
+while ($db->next_record()) {
+	if (!$soas[$db->Record['domain']]) {
 		print "<A HREF=\"../brzones.php?frame=records&domain=";
-		print $row['domain']."\">".$row['domain']."</A><BR>\n";
+		print $db->Record['domain']."\">".$db->Record['domain']."</A><BR>\n";
 		$count++;
 	}
 }
@@ -41,7 +40,6 @@ if ($count) {
 } else {
 	print "All zones are properly associated with SOA records.<P>\n";
 }
-mysql_free_result($rid);
 
 print $html_bottom;
 
