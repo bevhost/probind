@@ -62,6 +62,12 @@
 
         * html #header {position: absolute;}
         * html #navigation {position: absolute;}
+
+@media print {
+        #navigation, #header { display:none; }
+	#content { margin: 5px; }
+}
+
 </style>
 
 <!--[if lte IE 6]>
@@ -171,6 +177,7 @@ switch ($s) {
 <BR>Internal consistency
 &nbsp;&nbsp;&nbsp;<A HREF="int-ptr.php">A-less PTR's</A>
 &nbsp;&nbsp;&nbsp;<A HREF="int-multia.php">Multiple A's</A>
+&nbsp;&nbsp;&nbsp;<A HREF="int-nosoa.php">Missing SOA's</A>
 &nbsp;&nbsp;&nbsp;<A HREF="int-mxcnt.php">Too few MX's</A>
 &nbsp;&nbsp;&nbsp;<A HREF="int-invrec.php">Invalid data</A>
 <A HREF="full-report.php">Domain report</A>
