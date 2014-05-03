@@ -4,9 +4,78 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <title>ProBind</title>
-
 <LINK rel="stylesheet" href="style.css" type="text/css">
+<script type="text/javascript" src="/js/jquery.min.js"></script> 
 <style type="text/css">
+
+	.modal {
+	position: absolute;
+	font-family: Arial, Helvetica, sans-serif;
+	top: 0;
+	right: 0;
+	bottom: -2000px;
+	left: 0;
+	background: rgba(0,0,0,0.7);
+	z-index: 999;
+	}
+	.modal-header,
+	.modal-body,
+	.modal-footer {
+		background-color: #999966;
+		width:220px;
+		margin: auto;
+	}
+	.modal-header {
+		margin-top:130px;
+		height: 40px;
+	}
+	.modal-header h3 {
+		margin:10px 0px 0px 5px;
+	}
+	.modal-header .close {
+		float:right;
+		margin:9px;
+	}
+.modal-header {
+  padding: 9px 15px;
+  border-bottom: 1px solid #eee;
+  -webkit-border-radius: 6px 6px 0 0;
+     -moz-border-radius: 6px 6px 0 0;
+          border-radius: 6px 6px 0 0;
+}
+
+.modal-body {
+  max-height: 400px;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: 14px 15px 15px;
+  margin-bottom: 0;
+  text-align: right;
+  background-color: #999966;
+  border-top: 1px solid #ddd;
+  -webkit-border-radius: 0 0 6px 6px;
+     -moz-border-radius: 0 0 6px 6px;
+          border-radius: 0 0 6px 6px;
+  *zoom: 1;
+  -webkit-box-shadow: inset 0 1px 0 #ffffff;
+     -moz-box-shadow: inset 0 1px 0 #ffffff;
+          box-shadow: inset 0 1px 0 #ffffff;
+}
+
+.modal-footer:before,
+.modal-footer:after {
+  display: table;
+  content: "";
+}
+
+.modal-footer:after {
+  clear: both;
+}
+
+
         body {
                 margin: 0;
                 padding: 0 10px 0 10px;
@@ -15,11 +84,12 @@
         }
 
         #content {
-                margin: 63px 0px 0px 225px;
+                margin: 68px -10px 0px 215px;
                 display: block;
                 padding: 10px;
                 height: 100%;
                 overflow: auto;
+		background-color: #cccc99;
         }
 
         #header {
@@ -47,10 +117,10 @@
                 position: fixed;
                 border: 1px solid #888;
 		overflow: hidden;
+		background-color: #999966;
         }
 	#navigation:hover {
 		overflow: visible;
-		background-color: #999966;
 		z-index: 10;
 	}
 	#navigation a:before {
@@ -116,7 +186,7 @@ html {overflow-x: auto; overflow-y: hidden;}
 	get_request_values("domtype");
 	if (!preg_match('/[MSA*]/',$domtype)) $domtype='M'; 
 	echo "var domtype='$domtype';\n"; 
-	if ($SHOW_ALL) {
+	if (@$SHOW_ALL) {
 ?>
 function update_list(lookfor) {
   var nav = document.getElementById("navigation");

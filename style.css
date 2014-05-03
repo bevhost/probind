@@ -41,6 +41,7 @@ A:hover {
 	color: #646;
 	text-decoration: underline;
 	}
+button,
 INPUT, TEXTAREA {
 	background-color: #CC9;
 	font-family: Verdana, Arial, Helvetica;
