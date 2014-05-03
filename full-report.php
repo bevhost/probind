@@ -26,11 +26,11 @@ while ($db->next_record()) {
 	if ($master)
 		$zonedetails = "[Slave zone, master = $master]";
 	else {
-		$count->execute($id);
+		$count->execute(array($id));  # php execute (not phplib), so must be an array.
 		$rrs = $count->fetchColumn();
 		$zonedetails = "[Authoritative zone, contains $rrs Resource Records]";
 	}
-	$annotations->execute($id);
+	$annotations->execute(array($id));
 	$descr = $annotations->fetchColumn();
 	$html = join("<BR>\n", explode("\n", $descr));
 	print "<B>$domain</B> $zonedetails<P>\n<UL>$html</UL>\n<P>\n";
