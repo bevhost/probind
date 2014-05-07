@@ -467,6 +467,9 @@ function domain_list($lookfor, $type, $format)
 	case 'A':
 		$query .= ", annotations WHERE id = zone AND descr LIKE ?";
 		break;
+	default:
+		$query .= " WHERE 1"; // do the 'AND' from access() doesn't create an invalid $query
+		break;
 	}
 	$query .= access();
 	$query .= " ORDER BY domain LIMIT 1000";
