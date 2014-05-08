@@ -70,7 +70,13 @@ function mycallback($classname)
 function EventLog($Description,$ExtraInfo="",$Level="Info") {
 	global $PHP_SELF, $argv, $REMOTE_ADDR, $auth;
 	$db = new DB_probind;
-	if ($PHP_SELF) $Program=$PHP_SELF; else $Program = $argv[0];
+	if ($PHP_SELF) {
+		$Program = $PHP_SELF;
+	} else if (isset($argv[0]) {
+		$Program = $argv[0];
+	} else {
+		$Program = "Unknown";
+	}
 	if ($auth) $UserName = $auth->auth["uname"]; else $UserName="NotLoggedIn";
 	$sql = "INSERT INTO EventLog SET ";
 	$sql .= "Program = '$Program',";

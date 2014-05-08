@@ -1,0 +1,178 @@
+#!/usr/bin/php -q
+<?php
+require '../inc/lib.inc';
+require '../inc/getopt.inc';
+
+function usage()
+{
+	print "Usage: add-record -z -d -l -t -d -p\n";
+	print "Args: (z)one in which to add record, (r)ecord domain, tt(l), (t)ype, (d)ata and (p)tr generation (1 or 0)\n";
+}
+
+/* 
+ * lib.inc isn't a class, so I can't override its functions, unless I use
+ * override_function, but I don't want to add another dependency (PECL) to
+ * ProBIND, so, instead, I create variations of its functions to avoid
+ * authentication. 
+ */
+
+# Return the known information about a zone ID
+function get_zone_unauth($id)
+{
+	$db = new DB_probind;
+	$db->prepare("SELECT * FROM zones WHERE id = ? ");
+	$db->execute($id);
+	$db->next_record(PDO::FETCH_ASSOC);
+	return $db->Record;
+}
+
+# Return a formatted HTML string which describes the problems with
+# the resource record data, or an empty string of it is OK.
+function validate_record_unauth($zone, &$domain, $ttl, &$type, &$pref, &$data)
+{
+	global $DOMAIN_RE, $IPNO_RE, $IPV6_RE;
+	$warnings = "";
+	if (!isset($domain) || !strlen($domain))
+		$domain = '@';
+	if ($domain != '@'
+	&& $domain != '*'
+	&& !eregi($DOMAIN_RE, $domain))
+		$warnings .= "<LI>The domain '$domain' name is invalid.\n";
+	if (!ereg("^[a-zA-Z]+$", $type))
+		$warnings .= "<LI>You must specify valid a type.\n";
+	if (!isset($data) || !strlen($data))
+		$warnings .= "<LI>You must specify data.\n";
+	if ($type == 'A') {
+		$rc = preg_match($IPNO_RE, $data, $bytes);
+		if (!$rc || $bytes[0]<0 || $bytes[0]>255
+		 || $bytes[1]<0 || $bytes[1]>255
+		 || $bytes[2]<0 || $bytes[2]>255
+		 || $bytes[3]<0 || $bytes[3]>255)
+		 	$warnings .= "<LI>'$data' is not a correct IP number.\n";
+	}
+	if ($type =='AAAA') {
+		if (!preg_match($IPV6_RE, $data))
+			$warnings .= "<li>'$data' is not a valid IPv6 address.\n";
+	}
+	$type = strtoupper($type);
+	if ($type != 'MX') {
+		$pref = '';
+	} else {
+		if (!isset($pref) || $pref < 0 || $pref > 65535 || !strlen($pref)) {
+			$warnings .= "<LI>You must specify an unsigned 16-bit preference for MX records.\n";
+		}
+		if ( preg_match("/^\d+\.\d+\.\d+\.\d+$/" , $data) ) {
+			$warnings .= "<li>You can not insert IPs on MX records!\n";
+		}
+	}
+	//
+	// This modification makes wrong result in the 'import' so turn it off. We always can use it on the high level if necessary.
+	//if (strchr($data, ".") && ($type != "TXT") && !valid_ip($data) && $data[strlen($data)-1] != ".")
+	//	$data .= ".";
+	//
+	$zone = get_zone_unauth($zone);
+	if ($type == 'CNAME' && (($zone['domain']."." == $domain) || $domain == '@'))
+		$warnings .= "<LI>A CNAME may not exist for the entire domain.\n";
+	if (preg_match("/\.$/i", $domain)) {
+		if (!preg_match("/".$zone['domain'].'.$/i', $domain))
+			$warnings .= "<LI>Domain '$domain' is outside the zone.\n";
+	} else {
+		if (preg_match("/".$zone['domain'].'$/i', $domain))
+			$warnings .= "<LI>Domain '$domain' invalid: check if you didn't loose a dot or something...\n";
+	}
+	return $warnings;   
+
+}
+
+# return true iff the $domain string is the name of a domain in the
+# database
+function known_domain_unauth($domain)
+{
+	$db = new DB_probind;
+	$db->prepare("SELECT id FROM zones WHERE domain = ? ");
+	$db->execute($domain);
+	$id = 0;
+	if ($db->next_record())
+		$id = $db->Record["id"];
+	return $id;
+}
+# Find the arpa domain (if any) which correspond to an IP number, and
+# mark it updated.
+function affect_reverses_unauth($ip)
+{
+	$bytes = explode('.', $ip);
+	if ($zone = known_domain_unauth("$bytes[0].in-addr.arpa"))
+		tag_zoneid_updated($zone);
+	if ($zone = known_domain_unauth("$bytes[1].$bytes[0].in-addr.arpa"))
+		tag_zoneid_updated($zone);
+	if ($zone = known_domain_unauth("$bytes[2].$bytes[1].$bytes[0].in-addr.arpa"))
+		tag_zoneid_updated($zone);
+}
+# Add a resource record to an existing domain. The record data
+# are assumed to be correct, i.e. verified by validate_record.
+function insert_record_unauth($zone, $domain, $ttlspec, $type, $pref, $data, $genptr, $comment = '')
+{
+	if ( $type != 'A' )
+		$genptr = 0;
+	if (!isset($ttlspec) || !strlen($ttlspec))
+		$ttl = default_ttl($zone);
+	else
+		$ttl = ttl_to_seconds($ttlspec);
+	if ($type == 'A') {
+		$tmp = valid_ip($data);
+		$data = $tmp;
+	}
+	$data    = strtr($data,    "'",'.');
+	$comment = strtr($comment, "'",'.');
+	$param = array();
+	$query = "INSERT INTO records SET ctime=NOW(), mtime=NOW(), ";
+	$query .= "zone=:zone, "; 	$param[":zone"] = $zone;
+	$query .= "domain=:domain, ";	$param[":domain"] = $domain;
+	$query .= "ttl=:ttl, ";		$param[":ttl"] = $ttl;
+	$query .= "type=:type, ";	$param[":type"] = $type;
+	$query .= "data=:data, ";	$param[":data"] = $data;
+	$query .= "genptr=:genptr, ";	$param[":genptr"] = $genptr;
+	$query .= "comment=:comment";	$param[":comment"] = $comment;
+	if (isset($pref) && strlen($pref)) {
+	   $query .= ", pref=:pref";	$param[":pref"] = $pref;
+	}
+	if (isset($port) && strlen($port)) {
+	   $query .= ", port=:port";	$param[":port"] = $port;
+	}
+	if (isset($weight) && strlen($weight)) {
+	  $query .= ", weight=:weight"; $param[":weight"] = $weight;
+	}
+	$db = new DB_probind;
+	$db->prepare($query);
+	$db->execute($param);
+	tag_zone_updated($db->lastInsertId());
+	if ($type == 'A')
+		affect_reverses_unauth($data);
+}
+
+
+
+/* MAIN */
+
+$opts = getopts($argv, "z:r:l:t:d:p:"); 
+
+if (isset($opts['z']) && isset($opts['r']) && isset($opts['l']) && isset($opts['t']) && isset($opts['d']) && isset($opts['p'])) {
+	$db = new DB_probind;
+	$db->query("SELECT id FROM zones WHERE domain='".$opts['z']."'");
+	while($db->next_record()) {
+		extract($db->Record);
+		print "Let's validate the record\n";
+		$pref = '';
+		$validation=validate_record_unauth($id, $opts['r'], $opts['l'], $opts['t'], $pref, $opts['d']);
+		if (strlen($validation) > 0) {
+			"Invalid record, cannot proceed:\n$validation";
+			exit(0);
+		}
+		print "Going to insert record on zone ".$opts['z']." (internal id: $id)\n";
+		insert_record_unauth($id, $opts['r'], $opts['l'], $opts['t'], $pref, $opts['d'], $opts['p'], '');
+	}
+	print "Record inserted, please validate on ProBIND's web interface.\n";
+} else {
+	usage();
+}
+?>

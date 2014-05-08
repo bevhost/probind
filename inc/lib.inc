@@ -110,6 +110,11 @@ function owner($o="")
 function access($a="")
 {
         global $perm, $auth;
+        if (!isset($perm) || !isset($auth)) {
+            $query=" AND 1=0";
+            echo "Permission error: you need to be authenticated. ";
+            return $query;
+        }
         if ($perm->have_perm("admin")) return "";
 	$query = "";
         if ($perm->have_perm("owner")) $query .= " AND owner='".$auth->auth["uname"]."'";
