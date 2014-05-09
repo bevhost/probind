@@ -38,6 +38,28 @@ document.onreadystatechange = function () {
 $db = new DB_probind;
 $f = new recordsform;
 
+
+class MyRecordsTable extends recordsTable {
+
+    function format_table_cell($column,$data,&$align,&$comment,&$class) {
+        $cell = $data[$column];
+        switch($column) {
+                case "ttl":
+                        $cell = seconds_to_ttl($cell);
+                        $this->align[$column]="center";
+                        break;
+                case "serial":
+                        $this->align[$column]="right";
+                        break;
+                default:
+                        $this->align[$column]="left";
+                        break;
+        }
+        return $cell;
+    }
+}
+
+
 if ($WithSelected) {
         check_edit_perms();
 	$WithSelected = explode(" ",$WithSelected);
@@ -234,7 +256,7 @@ switch ($cmd) {
         #  flow through
     default:
 	$cmd="Query";
-	$t = new recordsTable;
+	$t = new MyRecordsTable;
 	$t->heading = 'on';
 	$t->sortable = 'on';
 	$t->trust_the_data = false;   /* if true, send raw data without htmlspecialchars */

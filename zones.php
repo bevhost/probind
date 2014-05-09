@@ -148,6 +148,31 @@ document.onreadystatechange = function () {
 </script>
 <?php
 
+class MyZonesTable extends zonesTable {
+
+    function format_table_cell($column,$data,&$align,&$comment,&$class) {
+        $cell = $data[$column];
+        switch($column) {		# possible formatting idea's
+                # dollars		 $cell = money_format('%n',$cell); 
+                # percent		 $cell = money_format("%!.0n%%",$cell);
+                # string		 $this->align[$column]="left";
+                # numbers		 $cell = number_format($cell);
+		case "retry":
+		case "refresh":
+		case "expire":
+			$cell = seconds_to_ttl($cell);
+			$this->align[$column]="center";
+			break;
+		case "serial":
+			$this->align[$column]="right";
+			break;
+		default:
+               		break;
+        }
+        return $cell;
+    }
+}
+
 $count = 0;
 class MyRecordView extends recordsform {
   # normally, form layout is stored in a separate include file, but I want to have a form for every record,
@@ -466,7 +491,7 @@ switch ($cmd) {
 	}
     default:
 	$cmd="Query";
-	$t = new zonesTable;
+	$t = new MyZonesTable;
 	$t->heading = 'on';
 	$t->sortable = 'on';
 	$t->trust_the_data = false;   /* if true, send raw data without htmlspecialchars */

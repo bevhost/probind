@@ -83,6 +83,9 @@ SELECT, OPTION {
 	color: #ff0000;
 }
 
+TD.alignright  { text-align: right; }
+TD.alignleft   { text-align: left; }
+TD.aligncenter { text-align: center; }
 
 td.ae a {
         display: block;
