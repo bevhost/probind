@@ -145,6 +145,8 @@ function seconds_to_ttl($seconds)
 {
 	$ttl = '';
 
+	if (!ctype_digit($seconds)) return $seconds;  // not a number
+
 	global $MINSECS, $HOURSECS, $DAYSECS, $WEEKSECS;
 
 	$t = floor($seconds / $WEEKSECS);
@@ -1168,14 +1170,14 @@ function close_database()
 #
 # MAIN
 #
-
+if ($INTERFACE == 'stable') {
 # Global initializations
 ($DBLINK = mysql_pconnect($MYSQL_HOST, $MYSQL_USER, $MYSQL_PASSWD))
 	or die("Unable to connect to the database on $MYSQL_HOST as $MYSQ_USER<P>\n");
 
 mysql_select_db($MYSQL_DB, $DBLINK)
 	or die("Database $MYSQL_DB not found<P>\n");
-
+}
 # Set some contants in case they aren't on the blackboard in the database
 $SHOW_ALL = false;
 # Get the constants from the blackboard and overwrite hard coded defaults
