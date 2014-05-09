@@ -2,45 +2,51 @@
 require 'inc/lib.inc';
 require 'header.php';
 
-$html_top = '
-<HTML>
-<HEAD>
-<TITLE>Detect zones without matching SOA records</TITLE>
-<LINK rel="stylesheet" href="../style.css" type="text/css">
-</HEAD>
-<BODY bgcolor=#9acdd0>
-<H1>Detect zones without matching SOA records</H1>
-<TABLE border>
-';
+echo "<H1>Detect zones without matching SOA records</H1>\n";
 
-$html_bottom = '
-</TABLE>
-</BODY>
-</HTML>
-';
-
-print $html_top;
 $db = new DB_probind;
-$db->query("SELECT zones.id AS zid, zones.domain AS zdom, records.id AS rid, records.domain AS rdom FROM zones, records WHERE zones.id = records.zone AND zones.domain != 'TEMPLATE' AND records.type = 'SOA' AND LENGTH(master) = 0 ORDER BY zone");
-while ($db->next_record()) {
-	$soas[$db->Record['zdom']] = $db->Record['rid'];
+
+function fix($id) {
+	global $db, $template;
+	if (!ctype_digit($id)) die ("Invalid zone id");
+        $db->query("INSERT INTO records (domain, zone, ttl, type, pref, data, port, weight, comment, genptr, ctime, mtime) ".
+                   "SELECT domain, $id, ttl, type, pref, data, port, weight, '', 1, NOW(), NOW() ".
+		   "FROM records WHERE zone=$template AND type='SOA'");
 }
 
-$count=0;
-$db->query("SELECT id, domain FROM zones WHERE domain != 'TEMPLATE' AND LENGTH(master) = 0 ORDER BY domain");
-while ($db->next_record()) {
-	if (!$soas[$db->Record['domain']]) {
-		print "<A HREF=\"../brzones.php?frame=records&domain=";
-		print $db->Record['domain']."\">".$db->Record['domain']."</A><BR>\n";
-		$count++;
+if ($cmd) {
+    $db->query("SELECT id FROM zones WHERE domain = 'TEMPLATE'");
+    if ($template = $db->fetchColumn()) {
+	switch($cmd) {
+	    case "Fix":
+		fix($id);
+		break;
+	    case "Fix All":
+		foreach($_REQUEST["ids"] as $id) fix($id);
+		break;
 	}
+    } else echo "TEMPLATE domain not found";
 }
-if ($count) {
+
+$sql = "SELECT z.id, z.domain FROM zones z
+	LEFT OUTER JOIN records r ON (r.zone=z.id AND r.type='SOA')
+	WHERE LENGTH(z.master)=0 AND r.id IS NULL";
+
+$db->query($sql);	
+	
+if ($count = $db->num_rows()) {
 	print "$count zones are not properly associated with SOA records.<P>\n";
+
+	echo "<form method=post>\n";
+	while ($db->next_record()) {
+		extract($db->Record);
+		print "$domain <A HREF='int-nosoa.php?cmd=Fix;id=$id'>fix</A><BR>\n";
+		print "<input type='hidden' name='ids[]' value='$id'>\n";
+	}
+	echo "<input type='submit' name='cmd' value='Fix All'>";
 } else {
 	print "All zones are properly associated with SOA records.<P>\n";
 }
 
-print $html_bottom;
-
+require 'footer.php';
 ?>
