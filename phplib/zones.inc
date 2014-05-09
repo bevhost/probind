@@ -12,7 +12,8 @@ class zonesform extends tpl_form {
     $this->form_data->add_element(array("type"=>"hidden","name"=>"id","field"=>"id","size"=>"12"));
     $this->form_data->add_element(array("type"=>"text","name"=>"domain","maxlength"=>"100","size"=>"33"
 		,"minlength"=>1,"length_e"=>"Domain must not be blank.  Required field.",
-		"field"=>"domain","extrahtml"=>""
+		"field"=>"domain",
+		"extrahtml"=>"onblur=\"ajax('/find.php?ZoneNotExists='+this.value,'ZoneOk')\""
 		));
     $this->form_data->add_element(array("type"=>"text","name"=>"serial","size"=>"12",
 		"valid_regex"=>"^[0-9|\-]+$|^$","field"=>"serial",
@@ -35,7 +36,7 @@ class zonesform extends tpl_form {
 		));
     $this->form_data->add_element(array("type"=>"text","name"=>"zonefile","maxlength"=>"80","size"=>"26"
 		,"minlength"=>1,"length_e"=>"Zonefile must not be blank.  Required field.",
-		"field"=>"zonefile","extrahtml"=>"","class"=>"ipe"
+		"field"=>"zonefile","extrahtml"=>"","action"=>"ipe"
 		));
     $this->form_data->add_element(array("type"=>"text","name"=>"options","maxlength"=>"255","size"=>"85",
 		"field"=>"options","extrahtml"=>""
@@ -58,11 +59,17 @@ class zonesform extends tpl_form {
                                 ), "value"=>"No"));
     $this->form_data->add_element(array("type"=>"text","name"=>"owner","maxlength"=>"32","size"=>"10"
 		,"minlength"=>1,"length_e"=>"Owner must not be blank.  Required field.",
-		"field"=>"owner","extrahtml"=>"","class"=>"ipe"
+		"field"=>"owner","extrahtml"=>"","action"=>"ipe"
 		));
     $this->form_data->add_element(array("type"=>"submit","name"=>"submit","value"=>"Submit"));
   }
 
+  /// PHP
+  function validate_input() {
+	$_POST["refresh"] = ttl_to_seconds($_POST["refresh"]);
+	$_POST["retry"] = ttl_to_seconds($_POST["retry"]);
+	$_POST["expire"] = ttl_to_seconds($_POST["expire"]);
+  }
 }
 class zonesTable extends Table {
   var $classname = "zonesTable";

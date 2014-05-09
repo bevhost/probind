@@ -3,7 +3,7 @@
         "http://www.w3.org/1999/xhtml/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<title>ProBind</title>
+<title><?php echo isset($htmlTitle) ? $htmlTitle : "ProBind:".substr($_SERVER["PHP_SELF"],1,-4); ?></title>
 <LINK rel="stylesheet" href="style.css" type="text/css">
 <script type="text/javascript" src="/js/jquery.min.js"></script> 
 <style type="text/css">
@@ -80,16 +80,16 @@
                 margin: 0;
                 padding: 0 10px 0 10px;
                 height: 100%;
-		background-color: #999966;
+		background-color: #cccc99;
         }
 
         #content {
-                margin: 68px -10px 0px 215px;
+                margin: 68px -10px 300px 195px;
                 display: block;
                 padding: 10px;
-                height: 100%;
                 overflow: auto;
-		background-color: #cccc99;
+		background: url('images/BG-shadowleft.gif') repeat-y;
+		height: 100%;
         }
 
         #header {
@@ -110,7 +110,7 @@
 		margin: 68px 0px 0px 0px;
 		top: 0px;
                 left: 0px;
-                width: 220px;
+                width: 200px;
                 height: 100%;
 		padding-left: 3px;
 		padding-top: 3px;
@@ -152,6 +152,7 @@ html {overflow-x: auto; overflow-y: hidden;}
 
 <body>
 
+<div id='popup'></div>
 <div id="header">
 
 <TABLE border="0" cellpadding="0" cellspacing="0" width="100%">

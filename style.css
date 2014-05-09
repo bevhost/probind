@@ -121,7 +121,7 @@ div#popup {
         position:absolute;
         background: url('/images/popup.gif') repeat;
         height: auto;
-        z-index: 350;
+        z-index: 9999;
         border: 1px solid;
         margin: 1px;
 }

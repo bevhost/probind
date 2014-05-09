@@ -18,7 +18,7 @@ class recordsform extends tpl_form {
 		"field"=>"domain","extrahtml"=>""
 		,"value"=>""));
     $this->form_data->add_element(array("type"=>"text","name"=>"ttl","maxlength"=>"15","size"=>"5",
-		"field"=>"ttl","extrahtml"=>""
+		"field"=>"ttl","extrahtml"=>"","value"=>"4H"
 		));
     $this->form_data->add_element(array("type"=>"text","name"=>"type","maxlength"=>"10","size"=>"3"
 		,"minlength"=>1, "length_e"=>"RequiredField",
@@ -48,7 +48,7 @@ class recordsform extends tpl_form {
 		"extrahtml"=>""));
     $this->form_data->add_element(array("type"=>"checkbox","name"=>"genptr",
 		"field"=>"genptr", "extrahtml"=>"",
-		"options"=>array("0"=>"0","1"=>"1"), "value"=>"1"));
+		"options"=>array("0"=>"0","1"=>"1"), "value"=>"value", "checked"=>"checked"));
     $this->form_data->add_element(array("type"=>"select","name"=>"disabled",
 		"field"=>"disabled", "extrahtml"=>"",
 		"options"=>array( array("label"=>"Yes","value"=>"1"),
@@ -170,6 +170,7 @@ JAVASCRIPT;
                 if (!preg_match($IPV6_RE, $post_data))
         	        $this->add_error(trans("InvalidIpAddress",$post_data));
         }
+	$_POST["ttl"] = ttl_to_seconds($post_ttl);
         $type = strtoupper($post_type);
         if ($type != 'MX')
                 $post_pref = '';

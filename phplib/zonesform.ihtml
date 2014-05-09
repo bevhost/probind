@@ -6,7 +6,7 @@
  <table class='tplform'>     <tr><td></td><td>
 		<?php $this->form_data->show_element('id'); ?> </td></tr>
     <tr><td>Domain</td><td>
-		<?php $this->form_data->show_element('domain'); ?> </td></tr>
+		<?php $this->form_data->show_element('domain'); ?>&#160;<span id='ZoneOk'></span> </td></tr>
     <tr><td>Serial</td><td>
 		<?php 	$this->form_data->elements['serial']['ob']->value = date('YmdHis01');
 			$this->form_data->show_element('serial'); ?> </td></tr>

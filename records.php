@@ -1,48 +1,102 @@
 <?php
 include('inc/lib.inc');
-include_once('phplib/records.inc');
-$_ENV["MyForeignKeys"]="LinkedTables";
-$_ENV["MyForeignKeysDB"]="DB_probind";
-error_reporting(E_ALL^(E_STRICT|E_NOTICE));
-#$EditMode='on';
-
-
-/*
-if ($export_results) {
-        page_open(array("sess"=>$_ENV["SessionClass"],"auth"=>$_ENV["AuthClass"],"perm"=>$_ENV["PermClass"],"silent"=>"silent"));
-} else {
-        page_open(array("sess"=>$_ENV["SessionClass"],"auth"=>$_ENV["AuthClass"],"perm"=>$_ENV["PermClass"]));
-	#if ($Field) include("pophead.ihtml"); else include("head.ihtml");
-	if ($records_group_by) $by = " by $records_group_by"; else $by="";
-	echo "<LINK rel=\"stylesheet\" href=\"style.css\" type=\"text/css\">\n";
-	echo "<BODY bgcolor=\"#999966\">";
-	echo "<style> .hide {display:none;} </style>";
-	echo "<span class='big'>Probind Records$by</span>";
-	if (empty($Field)) include("menu.php");
+if (!$export_results) {
+  include('header.php');
+?>
+<script type='text/javascript'>
+document.onreadystatechange = function () {
+ if (document.readyState == "complete") {
+  //document is ready
+  var contents=document.getElementById("content");
+  var btn = contents.getElementsByTagName("button");
+  for(i=0;i<btn.length;i++){
+    if (btn[i].getAttribute('data-toggle')=='modal') {
+        target=btn[i].getAttribute('show');
+        if (target) {
+          if (el = document.getElementById(target)) {
+            el.style.display='none';
+            btn[i].onclick=function(){
+                el = document.getElementById(this.getAttribute('show'));
+                el.style.display='inline';
+                el.style.visibility='visible';
+            }
+          }
+        }
+    }
+    if (btn[i].getAttribute('data-dismiss')=='modal') {
+        btn[i].onclick=function() {
+            this.parentNode.parentNode.style.display='none';
+        }
+    }
+  }
+ }
 }
-check_view_perms();
-*/
-include('header.php');
+</script>
+<?php
+}
 
 $db = new DB_probind;
 $f = new recordsform;
 
 if ($WithSelected) {
         check_edit_perms();
-        switch ($WithSelected) {
-                case "Delete":
-			if (array_search('records',$_ENV['no_edit'])) {
-				echo "No Delete Allowed";
-			} else {
-                        	$sql = "DELETE FROM records WHERE id IN (";
-                        	$sql .= implode(",",$id);
-                        	$sql .= ")";
-                        	if ($dev) echo "<h1>$sql</h1>";
-                        	$db->query($sql);
-                        	echo $db->affected_rows()." deleted.";
-		    	}
+	$WithSelected = explode(" ",$WithSelected);
+	if (!ctype_digit(implode("",$id))) die("Invalid id(s)");
+	$cond = "WHERE id IN (".implode(",",$id).")".access();
+        switch ($WithSelected[0]) {
+		case "Change":
+			echo "<pre>";
+			$field = $WithSelected[1];
+			if (!ctype_alpha($field)) die('Invalid Field Name');
+			$field = $db->qi($field);
+			$sql = "UPDATE records SET $field = ? $cond";
+			if ($dev) echo "<h1>".str_replace("?","'".$_POST["new_value"]."'",$sql)."</h1>";
+			$db->prepare($sql);
+			$db->execute($_POST["new_value"]);
+			echo $db->affected_rows()." updated.";
+                        if (!$dev) echo "<META HTTP-EQUIV=REFRESH CONTENT=\"10; URL=".$sess->self_url()."\">";
+			break;
+                case "Disable":
+			$sql = "UPDATE records SET disabled=1 $cond";
+			if ($dev) echo "<h1>$sql</h1>";
+			$db->query($sql);
+			echo $db->affected_rows()." disabled.";
                         if (!$dev) echo "<META HTTP-EQUIV=REFRESH CONTENT=\"10; URL=".$sess->self_url()."\">";
                         break;
+		case "Enable":
+			$sql = "UPDATE records SET disabled=0 $cond";
+			if ($dev) echo "<h1>$sql</h1>";
+			$db->query($sql);
+			echo $db->affected_rows()." enabled.";
+                        if (!$dev) echo "<META HTTP-EQUIV=REFRESH CONTENT=\"10; URL=".$sess->self_url()."\">";
+                        break;
+		case "Move":
+			$DeleteAfterCopy = true;
+		case "Copy":
+			$newzone = $_POST["new_value"];
+			if (!ctype_digit($newzone)) die("Invalid destination zone id");
+			$db->query("SELECT count(*) FROM records $cond AND type='SOA'");
+			if ($db->fetchColumn) { echo "SOA records cannot be moved or copied"; break; }
+		        $db->query("INSERT INTO records (domain, zone, ttl, type, pref, data, port, weight, comment, genptr, ctime, mtime) ".
+                		   "SELECT domain, $newzone, ttl, type, pref, data, port, weight, '', 1, NOW(), NOW() FROM records $cond");
+                        echo $db->affected_rows()." copied.<br>";
+			if (!isset($DeleteAfterCopy)) break;
+                case "Delete":
+			$db->query("INSERT INTO deleted_records SELECT * FROM records $cond");
+                        $sql = "DELETE FROM records $cond";
+                        if ($dev) echo "<h1>$sql</h1>";
+                        $db->query($sql);
+                        echo $db->affected_rows()." deleted.";
+			echo "<br><hr><form method='post'>";
+			echo "<input type='submit' name='WithSelected' value='UnDelete'>\n";
+			foreach ($id as $val) echo "<input type='hidden' name='id[]' value='$val'>\n";
+			echo "</form>\n";
+                        break;
+                case "UnDelete":
+			$db->query("INSERT INTO records SELECT * FROM deleted_records $cond");
+                        echo $db->affected_rows()." un-deleted.";
+                        $db->query("DELETE FROM deleted_records $cond");
+			break;
                 case "Print";
                         foreach ($id as $row) {
 				echo "<div class='float_left'>\n";
@@ -60,6 +114,8 @@ if ($WithSelected) {
         page_close();
         exit;
 }
+
+get_request_values('zone');
 
 if ($submit) {
   switch ($submit) {
@@ -83,15 +139,7 @@ if ($submit) {
      {
         echo "Saving....";
         $id = $f->save_values();
-        if ($Field) {
-                $text = $_POST["AddressLine1"].", ".$_POST["AddressLine2"].", ".$_POST["AddressLine3"].", ".$_POST["City"];
-?><script>
-if (window.opener) {
-        window.opener.addOption("<?php echo $Field; ?>","<?php echo $text; ?>","<?php echo $id; ?>");
-        window.close();
-}
-</script><?php
-        }
+	tag_zoneid_updated($zone);
         echo "<b>Done!</b><br />\n";
         if (!$dev) echo "<META HTTP-EQUIV=REFRESH CONTENT=\"2; URL=".$sess->self_url()."\">";
         echo "&nbsp;<a href=\"".$sess->self_url()."\">Back to records.</a><br />\n";
@@ -113,13 +161,16 @@ if (window.opener) {
         check_edit_perms();
         echo "Deleting....";
         $f->save_values();
+	tag_zoneid_updated($zone);
         echo "<b>Done!</b><br />\n";
     } else {
         echo "You are not logged in....";
         echo "<b>Aborted!</b><br />\n";
     }
-        if (!$dev) echo "<META HTTP-EQUIV=REFRESH CONTENT=\"2; URL=".$sess->self_url()."\">";
-        echo "&nbsp;<a href=\"".$sess->self_url()."\">Back to records.</a><br />\n";
+        if ($zone) $url = $sess->url("zones.php").$sess->add_query(array("zone"=>$zone));
+	else $url = $sess->self_url();
+        if (!$dev) echo "<META HTTP-EQUIV=REFRESH CONTENT=\"2; URL=$url\">";
+        echo "&nbsp;<a href=\"$url\">Back</a><br />\n";
         page_close();
         exit;
    default:
@@ -128,6 +179,7 @@ if (window.opener) {
 } else {
     if ($id) {
 	$f->find_values($id);
+	$ttl=seconds_to_ttl($ttl);
     } else {
 	include("search.php");
     }
@@ -140,13 +192,16 @@ else {
 	javascript_translations($language);
 }
 
+if ($cmd=='HideQuery') {
+        unset($q_records);
+        $cmd='Default';
+}
 
 switch ($cmd) {
     case "View":
     case "Delete":
 	$f->freeze();
     case "Add":
-
     case "Copy":
 	if ($cmd=="Copy") $id="";
     case "Edit":
@@ -154,6 +209,29 @@ switch ($cmd) {
 	$f->display();
 	if ($orig_cmd=="View") $f->showChildRecords();
 	break;
+    case "ShowQuery":
+	// When we hit this page the first time,
+	// there is no $q.
+	if (!isset($q_records)) {
+	    $q_records = new records_Sql_Query;     // We make one
+	    $q_records->conditions = 1;     // ... with a single condition (at first)
+	    $q_records->translate  = "on";  // ... column names are to be translated
+	    $q_records->container  = "on";  // ... with a nice container table
+	    $q_records->variable   = "on";  // ... # of conditions is variable
+	    $q_records->lang       = "en";  // ... in English, please
+	    $q_records->extra_cond = "";  
+	    $q_records->default_query = "records.disabled=0";  
+	    $q_records->default_sortorder = "domain";  
+
+	    $sess->register("q_records");   // and don't forget this!
+	    $sess->register("records_x");
+	}
+
+	if ($rowcount) {
+            $q_records->start_row = $startingwith;
+            $q_records->row_count = $rowcount;
+	}
+        #  flow through
     default:
 	$cmd="Query";
 	$t = new recordsTable;
@@ -173,7 +251,7 @@ switch ($cmd) {
 	/* See below - EditMode can also be turned on/off by user if section below uncommented */
 	#$t->edit = $f->classname;   /* Allow rows to be editable with a save button that appears onchange */
 	#$t->ipe_table = 'records';   /* Make in place editing changes immediate without a save button */
-	$t->checkbox_menu = Array('Print','Delete');
+	$t->checkbox_menu = Array('Print','Delete','Enable','Disable');
 	$t->check = 'id';  /* Display a column of checkboxes with value of key field*/
 	#$t->extra_html = array('fieldname'=>'extrahtml');  			/* better to put this in .inc */
 	#$t->align      = array('fieldname'=>'right', 'otherfield'=>'center');	/* better to put this in .inc */
@@ -183,7 +261,7 @@ switch ($cmd) {
         if (array_key_exists("records_fields",$_REQUEST)) {
 		$records_fields = $_REQUEST["records_fields"];
 		$records_funcs = $_REQUEST["records_funcs"];
-		$records_group_by = $_REQUEST["GroupBy"];
+#		$records_group_by = $_REQUEST["GroupBy"];
                 $sess->register("records_fields,records_funcs,records_group_by");
 	}
         if (empty($records_fields)) {
@@ -195,13 +273,13 @@ switch ($cmd) {
 	if (in_array(@$LocField,$records_fields)) displayLocSelect($f->classname,$LocField);
         
         $t->fields = $records_fields;
-	$t->GroupBy = $records_group_by;
+#	$t->GroupBy = $records_group_by;
 	$t->funcs = array();
 	foreach($records_funcs as $func ) if ($func) {
 		list($func,$field) = explode(":",$func);
 		$t->funcs[$field]=$func;
 	}
-/*	
+	
         if (!$export_results) {
           echo "Output to:";
           echo "&nbsp;<input name='ExportTo' type='radio' checked='checked' value='' onclick=\"javascript:export_results('');\"> Here";
@@ -209,8 +287,8 @@ switch ($cmd) {
 	  echo "&nbsp;<input name='ExportTo' type='radio' onclick=\"javascript:export_results('CSV');\"> CSV";
 
 
-          echo "\n<a class='btn' href='#ColumnChooser' data-toggle='modal'>Column Chooser</a>\n";
-          echo "<div id='ColumnChooser' class='modal hide'>\n";
+          echo "\n<button show='ColumnChooser' data-toggle='modal'>Column Chooser</button>\n";
+          echo "<div id='ColumnChooser' class='modal' style='display:none'>\n";
           echo "  <div class='modal-header'>\n   <button type='button' class='close' data-dismiss='modal'>×</button>\n";
           echo "   <h3>Column Chooser</h3>\n  </div>\n  <div class='modal-body'>";
           echo " <form id=ColumnSelector method='post'>\n";
@@ -240,55 +318,71 @@ switch ($cmd) {
                 $off='checked="checked"'; $on='';
             }
 	    $foot = " &nbsp; Edit Mode <input type='radio' name='EditMode' value='on' $on> On <input type='radio' name='EditMode' value='off' $off /> Off &nbsp; ";
-	    if ($gb) $foot .=  " Group By <input name=GroupBy value='$t->GroupBy'>";
+	    #if ($gb) $foot .=  " Group By <input name=GroupBy value='$t->GroupBy'>";
           } else {
             $EditMode='';
           }
 
-          echo "\n  </div>\n  <div class='modal-footer'>\n   <a href='#' class='btn' data-dismiss='modal'>Close</a>\n";
-          echo "  $foot<input type=submit class='btn btn-primary' value='Set'>\n  </div>\n </form>";
+          echo "\n  </div>\n  <div class='modal-footer'>\n";
+          echo "  <input type=submit class='btn btn-primary' value='Set'>\n  </div>\n </form>";
           echo "\n</div>";
-          echo "<script>$('#ColumnChooser').modal();</script>\n";
+?>
+<style>
+#ZoneChooser .modal-body,
+#ZoneChooser .modal-header,
+#ZoneChooser .modal-footer {
+	width:400px;
+}
+#ZoneChooser .modal-body {
+	min-height: 300px;
+}
+</style>
+<script type='text/javascript'>
+function update_main_form(f) {
+	var main_form = document.getElementById('ResultsTable');
+        var el = document.createElement('input');
+        el.type='hidden';
+        el.name='new_value';
+	e = f.elements["domain"];
+	if (e.selectedIndex){el.value=e.options[e.selectedIndex].value}else{el.value=e.value};
+        main_form.appendChild(el);
+	main_form.submit();
+	x=main_form.elements["WithSelected"]; 
+alert(x.options[x.selectedIndex].value);
+	return false;
+}
+</script>
+<?php
+          echo "<div id='ZoneChooser' class='modal' style='display:none'>\n";
+	  echo "<form name=zonechooser onsubmit=update_main_form(this) method=none>\n";
+          echo "  <div class='modal-header'>\n   <button type='button' class='close' data-dismiss='modal'>×</button>\n";
+          echo "   <h3 id='zchdr'>Zone Chooser</h3>\n  </div>\n  <div class='modal-body'>";
+
+	  $zf = new zonesform;
+	  $zf->setup();
+	  $zf->link("zones","id","domain","domain","0","select target domain...",access(),"");
+	  $zf->form_data->show_element('domain');
+
+          echo "\n  </div>\n  <div class='modal-footer'>\n";
+          echo "  <input type=submit class='btn btn-primary' value='Confirm'>\n  </div>\n </form>";
+          echo "\n</div>";
 
 	}
-*/
-
-  // When we hit this page the first time,
-  // there is no $q.
-  if (!isset($q_records)) {
-    $q_records = new records_Sql_Query;     // We make one
-    $q_records->conditions = 1;     // ... with a single condition (at first)
-    $q_records->translate  = "on";  // ... column names are to be translated
-    $q_records->container  = "on";  // ... with a nice container table
-    $q_records->variable   = "on";  // ... # of conditions is variable
-    $q_records->lang       = "en";  // ... in English, please
-    $q_records->extra_cond = "";  
-    $q_records->default_query = "records.disabled=0";  
-    $q_records->default_sortorder = "domain";  
-
-    $sess->register("q_records");   // and don't forget this!
-  }
-
-  if ($rowcount) {
-        $q_records->start_row = $startingwith;
-        $q_records->row_count = $rowcount;
-  } else {
-        $startingwith = $q_records->start_row;
-        $rowcount = $q_records->row_count;
-  }
 
   $query = "";
-  if ($submit=='Search') $query = $f->search();   // create sql query from form posted values.
+  if ($submit=='Search') $query = $f->search($t);   // create sql query from form posted values.
 
   // When we hit that page a second time, the array named
   // by $base will be set and we must generate the $query.
   // Ah, and don't set $base to "q" when $q is your Sql_Query
   // object... :-)
-  if (array_key_exists("x",$_POST)) {
-    get_request_values("x");
-    $query = $q_records->where("x", 1);
+  if (array_key_exists("records_x",$_POST)) {
+    get_request_values("records_x");
+    $query = $q_records->where("records_x", 1);
+    $join = $q_records->join;
     $hideQuery = "";
   } else {
+    $join = "";
     $hideQuery = "style='display:none'";
   }
 
@@ -336,7 +430,7 @@ switch ($cmd) {
         }
 
         $sql = "SELECT * FROM records $custom_query WHERE $query";
-	if ($t->GroupBy) $sql .= " group by ".$t->GroupBy;
+	if (isset($t->GroupBy)) $sql .= " group by ".$t->GroupBy;
         $db->query($sql);
         while ($db->next_record()) {
                 $r++;
@@ -367,10 +461,10 @@ switch ($cmd) {
         exit;
   }
 
-
+if (isset($q_records)) {
   if (empty($sortorder)) $sortorder = empty($q_records->last_sortorder) ? $q_records->default_sortorder : $q_records->last_sortorder ;
   if (empty($query))   $query     = empty($q_records->last_query)     ? $q_records->default_query     : $q_records->last_query ;
-
+  if (isset($q_records->last_query)) $join = $q_records->join;
   $q_records->last_query = $query;
   $q_records->last_sortorder = $sortorder;
 /*
@@ -380,6 +474,12 @@ switch ($cmd) {
       { $q_records->start_row = $db->f("total") - $q_records->row_count; }
 */ 
   if ($q_records->start_row < 0) { $q_records->start_row = 0; }
+} 
+
+        if (empty($sortorder))  $sortorder = 'domain';
+        if (empty($query))      $query = 'NOT records.disabled';
+        if (empty($row_count))  $row_count = 500;
+        if (empty($start_row))  $start_row = 0;
 
 #  $f->sort_function_maps = array(  /* use a function to sort values for specified fields */
 #      "ip_addr"=>"inet_aton",  
@@ -388,7 +488,7 @@ switch ($cmd) {
   $query .= access();
 
   if (strpos(strtolower($query),"group by")===false) {
-	if ($t->GroupBy) {
+	if (isset($t->GroupBy)) {
 		$query .= " group by ".$t->GroupBy;
 	 	$t->add_extra = false;
 	}
@@ -397,58 +497,74 @@ switch ($cmd) {
 	if ($so=$f->order_by($sortorder)) $query .= " order by ".$so;
   }
 
-  $query .= " LIMIT ".$q_records->row_count." OFFSET ".$q_records->start_row;
+  $query .= " LIMIT $row_count OFFSET $start_row";
 
   // In any case we must display that form now. Note that the
   // "x" here and in the call to $q->where must match.
   // Tag everything as a CSS "query" class.
   $mode = "'hide'";
 
-/*
-  echo "\n<a class='btn' href='#customQuery' data-toggle='modal'>Custom Query</a>\n";
-  echo "<div id='customQuery' class='modal hide'>\n";
+if (isset($q_records)) {
+    echo "\n<button onclick=\"location='".$sess->self_url().$sess->add_query(array("cmd"=>"HideQuery"))."'\">Hide Advanced Custom Query</button>\n";
+} else {
+    echo "\n<button onclick=\"location='".$sess->self_url().$sess->add_query(array("cmd"=>"ShowQuery"))."'\">Show Advanced Custom Query</button>\n";
+}
+    echo "\n<button onclick=\"location='".$sess->self_url().$sess->add_query(array("cmd"=>"Add"))."'\">Add New Record</button>\n";
+    echo "<hr />\n\n";
 
-  echo " <div class='modal-header'>\n  <button type='button' class='close' data-dismiss='modal'>×</button>\n";
-  echo "  <h3>Query Stats</h3>\n </div>\n <div class='modal-body'>\n";
-  printf($q_records->form("x", $t->map_cols, "query"));
-  if (array_key_exists("more_0",$x)) {$query=""; $mode="'show'";}
-  if (array_key_exists("less_0",$x)) {$query=""; $mode="'show'";}
-  if (!array_key_exists("x",$_POST)) $mode="'hide'";
-
-  echo "\n </div>\n <div class='modal-footer'>\n  <a href='#' class='btn' data-dismiss='modal'>Close</a>\n";
-  echo "  <a href='#' class='btn btn-primary'>Save changes</a>\n </div>\n</div>";
-
-  echo "<script>$('#customQuery').modal($mode);</script>\n";
-*/
+if (isset($q_records)) {
+  printf($q_records->form("records_x", $t->map_cols, "query"));
+  if (array_key_exists("more_0",$records_x)) {$query=""; $mode="'show'";}
+  if (array_key_exists("less_0",$records_x)) {$query=""; $mode="'show'";}
+  if (!array_key_exists("records_x",$_POST)) $mode="'hide'";
+    echo "<hr />\n\n";
+}
 
   // Do we have a valid query string?
   if ($query) {
 
     // Do that query
-    $sql = $t->select($f).$query;
+    $sql = $t->select($f,$join).$query;
     $db->query($sql);
-    #$db->query("select * from ".$db->qi("records")." where ". $query);
-
-/*
-    // Show that condition
-
-    echo "\n<a class='btn' href='#QueryStats' data-toggle='modal'>Query Stats</a>\n";
-    echo "<div id='QueryStats' class='modal hide'>\n";
-
-    echo " <div class='modal-header'>\n  <button type='button' class='close' data-dismiss='modal'>×</button>\n";
-    echo "  <h3>Query Stats</h3>\n </div>\n <div class='modal-body'>\n";
-    printf("  Query Condition = %s<br />\n", $sql);
-    printf("  Query Results = %s<br />\n", $db->num_rows());
-    echo " </div>\n <div class='modal-footer'>\n";
-
-    echo "  <a href='#' class='btn' data-dismiss='modal'>Close</a>\n";
-    echo " </div>\n</div><script>$('#QueryStats').modal();</script>\n";
-    echo "\n<a class='btn' href=\"".$sess->self_url().$sess->add_query(array("cmd"=>"Add"))."\">Add New Records</a>\n";
-*/
-    echo "<hr />\n\n";
 
     // Dump the results (tagged as CSS class default)
     $t->show_result($db, "default");
+    echo $db->num_rows()." records.";
+
+    // examine data to see what extra options can be added to WithSelected dropdown box.
+    foreach ($t->same_data as $k=>$v) {
+	if ($v) {
+	    switch ($k) {
+		case "_t1domain":
+			$NewWithSelected[] = "Move records to...";
+			$NewWithSelected[] = "Copy records to...";
+			break;
+		case "domain": 
+		case "data": 
+		case "ttl":
+			$NewWithSelected[] = "Change $k $v to...";
+	    }
+	}
+    }
+    if (!empty($NewWithSelected)) {
+?>
+<script type='text/javascript'>
+<?php echo "var newOptions=['".implode("','",$NewWithSelected)."'];\n"; ?>
+  for (i=0;i<document.forms.length;i++){
+    if (document.forms[i].name=='ResultsTable') {
+      if (el=document.forms[i].elements["WithSelected"]) {
+	for (j=0;j<newOptions.length;j++) {
+	   var option = document.createElement("option");
+	   option.text = newOptions[j];
+	   option.value = newOptions[j];
+	   el.add(option,el[el.options.length]);
+	}	
+      }
+    }
+  };
+</script>
+<?php
+    }
   }
 } // switch $cmd
 page_close();

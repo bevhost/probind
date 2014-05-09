@@ -22,16 +22,16 @@ class Zone_form extends zonesform {
 }
 $f = new Zone_form;
 
-get_request_values('zone');
+get_request_values('zone,domain');
 if (ctype_digit("$zone")) {
 	$id=$zone;
 	$cmd='Edit';
 }
-
 ?><style>
 table.recordsTable tr td {
    height: 20px;
 } 
+table tr.notEdit td input[type=checkbox], 
 table tr.notEdit td input[type=submit], 
 table tr.notEdit td input[type=reset] {
 	display: none;
@@ -51,8 +51,9 @@ document.onreadystatechange = function () {
   var has_changed = 0;
   var editRow = 0;
   var rtab = document.getElementById("recordsTable");
-  var a = rtab.getElementsByTagName("tr");
-  for(i=0;i<a.length;i++){
+  if (rtab) {
+   var a = rtab.getElementsByTagName("tr");
+   for(i=0;i<a.length;i++){
     if (a[i].className=='notEdit') {
 	a[i].onclick=function(){
 	    if (has_changed) {
@@ -91,6 +92,7 @@ document.onreadystatechange = function () {
 	    }
 	};
     }
+   }
   }
   var contents=document.getElementById("content");
   var r = contents.getElementsByTagName("form");
@@ -102,6 +104,42 @@ document.onreadystatechange = function () {
 	   }
 	   has_changed = 0;
 	}
+    }
+  }
+  var btn = contents.getElementsByTagName("button");
+  for(i=0;i<btn.length;i++){
+    if (btn[i].getAttribute('data-toggle')=='modal') {
+	target=btn[i].getAttribute('show');
+	if (target) {
+	  if (el = document.getElementById(target)) {
+	    el.style.display='none';
+	    btn[i].onclick=function(){
+		el = document.getElementById(this.getAttribute('show'));
+		el.style.display='inline';
+		el.style.visibility='visible';
+	    }
+          }
+	}
+    }
+    if (btn[i].getAttribute('data-dismiss')=='modal') {
+	btn[i].onclick=function() {
+	    this.parentNode.parentNode.style.display='none';
+	}
+    }
+  }
+  var sel=contents.getElementsByTagName("select");
+  for(i=0;i<sel.length;i++){
+    if(sel[i].name=='type'){
+      sel[i].onblur=function(){
+	var rectype=this.options[this.selectedIndex].value;
+	el = this.form.elements['genptr'];
+	if(rectype=='A'||rectype=='AAAA'){
+	  el.style.display='inline';
+	  el.style.visibility='visible';
+	} else {
+	  el.style.display='none';
+	};
+      };
     }
   }
  }
@@ -127,10 +165,13 @@ class MyRecordView extends recordsform {
     if ($row['type']=='SOA') $this->freeze(array('domain','data','pref','type','port','weight'));
     foreach (explode(',','domain,ttl,type,pref,genptr,data,comment') as $key) {
 	echo "<td>";
+	if ($key=='ttl') $row['ttl']=seconds_to_ttl($row['ttl']);
 	$val = $row[$key];
         $this->form_data->elements[$key]["ob"]->value=$val;
 	if ($key=='genptr') {
 	  switch($row['type']) {
+	    case "Add New":	
+		$val = 'checked'; //flow on
 	    case "A":
 	    case "AAAA":	
         	$this->form_data->elements[$key]["ob"]->value=1;
@@ -138,9 +179,10 @@ class MyRecordView extends recordsform {
 		break;
 	    default:
 		$this->form_data->elements[$key]["ob"]->class="hide";
+		$this->form_data->elements[$key]["ob"]->value=$val;
           }
 	}
-        $this->form_data->elements[$key]["ob"]->class="ipe";		# PHPLIB's "In Place Edit" special class
+        $this->form_data->elements[$key]["ob"]->action="ipe";		# PHPLIB's "In Place Edit"
 	if ($key=='data') {
 		if ($row['type']<>'SRV') {
 			$this->form_data->elements["weight"]["ob"]->extrahtml="style='display:none'";
@@ -219,12 +261,11 @@ if ($WithSelected) {
 }
 
 if ($submit) {
-  if ($dev) echo "<pre>";var_dump($_POST);
   if ($_POST["form_name"]=='recordsform') {
 	if ($_POST["disabled"]=='2') {  // deleting records need to be confirmed.
-        	$URL = $sess->url('/records.php').$sess->add_query(array("cmd"=>"Delete","id"=>$_POST["id"]));
-        	echo "<META HTTP-EQUIV=REFRESH CONTENT=\"20; URL=$URL\">";
-        	echo "&nbsp;<a href=\"$URL\">Back to zones.</a><br />\n";
+        	$URL = $sess->url('/records.php').$sess->add_query(array("cmd"=>"Delete","id"=>$_POST["id"],"zone"=>$zone));
+        	echo "<META HTTP-EQUIV=REFRESH CONTENT=\"0; URL=$URL\">";
+        	echo "&nbsp;<a href=\"$URL\">Delete Record</a><br />\n";
         	page_close();
         	exit;
 	}
@@ -252,12 +293,14 @@ if ($submit) {
      {
         echo "Saving....";
         $id = $f->save_values();
+	tag_zoneid_updated($id);
 	if ($submit=='Add') {
 		if ($id) $db->query("INSERT INTO records (domain, zone, ttl, type, pref, data, port, weight, comment, genptr, ctime, mtime) SELECT domain, $id, ttl, type, pref, data, port, weight, '', 1, NOW(), NOW() FROM records WHERE zone=(SELECT id FROM zones WHERE domain='TEMPLATE')");
 	}
         echo "<b>Done!</b><br />\n";
-        if (!$dev) echo "<META HTTP-EQUIV=REFRESH CONTENT=\"2; URL=".$sess->self_url()."\">";
-        echo "&nbsp;<a href=\"".$sess->self_url()."\">Back to zones.</a><br />\n";
+	$url = $sess->self_url().$sess->add_query(array("zone"=>$zone));
+        if (!$dev) echo "<META HTTP-EQUIV=REFRESH CONTENT=\"2; URL=$url\">";
+        echo "&nbsp;<a href=\"$url\">Back to zones.</a><br />\n";
         page_close();
         exit;
      }
@@ -267,8 +310,9 @@ if ($submit) {
     }
    case "View":
    case "Back":
-        echo "<META HTTP-EQUIV=REFRESH CONTENT=\"0; URL=".$sess->self_url()."\">";
-        echo "&nbsp;<a href=\"".$sess->self_url()."\">Back to zones.</a><br />\n";
+	$url = $sess->self_url().$sess->add_query(array("zone"=>$zone));
+        if (!$dev) echo "<META HTTP-EQUIV=REFRESH CONTENT=\"2; URL=$url\">";
+        echo "&nbsp;<a href=\"$url\">Back to zones.</a><br />\n";
         page_close();
         exit;
    case "Delete":
@@ -281,10 +325,12 @@ if ($submit) {
         echo "You are not logged in....";
         echo "<b>Aborted!</b><br />\n";
     }
-        if (!$dev) echo "<META HTTP-EQUIV=REFRESH CONTENT=\"2; URL=".$sess->self_url()."\">";
-        echo "&nbsp;<a href=\"".$sess->self_url()."\">Back to zones.</a><br />\n";
+	$url = $sess->self_url().$sess->add_query(array("zone"=>$zone));
+        if (!$dev) echo "<META HTTP-EQUIV=REFRESH CONTENT=\"2; URL=$url\">";
+        echo "&nbsp;<a href=\"$url\">Back to zones.</a><br />\n";
         page_close();
         exit;
+
    default:
 	include("search.php");
   }
@@ -297,7 +343,12 @@ if ($submit) {
 		$f->classname = "master_form";
 	}
     } else {
-	include("search.php");
+	if ($domain) { 
+		$f->find_values($domain,'domain'); 
+		$cmd='Edit'; 
+		$zone = $id;
+		if ($master) { $f->classname = "slave_form"; } else { $f->classname = "master_form"; }
+	} else include("search.php");
     }
 }
 
@@ -308,6 +359,10 @@ else {
 	javascript_translations($language);
 }
 
+if ($cmd=='HideQuery') {
+	unset($q_zones);
+	$cmd='Default';
+}
 
 $noShow=false;
 switch ($cmd) {
@@ -330,20 +385,23 @@ switch ($cmd) {
 	if ($cmd=="Copy") $id="";
 	$noShow=true;
     case "Edit":
+	$retry=$f->form_data->elements['retry']['ob']->value=seconds_to_ttl($retry);
+	$refresh=$f->form_data->elements['refresh']['ob']->value=seconds_to_ttl($refresh);
+	$expire=$f->form_data->elements['expire']['ob']->value=seconds_to_ttl($expire);
 	$f->display();
 	if (!empty($master) or $noShow) { 	# If there is a master then we hold no local data.
 		echo "</TABLE>";
 		break;				# stop here
 	}
-	echo "<tr><td></td>
-        <TH align=left>".trans('Domain')."</TH>
-        <TH align=left>".trans('TTL')."</TH>
-        <TH align=left>".trans('Type')."</TH>
-        <TH align=left>".trans('Pref')."</TH>
-        <TH align=left>".trans('Ptr')."?</TH>
-        <TH align=left>".trans('Data')."</TH>
-        <TH align=left>".trans('Comment')."</TH>
-        <TH>\n        </TH>\n</TR>";
+	echo "<tr><td width=5%></td>
+        <TH align=left width=25%>".trans('Domain')."</TH>
+        <TH align=left width=8%>".trans('TTL')."</TH>
+        <TH align=left width=5%>".trans('Type')."</TH>
+        <TH align=left width=4%>".trans('Pref')."</TH>
+        <TH align=left width=2%>".trans('Ptr')."?</TH>
+        <TH align=left width=25%>".trans('Data')."</TH>
+        <TH align=left width=16%>".trans('Comment')."</TH>
+        <TH width=10%>\n        </TH>\n</TR>";
 
 	$PTRs = array();  #contains real PTR records, so we can fill in the blanks later with auto generated ones.
 
@@ -366,12 +424,16 @@ switch ($cmd) {
 			break;
 		}
 	}
-	foreach ($row as $k=>$v) $row[$k]=''; $row['type']='Add New'; $f = new MyRecordView; $f->display($row);  // blank record for adding
+	foreach ($row as $k=>$v) $row[$k]=''; 
+	$row['type']='Add New'; 
+	$row['zone']=$id;
+	$f = new MyRecordView; 
+	$f->display($row);  // blank record for adding
 	echo "</TABLE>";
 
 	# show implied records.
 	$servers = published_servers();
-	$ttl = default_ttl($zone);
+	$ttl = default_ttl($id);
 	echo "<PRE>";
 	echo auto_nsrecs($domain, seconds_to_ttl($ttl), $servers);
 	if (preg_match("/\.ip6\.arpa(\.)?$/", $domain))
@@ -380,6 +442,28 @@ switch ($cmd) {
 		echo auto_ptrs($domain, seconds_to_ttl($soa_ttl), $PTRs);
 	echo "</PRE>";
 	break;
+    case "ShowQuery":  // Advanced Custom Query
+	// When we hit this page the first time,
+	// there is no $q.
+	if (!isset($q_zones)) {
+	    $q_zones = new zones_Sql_Query;     // We make one
+	    $q_zones->conditions = 1;     // ... with a single condition (at first)
+	    $q_zones->translate  = "on";  // ... column names are to be translated
+	    $q_zones->container  = "on";  // ... with a nice container table
+	    $q_zones->variable   = "on";  // ... # of conditions is variable
+	    $q_zones->lang       = "en";  // ... in English, please
+	    $q_zones->extra_cond = "";  
+	    $q_zones->default_query = "Id>''";  
+	    $q_zones->default_sortorder = "id desc";  
+
+	    $sess->register("q_zones");   // and don't forget this!
+	    $sess->register("zones_x");
+	}
+
+	if ($rowcount) {
+	    $q_zones->start_row = $startingwith;
+	    $q_zones->row_count = $rowcount;
+	}
     default:
 	$cmd="Query";
 	$t = new zonesTable;
@@ -390,7 +474,7 @@ switch ($cmd) {
     #	$t->add_extra = 'on';   /* or set to base url of php file to link to, defaults to PHP_SELF */
     #   $t->add_extra = "SomeFile.php";                           # use defaults, but point to a different target file.
     #   $t->add_extra = array("View","Edit","Copy","Delete");     # just specify the command names.
-        $t->add_extra = array("View");     # just specify the command names.
+        $t->add_extra = array("Edit");     # just specify the command names.
     #   $t->add_extra = array(                                    # or specify parameters as well.
     #                      "View" => array("target"=>"PayPal.php","key"=>"id","perm"=>"admin","display"=>"view","class"=>"ae_view"),
     #                      );
@@ -406,11 +490,10 @@ switch ($cmd) {
 	#$t->align      = array('fieldname'=>'right', 'otherfield'=>'center');	/* better to put this in .inc */
 
 
-
         if (array_key_exists("zones_fields",$_REQUEST)) {
 		$zones_fields = $_REQUEST["zones_fields"];
 		$zones_funcs = $_REQUEST["zones_funcs"];
-		$zones_group_by = $_REQUEST["GroupBy"];
+		$zones_group_by = @$_REQUEST["GroupBy"];
                 $sess->register("zones_fields,zones_funcs,zones_group_by");
 	}
         if (empty($zones_fields)) {
@@ -436,7 +519,7 @@ switch ($cmd) {
 	  echo "&nbsp;<input name='ExportTo' type='radio' onclick=\"javascript:export_results('CSV');\"> CSV";
 
 
-          echo "\n<a class='btn' href='#ColumnChooser' data-toggle='modal'>Column Chooser</a>\n";
+          echo "\n<button show='ColumnChooser' data-toggle='modal'>Column Chooser</button>\n";
           echo "<div id='ColumnChooser' class='modal hide'>\n";
           echo "  <div class='modal-header'>\n   <button type='button' class='close' data-dismiss='modal'>×</button>\n";
           echo "   <h3>Column Chooser</h3>\n  </div>\n  <div class='modal-body'>";
@@ -472,36 +555,12 @@ switch ($cmd) {
             $EditMode='';
           }
 
-          echo "\n  </div>\n  <div class='modal-footer'>\n   <a href='#' class='btn' data-dismiss='modal'>Close</a>\n";
-          echo "  $foot<input type=submit class='btn btn-primary' value='Set'>\n  </div>\n </form>";
+          echo "\n  </div>\n  <div class='modal-footer'>\n";
+          echo "  <input type=submit class='btn btn-primary' value='Set'>\n  </div>\n </form>";
           echo "\n</div>";
-          echo "<script>$('#ColumnChooser').modal();</script>\n";
 
 	}
 
-  // When we hit this page the first time,
-  // there is no $q.
-  if (!isset($q_zones)) {
-    $q_zones = new zones_Sql_Query;     // We make one
-    $q_zones->conditions = 1;     // ... with a single condition (at first)
-    $q_zones->translate  = "on";  // ... column names are to be translated
-    $q_zones->container  = "on";  // ... with a nice container table
-    $q_zones->variable   = "on";  // ... # of conditions is variable
-    $q_zones->lang       = "en";  // ... in English, please
-    $q_zones->extra_cond = "";  
-    $q_zones->default_query = "Id>''";  
-    $q_zones->default_sortorder = "id desc";  
-
-    $sess->register("q_zones");   // and don't forget this!
-  }
-
-  if ($rowcount) {
-        $q_zones->start_row = $startingwith;
-        $q_zones->row_count = $rowcount;
-  } else {
-        $startingwith = $q_zones->start_row;
-        $rowcount = $q_zones->row_count;
-  }
 
   if ($submit=='Search') $query = $f->search();   // create sql query from form posted values.
 
@@ -509,9 +568,11 @@ switch ($cmd) {
   // by $base will be set and we must generate the $query.
   // Ah, and don't set $base to "q" when $q is your Sql_Query
   // object... :-)
-  if (array_key_exists("x",$_POST)) {
-    get_request_values("x");
-    $query = $q_zones->where("x", 1);
+  if (array_key_exists("zones_x",$_POST)) {
+    get_request_values("zones_x");
+    $query = $q_zones->where("zones_x", 1);
+        $startingwith = $q_zones->start_row;
+        $rowcount = $q_zones->row_count;
     $hideQuery = "";
   } else {
     $hideQuery = "style='display:none'";
@@ -561,7 +622,7 @@ switch ($cmd) {
         }
 
         $sql = "SELECT * FROM zones $custom_query WHERE $query";
-	if ($t->GroupBy) $sql .= " group by ".$t->GroupBy;
+	if (isset($t->GroupBy)) $sql .= " group by ".$t->GroupBy;
         $db->query($sql);
         while ($db->next_record()) {
                 $r++;
@@ -592,7 +653,7 @@ switch ($cmd) {
         exit;
   }
 
-
+if (isset($q_zones)) {
   if (empty($sortorder)) $sortorder = empty($q_zones->last_sortorder) ? $q_zones->default_sortorder : $q_zones->last_sortorder ;
   if (empty($query))   $query     = empty($q_zones->last_query)     ? $q_zones->default_query     : $q_zones->last_query ;
 
@@ -605,6 +666,11 @@ switch ($cmd) {
       { $q_zones->start_row = $db->f("total") - $q_zones->row_count; }
 */ 
   if ($q_zones->start_row < 0) { $q_zones->start_row = 0; }
+}
+	if (empty($sortorder)) 	$sortorder = 'domain';
+	if (empty($query)) 	$query = 'NOT disabled';
+	if (empty($row_count))	$row_count = 500;
+	if (empty($start_row))	$start_row = 0;
 
 #  $f->sort_function_maps = array(  /* use a function to sort values for specified fields */
 #      "ip_addr"=>"inet_aton",  
@@ -620,28 +686,29 @@ switch ($cmd) {
 	if ($so=$f->order_by($sortorder)) $query .= " order by ".$so;
   }
 
-  $query .= " LIMIT ".$q_zones->row_count." OFFSET ".$q_zones->start_row;
+  $query .= " LIMIT $row_count OFFSET $start_row";
 
   // In any case we must display that form now. Note that the
   // "x" here and in the call to $q->where must match.
   // Tag everything as a CSS "query" class.
   $mode = "'hide'";
 
-  echo "\n<a class='btn' href='#customQuery' data-toggle='modal'>Custom Query</a>\n";
-  echo "<div id='customQuery' class='modal hide'>\n";
 
-  echo " <div class='modal-header'>\n  <button type='button' class='close' data-dismiss='modal'>×</button>\n";
-  echo "  <h3>Query Stats</h3>\n </div>\n <div class='modal-body'>\n";
-  printf($q_zones->form("x", $t->map_cols, "query"));
-  if (array_key_exists("more_0",$x)) {$query=""; $mode="'show'";}
-  if (array_key_exists("less_0",$x)) {$query=""; $mode="'show'";}
-  if (!array_key_exists("x",$_POST)) $mode="'hide'";
+if (isset($q_zones)) {
+    echo "\n<button onclick=\"location='".$sess->self_url().$sess->add_query(array("cmd"=>"HideQuery"))."'\">Hide Advanced Custom Query</button>\n";
+} else {
+    echo "\n<button onclick=\"location='".$sess->self_url().$sess->add_query(array("cmd"=>"ShowQuery"))."'\">Show Advanced Custom Query</button>\n";
+}
+    echo "\n<button onclick=\"location='".$sess->self_url().$sess->add_query(array("cmd"=>"Add"))."'\">Add New Zone</button>\n";
+    echo "<hr />\n\n";
 
-  echo "\n </div>\n <div class='modal-footer'>\n  <a href='#' class='btn' data-dismiss='modal'>Close</a>\n";
-  echo "  <a href='#' class='btn btn-primary'>Save changes</a>\n </div>\n</div>";
-
-  echo "<script>$('#customQuery').modal($mode);</script>\n";
-
+if (isset($q_zones)) {
+  printf($q_zones->form("zones_x", $t->map_cols, "query"));
+  if (array_key_exists("more_0",$zones_x)) {$query=""; $mode="'show'";}
+  if (array_key_exists("less_0",$zones_x)) {$query=""; $mode="'show'";}
+  if (!array_key_exists("zones_x",$_POST)) $mode="'hide'";
+    echo "<hr />\n\n";
+}
 
   // Do we have a valid query string?
   if ($query) {
@@ -649,27 +716,10 @@ switch ($cmd) {
     // Do that query
     $sql = $t->select($f).$query;
     $db->query($sql);
-    #$db->query("select * from ".$db->qi("zones")." where ". $query);
-
-    // Show that condition
-
-    echo "\n<a class='btn' href='#QueryStats' data-toggle='modal'>Query Stats</a>\n";
-    echo "<div id='QueryStats' class='modal hide'>\n";
-
-    echo " <div class='modal-header'>\n  <button type='button' class='close' data-dismiss='modal'>×</button>\n";
-    echo "  <h3>Query Stats</h3>\n </div>\n <div class='modal-body'>\n";
-    printf("  Query Condition = %s<br />\n", $sql);
-    printf("  Query Results = %s<br />\n", $db->num_rows());
-    echo " </div>\n <div class='modal-footer'>\n";
-
-    echo "  <a href='#' class='btn' data-dismiss='modal'>Close</a>\n";
-    echo " </div>\n</div><script>$('#QueryStats').modal();</script>\n";
-    echo "\n<a class='btn' href=\"".$sess->self_url().$sess->add_query(array("cmd"=>"Add"))."\">Add New Zones</a>\n";
-
-    echo "<hr />\n\n";
 
     // Dump the results (tagged as CSS class default)
     $t->show_result($db, "default");
+    echo $db->num_rows()." zones";
   }
 } // switch $cmd
 page_close();
