@@ -1,6 +1,5 @@
 <?php
   $this->form_data->start("zonesform");
-  if ($this->error) printf("<P class=error>Error: %s %s</p>\n", $ErrorFieldName, $this->error);  
   if ($this->errors) foreach($this->errors as $error) printf("<P class=error>Error: %s</p>\n", $error);
 ?>
  <table class='tplform'>     <tr><td></td><td>

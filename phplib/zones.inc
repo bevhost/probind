@@ -6,7 +6,7 @@ class zonesform extends tpl_form {
   var $key_field = "id"; # if different to $key
   var $classname = "zonesform";
   var $database_class = "DB_probind";
-  var $default_query = "Id>''";  
+  var $default_query = "NOT zones.disabled";  
 
   function setup_fields () {
     $this->form_data->add_element(array("type"=>"hidden","name"=>"id","field"=>"id","size"=>"12"));
@@ -20,16 +20,16 @@ class zonesform extends tpl_form {
 		"valid_e"=>"Serial must be a whole number containing digits 0-9 only. May also start with negative symbol -",
 		"extrahtml"=>""));
     $this->form_data->add_element(array("type"=>"text","name"=>"refresh","size"=>"12",
-		"valid_regex"=>"^[0-9|\-]+$|^$","field"=>"refresh",
-		"valid_e"=>"Refresh must be a whole number containing digits 0-9 only. May also start with negative symbol -",
+		"valid_regex"=>"^[0-9|\-]+$|^$|([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+m)?([0-9]+s)?","field"=>"refresh",
+		"valid_e"=>"Invalid Refresh",
 		"extrahtml"=>""));
     $this->form_data->add_element(array("type"=>"text","name"=>"retry","size"=>"12",
-		"valid_regex"=>"^[0-9|\-]+$|^$","field"=>"retry",
-		"valid_e"=>"Retry must be a whole number containing digits 0-9 only. May also start with negative symbol -",
+		"valid_regex"=>"^[0-9|\-]+$|^$|([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+m)?([0-9]+s)?","field"=>"retry",
+		"valid_e"=>"Invalid Retry",
 		"extrahtml"=>""));
     $this->form_data->add_element(array("type"=>"text","name"=>"expire","size"=>"12",
-		"valid_regex"=>"^[0-9|\-]+$|^$","field"=>"expire",
-		"valid_e"=>"Expire must be a whole number containing digits 0-9 only. May also start with negative symbol -",
+		"valid_regex"=>"^[0-9|\-]+$|^$|([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+m)?([0-9]+s)?","field"=>"expire",
+		"valid_e"=>"Invalid Expire",
 		"extrahtml"=>""));
     $this->form_data->add_element(array("type"=>"text","name"=>"master","maxlength"=>"32","size"=>"10",
 		"field"=>"master","extrahtml"=>""
@@ -42,11 +42,9 @@ class zonesform extends tpl_form {
 		"field"=>"options","extrahtml"=>""
 		));
     $this->form_data->add_element(array("type"=>"date","name"=>"mtime","maxlength"=>"","size"=>"0",
-		"field"=>"mtime","extrahtml"=>" onBlur=\"ajax_update_element(this,'find.php?dt=')\""
-		,"valid_e"=>"Invalid Date","valid_regex"=>"nulltimestamp","value"=>"CURRENT_TIMESTAMP"));
+		"field"=>"mtime","extrahtml"=>"","value"=>"CURRENT_TIMESTAMP"));
     $this->form_data->add_element(array("type"=>"date","name"=>"ctime","maxlength"=>"","size"=>"0",
-		"field"=>"ctime","extrahtml"=>" onBlur=\"ajax_update_element(this,'find.php?dt=')\""
-		,"valid_e"=>"Invalid Date","valid_regex"=>"nulltimestamp","value"=>"0000-00-00 00:00:00"));
+		"field"=>"ctime","extrahtml"=>"","value"=>"CURRENT_TIMESTAMP"));
     $this->form_data->add_element(array("type"=>"select","name"=>"updated","size"=>"1",
 		"field"=>"updated","extrahtml"=>"",
                 "options"=>array( array("label"=>"Yes","value"=>"1"),
@@ -69,6 +67,7 @@ class zonesform extends tpl_form {
 	$_POST["refresh"] = ttl_to_seconds($_POST["refresh"]);
 	$_POST["retry"] = ttl_to_seconds($_POST["retry"]);
 	$_POST["expire"] = ttl_to_seconds($_POST["expire"]);
+	return true;
   }
 }
 class zonesTable extends Table {

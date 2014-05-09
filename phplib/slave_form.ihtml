@@ -16,7 +16,6 @@
 <TR><TD>
 <TABLE id="recordsTable" border="0" width="100%">
 <?php
-  if ($this->error) printf("<P class=error>Error: %s %s</p>\n", $ErrorFieldName, $this->error);
   if ($this->errors) foreach($this->errors as $error) printf("<P class=error>Error: %s</p>\n", $error);
   $this->form_data->show_element('id'); 
   if (!$perm->have_perm('admin')) $this->freeze(array('owner'));
@@ -57,3 +56,5 @@
     <tr><td>Options</td><td>
                 <?php $this->form_data->show_element('options'); ?> </td></tr>
 -->
+<?php $this->form_data->finish(); ?>
+

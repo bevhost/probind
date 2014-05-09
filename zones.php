@@ -3,19 +3,6 @@ include('inc/lib.inc');
 include_once('phplib/records.inc');
 if (!$export_results) include('header.php');
 
-
-/*
-if ($export_results) {
-        page_open(array("sess"=>$_ENV["SessionClass"],"auth"=>$_ENV["AuthClass"],"perm"=>$_ENV["PermClass"],"silent"=>"silent"));
-} else {
-        page_open(array("sess"=>$_ENV["SessionClass"],"auth"=>$_ENV["AuthClass"],"perm"=>$_ENV["PermClass"]));
-	#if ($Field) include("pophead.ihtml"); else include("head.ihtml");
-	if ($zones_group_by) $by = " by $zones_group_by"; else $by="";
-#	echo "<span class='big'>Probind Zones$by</span>";
-	if (empty($Field)) include("header.php");
-}
-check_view_perms();
-*/
 $db = new DB_probind;
 
 class Zone_form extends zonesform {
@@ -253,6 +240,7 @@ function short_date($var) {
 
 
 if ($submit) {
+  $zoneform = true;  # it's a zone... unless...
   if ($_POST["form_name"]=='recordsform') {
 	if ($_POST["disabled"]=='2') {  // deleting records need to be confirmed.
         	$URL = $sess->url('/records.php').$sess->add_query(array("cmd"=>"Delete","id"=>$_POST["id"],"zone"=>$zone));
@@ -262,9 +250,11 @@ if ($submit) {
         	exit;
 	}
 	$f=new recordsform;
+	$zoneform = false;  # ok, so we updated a record
   }
   switch ($submit) {
    case "Copy": $id="";
+   case "Update":
    case "Save":
     if ($id) $submit = "Edit";
     else $submit = "Add";
@@ -284,13 +274,14 @@ if ($submit) {
      else
      {
         echo "Saving....";
-        $id = $f->save_values();
-	tag_zoneid_updated($id);
+        $id = $f->save_values();  
+	$zone_id = $zoneform ? $id : $zone;   # Did we save a zone or a record
+	tag_zoneid_updated($zone_id);
 	if ($submit=='Add') {
 		if ($id) $db->query("INSERT INTO records (domain, zone, ttl, type, pref, data, port, weight, comment, genptr, ctime, mtime) SELECT domain, $id, ttl, type, pref, data, port, weight, '', 1, NOW(), NOW() FROM records WHERE zone=(SELECT id FROM zones WHERE domain='TEMPLATE')");
 	}
         echo "<b>Done!</b><br />\n";
-	$url = $sess->self_url().$sess->add_query(array("zone"=>$zone));
+	$url = $sess->self_url().$sess->add_query(array("zone"=>$zone_id));
         if (!$dev) echo "<META HTTP-EQUIV=REFRESH CONTENT=\"2; URL=$url\">";
         echo "&nbsp;<a href=\"$url\">Back to zones.</a><br />\n";
         page_close();
