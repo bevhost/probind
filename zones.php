@@ -251,39 +251,6 @@ function short_date($var) {
         }   
 }
 
-if ($WithSelected) {
-        check_edit_perms();
-        switch ($WithSelected) {
-                case "Delete":
-			if (array_search('zones',$_ENV['no_edit'])) {
-				echo "No Delete Allowed";
-			} else {
-                        	$sql = "DELETE FROM zones WHERE id IN (";
-                        	$sql .= implode(",",$id);
-                        	$sql .= ")";
-                        	if ($dev) echo "<h1>$sql</h1>";
-                        	$db->query($sql);
-                        	echo $db->affected_rows()." deleted.";
-		    	}
-                        if (!$dev) echo "<META HTTP-EQUIV=REFRESH CONTENT=\"10; URL=".$sess->self_url()."\">";
-                        break;
-                case "Print";
-                        foreach ($id as $row) {
-				echo "<div class='float_left'>\n";
-                                $f = new zonesform;
-                                $f->find_values($row);
-                                $f->freeze();
-                                $f->display();
-				echo "\n</div>\n";
-                        }
-			echo "\n<br style='clear: both;'>\n";
-                        break;
-        }
-        echo "&nbsp<a href=\"".$sess->self_url();
-        echo "\">Back to zones.</a><br>\n";
-        page_close();
-        exit;
-}
 
 if ($submit) {
   if ($_POST["form_name"]=='recordsform') {
