@@ -3,26 +3,15 @@ require 'inc/lib.inc';
 require 'header.php';
 
 $html_top = '
-<HTML>
-<HEAD>
-<TITLE>Detect multiple A records for the same IP address</TITLE>
-<LINK rel="stylesheet" href="../style.css" type="text/css">
-</HEAD>
-<BODY bgcolor="#cccc99" background="../images/BG-shadowleft.gif">
 <H1>Detect multiple A records for the same IP address</H1>
 ';
-
-$html_bottom = "
-</BODY>
-</HTML>
-";
 
 $count=0;
 function list_record($record)
 {
 	$GLOBALS["count"]++;
 	if ($record['rdom']<>'@' and substr($record['rdom'],-1)<>'.') print $record['rdom']."." ;
-	print "<A HREF=\"../brzones.php?frame=records&zone=".$record['zid'];
+	print "<A HREF=\"zones.php?zone=".$record['zid'];
 	print "\">".$record['zdom']."</A><BR>\n";
 }
 
@@ -60,6 +49,6 @@ while ($db->next_record()) {
 }
 if ($last) echo "</UL>";
 print "<HR><P>".$db->num_rows()." ($count) records.<BR>\n";
-print $html_bottom;
 
+require 'footer.php';
 ?>

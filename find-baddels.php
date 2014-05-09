@@ -152,7 +152,7 @@ while (!feof($pipe)) {
 	$hostnames = explode(" ", $result);
 	if (strlen($hostnames[0])) {
 		$zone = get_named_zone($hostnames[0]);
-		$domstr = "<B><A HREF=\"../brzones.php?frame=records&zone=".$zone['id']."\">%s</A></B>";
+		$domstr = "<B><A HREF=\"zones.php?zone=".$zone['id']."\">%s</A></B>";
 		begin_domain($hostnames[0]);
 		for ($i=1; $i<count($hostnames); $i++) {
 			domain_name_server($hostnames[$i]);

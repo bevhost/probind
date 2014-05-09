@@ -3,16 +3,11 @@ require 'inc/lib.inc';
 include 'header.php';
 
 $html_top = '
-<HTML>
-<HEAD>
-<TITLE>Detect lame delegations</TITLE>
-<LINK rel="stylesheet" href="../style.css" type="text/css">
-</HEAD>
-<BODY bgcolor="#cccc99" background="../images/BG-shadowleft.gif">
 <H1>Detect lame delegations</H1>
 ';
 
 $html_bottom = '
+</DIV>
 </BODY>
 </HTML>
 ';
@@ -143,7 +138,7 @@ while (!feof($pipe)) {
 	$hostnames = explode(" ", $result);
 	if (strlen($hostnames[0])) {
 		$zone = get_named_zone($hostnames[0]);
-		$domstr = "<B><A HREF=\"../brzones.php?frame=records&zone=".$zone['id']."\">%s</A></B> &nbsp; ";
+		$domstr = "<B><A HREF=\"zones.php?zone=".$zone['id']."\">%s</A></B> &nbsp; ";
 		begin_domain($hostnames[0]);
 		for ($i=1; $i<count($hostnames); $i++) {
 			domain_name_server($hostnames[$i]);

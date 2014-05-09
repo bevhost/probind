@@ -1,21 +1,10 @@
 <?php 
 require 'inc/lib.inc'; 
+$htmlTitle = "ProBind:TooFewMX";
 require 'header.php';
 
-$html_top = '
-<HTML>
-<HEAD>
-<TITLE>Detect domains with few MX records</TITLE>
-<LINK rel="stylesheet" href="../style.css" type="text/css">
-</HEAD>
-<BODY bgcolor="#cccc99" background="../images/BG-shadowleft.gif">
-<H1>Detect domains with few MX records</H1>
-';
+echo '<H1>Detect domains with few MX records</H1>';
 
-$html_bottom = "
-</BODY>
-</HTML>
-";
 
 function check_mx_cnt($count)
 {
@@ -38,7 +27,7 @@ function check_mx_cnt($count)
 	while ($db->next_record()) {
 		if ($db->Record['zdom'] != $lastdom) {
 			if ($lastdom && $mxcnt == $count) {
-				$result .= "<B><A HREF=\"../brzones.php?frame=records&zone=$lastzid\">$lastdom</A></B><BR>\n";
+				$result .= "<B><A HREF=\"zones.php?zone=$lastzid\">$lastdom</A></B><BR>\n";
 			} 
 			$mxcnt = 0;
 			$lastdom = $db->Record['zdom'];
@@ -48,11 +37,10 @@ function check_mx_cnt($count)
 			$mxcnt = $db->Record['rcnt'];
 	}
 	if ($mxcnt == $count)
-		$result .= "<B><A HREF=\"../brzones.php?frame=records&zone=$lastzid\">$lastdom</A></B><BR>\n";
+		$result .= "<B><A HREF=\"zones.php?zone=$lastzid\">$lastdom</A></B><BR>\n";
 	return $result;
 }
 
-print $html_top;
 if ($list = check_mx_cnt(0)) 
 	print "Domains without any MX records at all:<P><UL>
 $list
@@ -67,4 +55,5 @@ $list
 
 print $html_bottom;
 
+require 'footer.php';
 ?>

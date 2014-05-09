@@ -36,10 +36,10 @@ function subnet_view($subnet)
 	$db->execute($prefix.".%");
 	while ($db->next_record()) {
 		if ($db->Record['rdom'] == $db->Record['zdom'].".")
-			$descr = sprintf("<A HREF=\"../brzones.php?frame=records&zone=%d\">%s</A>",
+			$descr = sprintf("<A HREF=\"zones.php?zone=%d\">%s</A>",
 				$db->Record['zid'], $db->Record['zdom']);
 		else
-			$descr = sprintf("%s.<A HREF=\"../brzones.php?frame=records&zone=%d\">%s</A>",
+			$descr = sprintf("%s.<A HREF=\"zones.php?zone=%d\">%s</A>",
 				$db->Record['rdom'], $db->Record['zid'], $db->Record['zdom']);
 		$bytes = explode(".", $db->Record['rdata']);
 		$hosts[$bytes[3]][] = $descr;
@@ -50,7 +50,7 @@ function subnet_view($subnet)
 			WHERE zones.id = records.zone AND records.type = 'PTR' AND zones.domain = ?");
 	$db->execute($prefix.".",$subnet);
 	while ($db->next_record()) {
-		$descr = sprintf("%s<BR>&nbsp;(explicit PTR in <A HREF=\"../brzones.php?frame=records&zone=%d\">%s</A>)",
+		$descr = sprintf("%s<BR>&nbsp;(explicit PTR in <A HREF=\"zones.php?zone=%d\">%s</A>)",
 			$db->Record['rdata'], $db->Record['zid'], $db->Record['zdom']);
 		$bytes = explode(".", $db->Record['rdom']);
 		$hosts[$bytes[3]][] = $descr;
@@ -102,7 +102,7 @@ if ($subnet = @$INPUT_VARS['subnet']) {
 	else echo "$subnet not found.";
 }
 if ($zid) {
-	print "IP number usage in the <A HREF=\"../brzones.php?frame=records&zone=$zid\">$subnet</A> subnet<P>\n<UL>\n";
+	print "IP number usage in the <A HREF=\"zones.php?zone=$zid\">$subnet</A> subnet<P>\n<UL>\n";
 	print subnet_view($subnet);
 	print "</UL>\n";
 } else {

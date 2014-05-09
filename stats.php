@@ -34,7 +34,7 @@ if ($count) {
 	print "<P>The database contains changes to $count domains.<P><UL>";
 	while ($db->next_record()) {
 		extract($db->Record);
-		print "<LI><A HREF=\"../brzones.php?frame=records&zone=$id\">$domain</A>\n";
+		print "<LI><A HREF=\"zones.php?zone=$id\">$domain</A>\n";
 	}
 	print "</UL>\n";
 	$update = TRUE;
@@ -106,7 +106,7 @@ while ($db->next_record()) {
 				break;
 			default:  $T = $state;break;
 	}
-	print "<TR><TD><A HREF=\"servers.php?action=detailedview&server=$row[0]\">$row[1]</A></TD><TD>$row[2]</TD><TD align=center>$type</TD><TD align=center>$push</TD><TD align=center>$mkrec</TD><TD align=CENTER $B>$T</TD><TD align=center><A href=\"../test.php?id=$id\"><img src=\"../images/greenbutton.gif\" border=0 high=16 width=24></A></TD></TR>\n";
+	print "<TR><TD><A HREF=\"servers.php?action=detailedview&server=$row[0]\">$row[1]</A></TD><TD>$row[2]</TD><TD align=center>$type</TD><TD align=center>$push</TD><TD align=center>$mkrec</TD><TD align=CENTER $B>$T</TD><TD align=center><A href=\"test.php?id=$id\"><img src=\"images/greenbutton.gif\" border=0 high=16 width=24></A></TD></TR>\n";
 }
 ?>
 </TABLE>
