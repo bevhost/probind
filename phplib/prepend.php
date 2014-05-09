@@ -36,7 +36,7 @@ if (array_key_exists("parameters",$_GET)) {
 }
 
 $dev = false;
-#$dev = true;
+$dev = true;
 
 $_ENV["local"]  = dirname(__FILE__)."/";
 $_ENV["libdir"] = "/usr/share/phplib/";
@@ -72,7 +72,7 @@ function EventLog($Description,$ExtraInfo="",$Level="Info") {
 	$db = new DB_probind;
 	if ($PHP_SELF) {
 		$Program = $PHP_SELF;
-	} else if (isset($argv[0]) {
+	} else if (isset($argv[0])) {
 		$Program = $argv[0];
 	} else {
 		$Program = "Unknown";
