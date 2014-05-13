@@ -1,0 +1,35 @@
+#!/usr/bin/php
+<?php
+if (php_sapi_name() == 'cli' && isset($_SERVER["argc"])) { include ("inc/lib.inc"); } else die("Command Line Utility");
+newt_init();
+newt_cls();
+newt_draw_root_text(0, 0, "Text Mode Utility to UnBlock IP Addresses from WebSite");
+newt_push_help_line(null);
+newt_draw_root_text(-30, 0, "Probind DNS Management Tool");
+newt_centered_window(50, 17, "Choose Entry to UnBlock");
+$form = newt_form();
+$list = newt_listbox(3,2,10);
+$db->query("SELECT id, DATE(datetime) as dt, ip FROM exploits WHERE banned=1 ORDER BY datetime DESC LIMIT 50");
+newt_listbox_add_entry($list, 'exit without unblocking any', $id);
+while ($db->next_record()) {
+	extract($db->Record);
+	newt_listbox_add_entry($list, "$dt $ip", "$id");
+}
+$b1 = newt_button (18, 13, "Submit");
+newt_form_add_component($form, $list);
+newt_form_add_component($form, $b1);
+newt_refresh();
+newt_run_form($form);
+$res = newt_listbox_get_current($list);
+newt_finished();
+newt_form_destroy($form);
+if ($res) {
+	$db->prepare("DELETE FROM exploits WHERE id=?");
+	$db->execute($res);
+	echo $db->num_rows();
+} else {
+	echo "no";
+}
+echo " entries deleted.\n";
+?>
+
