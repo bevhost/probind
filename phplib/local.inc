@@ -81,6 +81,9 @@ class probind_Auth extends Auth {
         $uid = $this->db->f("user_id");
         $this->auth["perm"] = $this->db->f("perms");
       }
+      if ($this->check_brute_force($_SERVER["REMOTE_ADDR"],$uid)) {
+        $uid = false;
+      }
       return $uid;
     }
   }
