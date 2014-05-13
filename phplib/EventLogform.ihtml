@@ -1,0 +1,39 @@
+<?php
+  $this->form_data->start("EventLogform");
+  if ($this->error) printf("<P class=error>Error: %s %s</p>\n", $ErrorFieldName, $this->error);  ?>
+ <TABLE>     <TR><TD></TD><TD>
+		<?php $this->form_data->show_element('id'); ?> </TD></TR>
+    <TR><TD>Event Time</TD><TD>
+		<?php $this->form_data->show_element('EventTime'); ?> </TD></TR>
+    <TR><TD>Program</TD><TD>
+		<?php $this->form_data->show_element('Program'); ?> </TD></TR>
+    <TR><TD>IP Address</TD><TD>
+		<?php $this->form_data->show_element('IPAddress'); ?> </TD></TR>
+    <TR><TD>User Name</TD><TD>
+		<?php $this->form_data->show_element('UserName'); ?> </TD></TR>
+    <TR><TD>Description</TD><TD>
+		<?php $this->form_data->show_element('Description'); ?> </TD></TR>
+    <TR><TD>Extra Info</TD><TD>
+		<?php $this->form_data->show_element('ExtraInfo'); 
+			global $Description, $ExtraInfo;
+			if (substr($Description,0,17)=="<b>PHP Error:</b>") {
+				echo "<pre>\n";
+				var_dump(unserialize($ExtraInfo));
+				echo "</pre>\n";
+			}
+		?> </TD></TR>
+    <TR><TD>Level</TD><TD>
+		<?php $this->form_data->show_element('Level'); ?> </TD></TR>
+    <TR><TD>&nbsp;</TD><TD> 
+		<?php 
+		if ($cmd=="View") $cmd="Back";
+		if ($cmd=="Add") $cmd="Save";
+		if ($cmd=="Edit") $cmd="Save";
+		$this->form_data->show_element('submit',$cmd);
+		?> </TD></TR>
+    <TR><TD>&nbsp;</TD><TD> 
+		<?php $this->form_data->show_element('reset');
+		?> </TD></TR>
+ </TABLE>
+<?php $this->form_data->finish();
+?>

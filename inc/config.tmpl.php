@@ -18,6 +18,8 @@ class DB_probind extends DB_Sql {
   #var $Debug	= 1;
 }
 
+$webmaster = "root@localhost";
+
 $idn_version = 2008;  // internationalisation version for punycode converter
 
 include ("lang.php");

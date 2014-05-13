@@ -257,6 +257,7 @@ switch ($s) {
 <?php if ($perm->have_perm("admin")) { ?>
 <A HREF="settings.php?action=browse">Settings</A>
 <A HREF="servers.php?action=browse">Servers</A>
+<A HREF="exploits.php">Unblock banned</A>
 <A HREF="usermgr.php">Manage Logins</A>
 <?php } ?>
 <A HREF="password.php">Change Password</A>

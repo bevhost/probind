@@ -9,7 +9,11 @@ if(file_exists(dirname(__FILE__) . "/config.php"))
 else
         die('Could not load configuration file. Please check this ProBIND installation.');
 
+$db = new DB_probind;
+include("scan.php");  // sql injection attack scanner
+
 page_open(array("sess" => "probind_Session", "auth" => "probind_Auth", "perm" => "probind_Perm"));
 
 check_view_perms();
+
 ?>
