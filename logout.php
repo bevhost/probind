@@ -16,7 +16,7 @@ foreach($sess->pt as $thing=>$val) {  # forget everything stored in our session
                         unset($sess->pt[$thing]);
         }
 }
-$auth->logout();
+if (is_object($auth)) $auth->logout();
 page_close();
 header("Location:index.php");
 ?>
