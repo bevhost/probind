@@ -475,9 +475,7 @@ print "<SCRIPT>open('update.php?frame=PROGRESS','MAIN');</SCRIPT><HR>\n";
 for($i = 0; $i < 512; $i++)
     print "<B></B>\n";
 
-# FIXME - REMOTE_USER is not defined, and relies on register_globals to be so. Dirty hack for now...
-$REMOTE_USER = 'User';
-if ($user = patient_enter_crit($REMOTE_USER, 'PUSH')) {
+if ($user = patient_enter_crit($auth->auth["uname"], 'PUSH')) {
 	print sprintf($push_in_progress, ucfirst($user));
 	exit();
 }
