@@ -460,20 +460,6 @@ if ($frame == 'BLANK') {
 	exit;
 }
 
-/*
-session_register("session_counter");
-if ($session_counter < time() - $SESSION_TIMEOUT ) {
-    $session_counter = time();
-    session_start();
-    header('WWW-Authenticate: Basic realm="probind-OPERATOR"');
-    header('HTTP/1.0 401 Unauthorized');
-    print $html_top1;
-    exit;
-}
-$session_counter = time();
-session_start();
-*/
-
 print $html_top1;
 
 if ( !$LOG_DIR || !opendir($LOG_DIR) ) {
