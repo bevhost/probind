@@ -33,6 +33,8 @@ $HOURSECS = 60*$MINSECS;
 $DAYSECS = 24*$HOURSECS;
 $WEEKSECS = 7*$DAYSECS;
 
+$SERVER_TYPES = array("M"=>"Master","S"=>"Slave","N"=>"Native","D"=>"DnsMasq");
+
 # Maximum time between user / password requests if no activity take place
 $SESSION_TIMEOUT = 60;
 # We use this error message if a domain lock cannot be acquired
@@ -73,6 +75,60 @@ if (!function_exists("inet_pton")) {
     return $ip;
   }
 }
+
+function update_powerdns_zone($zone_id,$soa_ns,$hostmaster) {
+	if (!ctype_digit("$zone_id")) die('Invalid zoneid.'); 
+	$db = new DB_probind;
+	$pdns = new DB_powerdns;
+	$db->query("SELECT domain as zonename, master, serial FROM zones WHERE id=$zone_id");
+	if (!$db->next_record()) return 0;
+	extract($db->Record);
+	$db->query("SELECT ttl FROM records WHERE zone=$zone_id AND type='SOA'");
+	if (!$soa_ttl = $db->fetchColumn()) $soa_ttl=14400;
+	if ($master) echo "Skipping slave zone $zonename<br>\n";
+	if ($master) return 0;	# not supported yet 
+	$pdns->prepare("SELECT id FROM domains WHERE name=?");
+	$pdns->execute($zonename);
+	echo "Updating $zonename\n";
+	if (!$pdns_zone_id = $pdns->fetchColumn()) {
+		$pdns->prepare("INSERT INTO domains SET type='NATIVE', name=?");
+		$pdns->execute($zonename);
+		$pdns_zone_id = $pdns->lastInsertId();
+	}
+	$change_date=time();
+	$sql = "INSERT INTO records SET domain_id=$pdns_zone_id, type=?, prio=?, name=?, content=?, ttl=?, change_date=$change_date ";
+	$pdns->prepare($sql);
+	$pdns->execute("SOA", NULL, $zonename, "$soa_ns $hostmaster $serial", $soa_ttl );
+	$db->query("SELECT * FROM records WHERE zone=$zone_id");
+	$PTRs = array();
+	$ns_found = false;
+	while ($db->next_record()) {
+		extract($db->Record);
+		if ($type<>'TXT' and substr($data,-1)==".") $data=substr($data,0,-1);
+		if ($domain=="@") $host = $zonename; 
+		else if (substr($domain,-1)==".") $host=substr($domain,0,-1);
+		else $host="$domain.$zonename";
+		if ($type=='SRV') $content = "$weight $port $data"; else $content = $data;
+		$pdns->execute($type, $pref, $host, $content, $ttl);
+		echo ".";
+		if ($type=='PTR') $PTRs[$domain] = true;
+		if ($type=='NS') $ns_found = true;
+	}
+	if (!$ns_found) foreach(published_servers() as $server) {
+		$pdns->execute("NS", NULL, $zonename, $server, $soa_ttl);
+	}
+	$reverse = array();
+        if (preg_match("/\.ip6\.arpa(\.)?$/", $zonename))
+                $reverse = auto_ip6_ptrs($zonename, $soa_ttl, $PTRs, "Native");
+        if (preg_match("/\.in-addr\.arpa(\.)?$/", $zonename))
+                $reverse = auto_ptrs($zonename, $soa_ttl, $PTRs, "Native");
+	foreach ($reverse as $host=>$content) {
+		$pdns->execute("PTR", NULL, "$host.$zonename", $content, $soa_ttl);
+	}
+	echo "<br>\n";
+	$pdns->query("DELETE FROM records WHERE domain_id=$pdns_zone_id AND change_date<$change_date");
+}
+
 
 function make_ipv6_ptr($ip) {
 	$addr = inet_pton($ip);
@@ -864,7 +920,7 @@ function updates_completed()
 	$db->query("UPDATE zones SET updated = 0 WHERE updated = 2 ");
 }
 
-function auto_ip6_ptrs($domain, $ttl, $reversehosts)
+function auto_ip6_ptrs($domain, $ttl, $reversehosts, $server_type='M')
 {
 	$chop = (strlen($domain)+1) * -1;
 	$mainptr = substr($domain, 0, strlen($domain)-9);
@@ -889,7 +945,9 @@ function auto_ip6_ptrs($domain, $ttl, $reversehosts)
 	$db = new DB_probind;
 	$db->query($query);
 	$autoflag = FALSE;
-	$result = ";\n; PTR's implied by AAAA records in the database\n;\n";
+	if ($server_type=='M') 
+		$result = ";\n; PTR's implied by AAAA records in the database\n;\n";
+	else $result=array();
 	while ($db->next_record()) {
 		if ($db->Record['rdom'] == '@')
 			$hostname = $db->Record['zdom'].".";
@@ -898,13 +956,15 @@ function auto_ip6_ptrs($domain, $ttl, $reversehosts)
 		else
 			$hostname = $db->Record['rdom'];
 		$ptr = substr(make_ipv6_ptr($db->Record['data']),0,$chop);
-		$result .= "$ptr\t$ttl IN\tPTR\t$hostname\n";
+		if ($server_type=='M') 
+			$result .= "$ptr\t$ttl IN\tPTR\t$hostname\n";
+		else $result[$ptr]=$hostname;
 	}
 	return $result;
 }
 #
 #
-function auto_ptrs($domain, $ttl, $reversehosts)
+function auto_ptrs($domain, $ttl, $reversehosts, $server_type='M')
 {
 	global $DEFAULT_PTR_DOMAIN;
 	preg_match("/(.*)\.in-addr\.arpa(\.)?/", $domain, $matches);
@@ -921,7 +981,9 @@ function auto_ptrs($domain, $ttl, $reversehosts)
 	$db = new DB_probind;
 	$db->query($query);
 	$autoflag = FALSE;
-	$result = "";
+	if ($server_type=='M') 
+		$result = ";\n; PTR's implied by A records in the database\n;\n"; 
+	else $result=array();
 	# Output the PTR's implied by A records in the database
 	while ($db->next_record()) {
 		if ($db->Record['rdom'] == '@')
@@ -945,15 +1007,16 @@ function auto_ptrs($domain, $ttl, $reversehosts)
 		}
 		if (@$reversehosts[$host] || ($host0 && @$reversehosts[$host0]) || ($host1 && @$reversehosts[$host1]) )
 			continue;
-		if (!$autoflag) {
-			$autoflag = TRUE;
-			$result .= ";\n; PTR's implied by A records in the database\n;\n";
-		}
 		$pos = strpos($hostname, "*");
 		$fixedhost = preg_replace("/\*/", "wildcard", $hostname);
-		$result .= "$host\t$ttl IN\tPTR\t$fixedhost\n";
+		if ($server_type=='M')
+			$result .= "$host\t$ttl IN\tPTR\t$fixedhost\n";
+		else $result[$host]=$fixedhost;
 		$ips[$host] = 1;
 	}
+
+	if ($server_type != 'M') return $result;	
+
 	# Output PTR's with bullshit data for all IP numbers not covered
 	# by explicit PTR records in the database or implicit ones from A's
 	if ($reversehosts) {
@@ -966,11 +1029,11 @@ function auto_ptrs($domain, $ttl, $reversehosts)
 	if (strtoupper($DEFAULT_PTR_DOMAIN) == "NONE")
 		return $result;
 	if ($octets==1) {
-		$result .= ";\n; Cowardly refusing to generate so many records as to run out of RAM\n;\n";
+		if ($server_type=='M') $result .= ";\n; Cowardly refusing to generate so many records as to run out of RAM\n;\n";
 		return $result;
 	}
 
-	$result .= ";\n; Default PTR records for unused IP numbers\n;\n";
+	if ($server_type=='M') $result .= ";\n; Default PTR records for unused IP numbers\n;\n";
 
 	$reversed = array_reverse($bytes);
 	for ($i=0; $i<=3; $i++) {
@@ -987,7 +1050,7 @@ function auto_ptrs($domain, $ttl, $reversehosts)
 	 for ($j=$ob[1]; $j<=$oe[1]; $j++) {
 	  for ($k=$ob[2]; $k<=$oe[2]; $k++) {
 	    if ($octets<3) { 
-		$result .= ";\n; $i.$j.$k PTRs\n;\n";
+		if ($server_type=='M') $result .= ";\n; $i.$j.$k PTRs\n;\n";
 		if ($octets==1) $subzone = "$j.$k.";
 		if ($octets==2) $subzone = "$k.";
 	    }
@@ -995,7 +1058,9 @@ function auto_ptrs($domain, $ttl, $reversehosts)
 		if (@$ips["$subzone$l"])
 			continue;
 		$hostname = sprintf("host-%s-%s-%s-%s.$DEFAULT_PTR_DOMAIN.",$i,$j,$k,$l);
-		$result .= "$subzone$l\t$ttl IN\tPTR\t$hostname\n";
+		if ($server_type=='M') 
+			$result .= "$subzone$l\t$ttl IN\tPTR\t$hostname\n";
+		else $result["$subzone$l"]=$hostname;
 	    }
 	  }
 	 }

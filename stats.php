@@ -76,7 +76,7 @@ print "<TR><TH>Server</TH><TH>Ip number</TH><TH>Type</TH><TH>Update?</TH><TH>NS 
 while ($db->next_record()) {
 	$row = $db->Record;
 	$id = $row[0];
-	$type = ($row[3] == 'M' ? 'Master' : 'Slave');
+	$type = $SERVER_TYPES[$row[3]];
 	$push = ($row[4] ? 'Yes' : 'No');
 	$mkrec = ($row[5] ? 'Yes' : 'No');
 	$state = $row[6];

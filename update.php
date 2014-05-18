@@ -187,6 +187,8 @@ function generate_files($input)
 	global $HOST_URL;
 	global $TOP;
 	global $BIN;
+	global $SERVER_TYPES;
+	global $HOSTMASTER;
 
 	$skipped = 0;
 	$ret = '';
@@ -195,7 +197,7 @@ function generate_files($input)
 
 	$db = new DB_probind;
 
-	$db->prepare("SELECT id, domain, master, zonefile FROM zones WHERE updated AND domain != 'TEMPLATE' ORDER BY domain");
+	$db->prepare("SELECT id, domain, master, zonefile FROM zones WHERE /*updated AND*/ domain != 'TEMPLATE' ORDER BY domain");
 	$db->execute();
 	$zones = $db->fetchAll();
 
@@ -214,11 +216,7 @@ function generate_files($input)
 			continue;
 		}
 
-		print "<H4>Updating $server ";
-		if ($type == 'M')
-			print "(as master)</H4>\n";
-		else
-			print "(as slave)</H4>\n";
+		print "<H4>Updating $server (as ".$SERVER_TYPES[$type].")</H4>\n";
 
 		# This server need real file update
 		if (!file_exists("$HOST_DIR/$server")) mkdir("$HOST_DIR/$server");
@@ -233,6 +231,11 @@ function generate_files($input)
 		else
 		    print "<A href=\"view.php?file=$server/named.conf\"><FONT color=GREEN>named.conf</FONT></A> updated, see $A_LOG<BR>\n";
 
+		if ($type == 'N') {
+			foreach($zones as $zone) {
+				update_powerdns_zone($zone["id"],$server,$HOSTMASTER);
+			}
+		}
 
 		if ($type == 'M') {
 			print "<UL>\n";
@@ -349,7 +352,7 @@ function run_scripts($input, $push, $conf)
 	$db->query("
 	SELECT id as servid, hostname as server, ipno, type, zonedir, chrootbase, script, state 
 	FROM servers 
-	WHERE pushupdates != 0");
+	WHERE pushupdates != 0 and type<>'N'");
 
 	while ($db->next_record()) {
 		extract($db->Record);
@@ -438,8 +441,7 @@ $frame = empty($INPUT_VARS['frame']) ? '' : $INPUT_VARS['frame'];
 # Set up frame structure
 #
 if (!$frame) {
-	print $start_frame;
-	exit();
+	$frame = 'MAIN';
 }
 
 
@@ -471,9 +473,9 @@ $UPDATE_LOG = "$LOG_DIR/$UPDATE_LOG_NAME";
 $A_LOG="<A href=\"view.php?base=LOGS&file=$UPDATE_LOG_NAME\">LOG</A>";
 $A_LOGE="<A href=\"view.php?base=LOGS&file=$UPDATE_LOG_NAME&error=1\">LOG</A>";
 
-print "<SCRIPT>open('update.php?frame=PROGRESS','MAIN');</SCRIPT><HR>\n";
-for($i = 0; $i < 512; $i++)
-    print "<B></B>\n";
+#print "<SCRIPT>open('update.php?frame=PROGRESS','MAIN');</SCRIPT><HR>\n";
+#for($i = 0; $i < 512; $i++)
+#    print "<B></B>\n";
 
 if ($user = patient_enter_crit($auth->auth["uname"], 'PUSH')) {
 	print sprintf($push_in_progress, ucfirst($user));
@@ -514,7 +516,7 @@ else {
 leave_crit('PUSH');
 
 close_database();
-print "<SCRIPT>open('update.php?frame=MAIN','MAIN');</SCRIPT><HR>\n";
+#print "<SCRIPT>open('update.php?frame=MAIN','MAIN');</SCRIPT><HR>\n";
 print $html_bottom;
 ?>
 

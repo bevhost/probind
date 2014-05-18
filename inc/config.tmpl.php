@@ -18,6 +18,15 @@ class DB_probind extends DB_Sql {
   #var $Debug	= 1;
 }
 
+#connection to powerdns database
+class DB_powerdns extends DB_Sql {
+  var $Host     = "localhost";
+  var $Database = "powerdns";
+  var $User     = "powerdns";
+  var $Password = "CHANGEME";
+}
+
+
 $webmaster = "root@localhost";
 
 $idn_version = 2008;  // internationalisation version for punycode converter
