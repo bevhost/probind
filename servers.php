@@ -62,8 +62,12 @@ $add_form = '
  <TH>Updates</TH>
  <TH>NS records</TH>
 </TR><TR align=left>
- <TD><SELECT name="type"><OPTION>Master</OPTION>
-  <OPTION SELECTED>Slave</OPTION></SELECT></TD>
+ <TD><SELECT name="type">
+  <OPTION>Master</OPTION>
+  <OPTION SELECTED>Slave</OPTION>
+  <OPTION>Native (PDNS)</OPTION>
+  <OPTION>DnsMasq</OPTION>
+  </SELECT></TD>
  <TD><SELECT name="push"><OPTION SELECTED>Skip</OPTION>
   <OPTION>Update</OPTION></SELECT></TD>
  <TD><SELECT name="mkrec"><OPTION SELECTED>Skip</OPTION>
@@ -180,8 +184,8 @@ function valid_server($name, $ipno, $type, $push, $zonedir, $chrootbase, $templa
 		$warns = "Invalid server name '$name'";
 	if (!valid_ip($ipno))
 		$warns .= "You must specify a valid IP number<BR>\n";
-	if ($type != 'M' && $type != 'S')
-		$warns .= "The server type must be 'M' or 'S'<BR\n";
+	if ($type != 'M' && $type != 'S' && $type != 'N' && $type != 'D')
+		$warns .= "The server type must be 'M','S','N' or 'D'<BR\n";
 	if (strlen($zonedir) && !valid_path($zonedir))
 		$warns .= "The zone directory is not a valid path<BR>\n";
 	if (strlen($chrootbase) && !valid_path($chrootbase))
@@ -207,7 +211,7 @@ function add_servers($input)
 	$res = '';
 	$name = chop(ltrim($input['name']));
 	$ipno = $input['ipno'];
-	$type = ($input['type'] == 'Master' ? 'M' : 'S');
+	$type = substr($input['type'],0,1); # == 'Master' ? 'M' : 'S');
 	$push = ($input['push'] == 'Skip' ? 0 : 1);
 	$mkrec = ($input['mkrec'] == 'Skip' ? 0 : 1);
 	$zonedir = $input['zonedir'];
@@ -290,6 +294,7 @@ function mk_update_form($server)
 
 function browse_servers()
 {
+	global $SERVER_TYPES;
 	$db = new DB_probind;
 	$query = "SELECT id, hostname, ipno, type, pushupdates, mknsrec FROM servers ORDER BY hostname";
 	$db->query($query);
@@ -307,7 +312,7 @@ function browse_servers()
 		$id = $server['id'];
 		$name = $server['hostname'];
 		$ipno = $server['ipno'];
-		$type = ($server['type'] == 'M' ? "Master" : "Slave");
+		$type = $SERVER_TYPES[$server['type']];
 		$push = ($server['pushupdates'] ? "Yes" : "No");
 		$mkrec = ($server['mknsrec'] ? "Yes" : "No");
 		$result .= "<TR>
