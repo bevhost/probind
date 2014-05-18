@@ -197,7 +197,7 @@ function generate_files($input)
 
 	$db = new DB_probind;
 
-	$db->prepare("SELECT id, domain, master, zonefile FROM zones WHERE /*updated AND*/ domain != 'TEMPLATE' ORDER BY domain");
+	$db->prepare("SELECT id, domain, master, zonefile FROM zones WHERE updated AND domain != 'TEMPLATE' ORDER BY domain");
 	$db->execute();
 	$zones = $db->fetchAll();
 
