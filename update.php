@@ -93,7 +93,7 @@ function main_update_menu($input)
 	$zones = $db->num_rows();
 
 	$db->query("SELECT id,hostname,ipno,type,state FROM servers WHERE pushupdates = 1");
-	print "<FORM TARGET=\"VIEW\" action=\"update.php\"><INPUT type=\"HIDDEN\" name=\"frame\" value=\"VIEW\">\n";
+	print "<FORM action=\"update.php\"><INPUT type=\"HIDDEN\" name=\"frame\" value=\"VIEW\">\n";
 	$res = "<TABLE BORDER=2 width=\"70%\">\n";
 	$res .= "<TR><TH>name</TH><TH>ip address</TH><TH>type</TH><TH>state</TH><TH>Do not apply</TH><TH>View</TH><TH>Test</TH></TR>\n";
 	$gen_c  = "";
@@ -146,10 +146,10 @@ function main_update_menu($input)
 		$res .= "\t<TD $B>$T</TD>\n";
 		$res .= "\t<TD align=center><INPUT TYPE=\"CHECKBOX\" $skip_c name=\"skip_$id\"></TD>\n";
 		$res .= "\t<TD align=center>";
-		    $res .= "<A TARGET=\"VIEW\" href=\"view.php?file=$hostname/named.conf\">named.conf</A>,";
-			$res .= "<A TARGET=\"VIEW\" href=\"$HOST_URL/$hostname/\">files</A>";
+		    $res .= "<A href=\"view.php?file=$hostname/named.conf\">named.conf</A>,";
+			$res .= "<A href=\"$HOST_URL/$hostname/\">files</A>";
 			$res .= "</TD>\n";
-		$res .= "\t<TD align=center><A TARGET=\"VIEW\" href=\"test.php?id=$id\"><img src=\"images/greenbutton.gif\" border=0 high=16 width=24></A></TD>\n";
+		$res .= "\t<TD align=center><A href=\"test.php?id=$id\"><img src=\"images/greenbutton.gif\" border=0 high=16 width=24></A></TD>\n";
 		$res .= "</TR>\n";
 	}
 	$res .= "</TABLE>\n";
@@ -227,11 +227,11 @@ function generate_files($input)
 		print $cmd;
 		passthru("$cmd >> $UPDATE_LOG 2>& 1", $ret);
 		if ($ret != 0) {
-		    print "<A  TARGET=\"VIEW\" href=\"view.php?file=$server/named.conf\"><FONT color=RED>mknamed.conf</FONT></A> failure, see $A_LOGE<BR>\n";
+		    print "<A href=\"view.php?file=$server/named.conf\"><FONT color=RED>mknamed.conf</FONT></A> failure, see $A_LOGE<BR>\n";
 		    $error = 1;
 		}
 		else
-		    print "<A  TARGET=\"VIEW\" href=\"view.php?file=$server/named.conf\"><FONT color=GREEN>named.conf</FONT></A> updated, see $A_LOG<BR>\n";
+		    print "<A href=\"view.php?file=$server/named.conf\"><FONT color=GREEN>named.conf</FONT></A> updated, see $A_LOG<BR>\n";
 
 
 		if ($type == 'M') {
@@ -243,7 +243,7 @@ function generate_files($input)
 
 				$cmd = "mkdir -p DELETED;rm -f DELETED/'$zonefile'; mv '$zonefile' DELETED/. && echo '$zonefile' >> deleted_files";
 				exec($cmd);
-				print "<LI><A TARGET=\"VIEW\" href=\"view.php?file=$server/DELETED/$zonefile\">$domain deleted</A>\n";
+				print "<LI><A href=\"view.php?file=$server/DELETED/$zonefile\">$domain deleted</A>\n";
 			}
 
 			$out= "";
@@ -270,8 +270,8 @@ function generate_files($input)
 					$err = "";
 
 				 }
-				 $out .=  "<LI><A TARGET=\"VIEW\" href=\"view.php?file=$server/$zonefile\">$domain</A> updated\n";
-				 $err .= "<LI><A TARGET=\"VIEW\" href=\"view.php?file=$server/$zonefile\">$domain</A> <FONT color=RED>error</FONT>\n";
+				 $out .=  "<LI><A href=\"view.php?file=$server/$zonefile\">$domain</A> updated\n";
+				 $err .= "<LI><A href=\"view.php?file=$server/$zonefile\">$domain</A> <FONT color=RED>error</FONT>\n";
 			    if (count($domains)) {
 				 $cmd =  "TOP=$TOP $BIN/mkzonefile -d $HOST_DIR/$server -u ".join(" ", $domains);
 				 // print "<I>$cmd</I><BR>\n";
@@ -299,7 +299,7 @@ function generate_files($input)
 		else
 			$text = "<FONT color=RED>UPDATED:</FONT>";
 
-		print "$text<A TARGET=\"VIEW\" href=\"$HOST_URL/$server/\">$server</A><HR>\n";
+		print "$text<A href=\"$HOST_URL/$server/\">$server</A><HR>\n";
 		if ($error) {
 			$db->prepare("UPDATE servers SET state='ERR' WHERE id = ?");
 			$db->execute($servid);
@@ -408,7 +408,7 @@ function run_scripts($input, $push, $conf)
 	else
 	    $err_text="";
 
-	// print "<H4>Log file: <A TARGET=\"VIEW\" href=\"view.php?base=LOGS&file=$UPDATE_LOG_NAME$err_text\">$UPDATE_LOG</A></H4>\n";
+	// print "<H4>Log file: <A href=\"view.php?base=LOGS&file=$UPDATE_LOG_NAME$err_text\">$UPDATE_LOG</A></H4>\n";
 	return ($error? "script failure" : "");
 }
 
@@ -468,8 +468,8 @@ if ( !$LOG_DIR || !opendir($LOG_DIR) ) {
 closedir();
 $UPDATE_LOG_NAME= date("YmdHis").".log";
 $UPDATE_LOG = "$LOG_DIR/$UPDATE_LOG_NAME";
-$A_LOG="<A TARGET=\"VIEW\" href=\"view.php?base=LOGS&file=$UPDATE_LOG_NAME\">LOG</A>";
-$A_LOGE="<A TARGET=\"VIEW\" href=\"view.php?base=LOGS&file=$UPDATE_LOG_NAME&error=1\">LOG</A>";
+$A_LOG="<A href=\"view.php?base=LOGS&file=$UPDATE_LOG_NAME\">LOG</A>";
+$A_LOGE="<A href=\"view.php?base=LOGS&file=$UPDATE_LOG_NAME&error=1\">LOG</A>";
 
 print "<SCRIPT>open('update.php?frame=PROGRESS','MAIN');</SCRIPT><HR>\n";
 for($i = 0; $i < 512; $i++)
@@ -501,7 +501,7 @@ if ($err) {
 	print "<H3><FONT color=RED>Errors";
 	if (file_exists($UPDATE_LOG)) {
 		print ", see logs ";
-		print "<A TARGET=\"VIEW\" href=\"view.php?base=LOGS&file=$UPDATE_LOG_NAME\">here</A></FONT></H3>\n";
+		print "<A href=\"view.php?base=LOGS&file=$UPDATE_LOG_NAME\">here</A></FONT></H3>\n";
 	}
 }
 else {
