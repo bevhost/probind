@@ -1,0 +1,30 @@
+#!/usr/bin/php -q
+<?php
+require '../inc/lib.inc';
+require '../inc/getopt.inc';
+
+function usage()
+{
+	print "Usage: rm-record -z -r\n";
+	print "Args: (z)one in which the record is, (r)ecord to remove\n";
+	print "Notice: if more than one record exists with that name in that zone, all of them will be removed!\n";
+}
+
+/* MAIN */
+
+$opts = getopts($argv, "z:r:"); 
+
+if (isset($opts['z']) && isset($opts['r'])) {
+	$db = new DB_probind;
+	$db->query("SELECT r.id as id FROM zones z, records r WHERE z.domain='".$opts['z']."' and r.zone=z.id and r.domain='".$opts['r']."'");
+	while($db->next_record()) {
+		extract($db->Record);
+		print "Going to remove record on zone ".$opts['z']." (internal id: $id)\n";
+		del_record($id);
+		print "Record removed.\n";
+	}
+	print "All records removed, please validate on ProBIND's web interface.\n";
+} else {
+	usage();
+}
+?>
