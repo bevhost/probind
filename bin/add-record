@@ -5,7 +5,7 @@ require '../inc/getopt.inc';
 
 function usage()
 {
-	print "Usage: add-record -z -d -l -t -d -p\n";
+	print "Usage: add-record -z -r -l -t -d -p\n";
 	print "Args: (z)one in which to add record, (r)ecord domain, tt(l), (t)ype, (d)ata and (p)tr generation (1 or 0)\n";
 }
 
