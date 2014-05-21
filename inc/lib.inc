@@ -785,6 +785,11 @@ function validate_record($zone, &$domain, $ttl, &$type, &$pref, &$data)
 		if (preg_match("/".$zone['domain'].'$/i', $domain))
 			$warnings .= "<LI>Domain '$domain' invalid: check if you didn't loose a dot or something...\n";
 	}
+
+	// TODO: check if there is already another CNAME with the same name in this
+	// zone, raise a warning if there is... unlike A records, we can't have two
+	// CNAMES with the same alias pointing to two different places
+
 	return $warnings;   
 
 }
