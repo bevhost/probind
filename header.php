@@ -255,6 +255,9 @@ switch ($s) {
 <A HREF="ip-ranges.php">IP ranges</A>
 <A HREF="bulkupdate.php">Bulk update</A>
 <?php if ($perm->have_perm("admin")) { ?>
+<?php if (class_exists("DB_powerdns")) { ?>
+<A HREF="pdns-import.php">PDNS Import</A>
+<?php } ?>
 <A HREF="settings.php?action=browse">Settings</A>
 <A HREF="servers.php?action=browse">Servers</A>
 <A HREF="exploits.php">Unblock banned</A>
