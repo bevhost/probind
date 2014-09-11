@@ -27,7 +27,7 @@ class recordsform extends tpl_form {
     $this->form_data->add_element(array("type"=>"text","name"=>"pref","maxlength"=>"5","size"=>"1",
 		"field"=>"pref","extrahtml"=>""
 		));
-    $this->form_data->add_element(array("type"=>"text","name"=>"data","maxlength"=>"255","size"=>"85"
+    $this->form_data->add_element(array("type"=>"text","name"=>"data","maxlength"=>"448","size"=>"85"
 		,"minlength"=>1, "length_e"=>"\"+message['RequiredField'].replace(/%s/g,'Data')+\"",
 		"field"=>"data","extrahtml"=>""
 		,"value"=>""));
