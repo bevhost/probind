@@ -76,6 +76,39 @@ if (!function_exists("inet_pton")) {
   }
 }
 
+function import_pdns_zone($domain_id, $owner='admin') {
+	$db = new DB_probind;
+	$pdns = new DB_powerdns;
+	$pdns->query("SELECT name as zone_name, master FROM domains WHERE id=$domain_id");
+	if ($pdns->next_record()) extract($pdns->Record); else return false;
+	$len = strlen($zone_name);
+	$neglen = 0 - $len;
+	$len = $neglen-1;
+	if (empty($master)) $master="";
+	$zone_id = add_domain($zone_name, $master, $eoptions = "", $owner);
+	echo "<br><a href=zones.php?zone=$zone_id>$zone_name</a>";
+	if ($master) return true;  # If it has a master, then it's a slave, so no records.
+	$pdns->query("SELECT * FROM records WHERE domain_id=$domain_id");
+	$db->prepare("INSERT INTO records (zone,domain,ttl,type,pref,data,weight,port,genptr,disabled,ctime,mtime) VALUES (?,?,?,?,?,?,?,?,?,?,NOW(),NOW())");
+	while ($pdns->next_record()) {
+		extract($pdns->Record);
+		$w = $p = "";
+		if (substr($name,$neglen)==$zone_name) $host=substr($name,0,$len); else $host = $name;
+		if (!$host) $host="@";
+		switch($type) {
+			case "SRV":
+				list($w,$p,$content) = explode(" ",$content);
+			default:
+				if (substr($content,$neglen)==$zone_name) $content=substr($content,0,$len); else $content.=".";
+			case "A":
+			case "AAAA":
+				$db->execute($zone_id,$host,$ttl,$type,$prio,$content,$w,$p,1,0);
+			case "SOA":
+		}
+	}
+}
+	
+
 function update_powerdns_zone($zone_id,$soa_ns,$hostmaster) {
 	if (!ctype_digit("$zone_id")) die('Invalid zoneid.'); 
 	$db = new DB_probind;
@@ -778,6 +811,14 @@ function validate_record($zone, &$domain, $ttl, &$type, &$pref, &$data)
 	$zone = get_zone($zone);
 	if ($type == 'CNAME' && (($zone['domain']."." == $domain) || $domain == '@'))
 		$warnings .= "<LI>A CNAME may not exist for the entire domain.\n";
+	if ($type == 'CNAME') {
+		$db = new DB_probind;
+		$db->query("SELECT id FROM records WHERE REPLACE(domain,'.".$zone['domain'].".','')=".
+                                $db->quote(str_replace(".".$zone['domain'].".","",$domain)));
+		if ($db->next_record()) {
+			$warnings .= "<LI>A CNAME with that name already exists.\n";
+		}
+	}
 	if (preg_match("/\.$/i", $domain)) {
 		if (!preg_match("/".$zone['domain'].'.$/i', $domain))
 			$warnings .= "<LI>Domain '$domain' is outside the zone.\n";
@@ -785,11 +826,6 @@ function validate_record($zone, &$domain, $ttl, &$type, &$pref, &$data)
 		if (preg_match("/".$zone['domain'].'$/i', $domain))
 			$warnings .= "<LI>Domain '$domain' invalid: check if you didn't loose a dot or something...\n";
 	}
-
-	// TODO: check if there is already another CNAME with the same name in this
-	// zone, raise a warning if there is... unlike A records, we can't have two
-	// CNAMES with the same alias pointing to two different places
-
 	return $warnings;   
 
 }
