@@ -9,6 +9,7 @@
 # 20070511 youngmug  Fixed to support newer MySQL versions
 # 20100614 youngmug  Added AAAA record type for IPv6
 # 20140422 marado    Added columns needed for SRV records
+# 20140911 marado    Changed record data length to 448 characters
 
 DROP TABLE IF EXISTS zones, zoneattr, records, annotations, servers, deleted_domains, typesort, blackboard, active_sessions, auth_user, session_stats;
 
@@ -81,7 +82,7 @@ CREATE TABLE records (
 # Preference value for this MX record
     pref    CHAR(5),
 # RR Data
-    data    CHAR(255) DEFAULT '' NOT NULL,
+    data    CHAR(448) DEFAULT '' NOT NULL,
 # weight
     weight CHAR(15),
 # port
@@ -117,7 +118,7 @@ CREATE TABLE deleted_records (
 # Preference value for this MX record
     pref    CHAR(5),
 # RR Data
-    data    CHAR(255) DEFAULT '' NOT NULL,
+    data    CHAR(449) DEFAULT '' NOT NULL,
 # weight
     weight CHAR(15),
 # port
