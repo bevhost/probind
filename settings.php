@@ -173,10 +173,12 @@ case 'breaklock':
 	print break_lock($INPUT_VARS);
 	break;
 default:
+    if ($dev) {
 	while ($var = each($INPUT_VARS)) {
 		print "$var[0] = $var[1]<BR>\n";
 	}
 	print "action = '".$INPUT_VARS['action']."' => default<P>\n";
+    }
 }
 
 ?>
