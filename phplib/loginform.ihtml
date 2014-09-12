@@ -38,7 +38,7 @@ function SetFocus() {
 			case "loginbutton":
 				break;
 			default:
-				echo "<input type='hidden' name='$k' value='$v' />\n";
+				echo "<input type='hidden' name='".htmlentities($k)."' value='".htmlentities($v)."' />\n";
 		}
 	}
 ?>
