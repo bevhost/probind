@@ -137,17 +137,15 @@ function update_settings($input)
 		$name = $setting[0];
 		$value = strtr($input[$name], "@", ".");
 		if ($value != '') {
-			$sql[] = "DELETE FROM blackboard WHERE name = '$name'";
-			$sql[] = "INSERT INTO blackboard (name, value) VALUES ('$name', '$value')";
+			$param[$name]=$value;
 		} else 
 			$warnings .= "<LI>You must specify a value for <B>$name</B>\n";
 	}
 	if (strlen($warnings)) 
 		return "<UL>$warnings</UL>\n";
 	$db = new DB_probind;
-	while ($q = each($sql)) {
-		$db->query($q[1]);
-	}
+	$db->prepare("REPLACE INTO blackboard (name, value) VALUES (?,?)");
+	foreach($param as $name=>$value) $db->execute($name,$value);
 	return browse_settings();
 }
 
