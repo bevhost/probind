@@ -185,7 +185,7 @@ html {overflow-x: auto; overflow-y: hidden;}
 <script type='text/javascript'>
 <?php 
 	get_request_values("domtype");
-	if (!preg_match('/[MSA*]/',$domtype)) $domtype='M'; 
+	if (!preg_match('/^[MSA*]$/',$domtype)) $domtype='M'; 
 	echo "var domtype='$domtype';\n"; 
 	if (@$SHOW_ALL) {
 ?>
@@ -218,10 +218,6 @@ switch ($s) {
   case "addzone":
   case "delzone":
   case "update":  
-
-	get_request_values("domtype");
-
-
 	echo trans('Search')."<BR />\n";
         if ($SHOW_ALL) echo "<SELECT name='domtype' onchange=\"location='/zones.php?domtype='+this.options[this.selectedIndex].value\">\n";
 	else echo "<SELECT name='domtype' onchange=\"domtype=this.options[this.selectedIndex].value\">\n";
