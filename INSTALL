@@ -61,8 +61,8 @@ server. Usually, this would be in a directory in the document root for
 your Apache installation, e.g. /www/htdocs/probind. Change to this
 directory.
 
-Installation of PHP and Excel Modules in PEAR
----------------------------------------------
+Installation of PHP and optional Excel Modules in PEAR
+------------------------------------------------------
 
 Make sure these (or similar) are installed. (In cPanel use EasyApache)
 # yum install php-mbstring php-gd php-imap php-xml php-snmp php-mysql php-mcrypt
@@ -73,6 +73,11 @@ New installation:
 
 Or if you've already installed PHPExcel before:
 # pear upgrade pearplex/PHPExcel
+
+I have heard that pearplex has been down, 
+so you could try https://phpexcel.codeplex.com
+or https://github.com/PHPOffice/PHPExcel
+
 
 Configuring MySQL
 -----------------
